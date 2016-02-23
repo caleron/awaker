@@ -1,4 +1,4 @@
-package com.awaker;
+package com.awaker.audio;
 
 /*
  *  Copyright 2006-2007 Columbia University.
@@ -24,6 +24,8 @@ package com.awaker;
 
 /**
  * http://www.ee.columbia.edu/~ronw/code/MEAPsoft/doc/html/FFT_8java-source.html
+ * <p>
+ * Eine schnellere, aber komplexere Variante ist das: https://sites.google.com/site/piotrwendykier/software/jtransforms
  */
 public class FFT {
 
@@ -46,17 +48,6 @@ public class FFT {
         // precompute tables
         cos = new double[n / 2];
         sin = new double[n / 2];
-
-//     for(int i=0; i<n/4; i++) {
-//       cos[i] = Math.cos(-2*Math.PI*i/n);
-//       sin[n/4-i] = cos[i];
-//       cos[n/2-i] = -cos[i];
-//       sin[n/4+i] = cos[i];
-//       cos[n/2+i] = -cos[i];
-//       sin[n*3/4-i] = -cos[i];
-//       cos[n-i]   = cos[i];
-//       sin[n*3/4+i] = -cos[i];
-//     }
 
         for (int i = 0; i < n / 2; i++) {
             cos[i] = Math.cos(-2 * Math.PI * i / n);
@@ -187,6 +178,7 @@ public class FFT {
         for (int i = 0; i < iter; i++)
             fft.fft(re, im);
         time = System.currentTimeMillis() - time;
+        System.out.println("Total for " + iter + " iterations: " + time + "ms");
         System.out.println("Averaged " + (time / iter) + "ms per iteration");
     }
 

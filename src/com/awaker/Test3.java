@@ -1,5 +1,6 @@
 package com.awaker;
 
+import com.awaker.audio.FFT;
 import com.awaker.princeton.Complex;
 import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;

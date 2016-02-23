@@ -1,5 +1,6 @@
-package com.awaker;
+package com.awaker.audio;
 
+import com.awaker.Awaker;
 import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
 import javazoom.jl.player.FactoryRegistry;
@@ -9,20 +10,13 @@ import java.io.InputStream;
 @SuppressWarnings("Duplicates")
 public class CustomPlayer {
     /**
-     * The current frame number.
-     */
-    private int frame = 0;
-
-    /**
      * The MPEG audio bitstream.
-     */
-    // javac blank final bug.
-    /*final*/ private Bitstream bitstream;
+     */private Bitstream bitstream;
 
     /**
      * The MPEG audio decoder.
      */
-    /*final*/ private Decoder decoder;
+    private Decoder decoder;
 
     /**
      * The AudioDevice the audio samples are written to.
@@ -87,7 +81,7 @@ public class CustomPlayer {
             if (out != null) {
                 out.flush();
                 synchronized (this) {
-                    complete = (!closed);
+                    complete = !closed;
                     close();
                 }
             }

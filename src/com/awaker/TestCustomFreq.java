@@ -1,5 +1,7 @@
 package com.awaker;
 
+import com.awaker.audio.FFTAnalyzer;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -18,7 +20,9 @@ public class TestCustomFreq {
                 .addFrequency(200, 5000).addFrequency(600, 5000)
                 .addFrequency(1500, 5000).addFrequency(2700, 8000).getSamples();
 
-        FFTAnalyzer.analyzeChannel(samples);
+        FFTAnalyzer fftAnalyzer = new FFTAnalyzer(null);
+
+        fftAnalyzer.analyzeChannelOld(samples);
 
         AudioFormat audioFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, sampleRate, 16, 1, 2, sampleRate, false);
         SourceDataLine sourceLine;
@@ -40,14 +44,6 @@ public class TestCustomFreq {
             sourceLine.close();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    static void addFrequency(short[] samples, int freq, int amp) {
-        final double wellenlänge = sampleRate / freq;
-
-        for (int i = 0; i < sampleFrame; i++) {
-            samples[i] += (short) (Math.sin((i / wellenlänge) * Math.PI * 2) * amp);
         }
     }
 

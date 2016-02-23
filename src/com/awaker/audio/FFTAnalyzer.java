@@ -1,15 +1,10 @@
-package com.awaker;
+package com.awaker.audio;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@SuppressWarnings("Duplicates")
 public class FFTAnalyzer {
 
     public static final int SAMPLE_RATE = 44100;
-
 
     private final short[] buffer;
     private int bufferedSampleCount = 0;
@@ -19,9 +14,11 @@ public class FFTAnalyzer {
     private static final int MIN_ANALYZE_SIZE = 1024;
     private static final int BUFFER_SIZE = MIN_ANALYZE_SIZE * 2;
 
-    ResultCallback listener;
+    ResultListener listener;
 
-    public FFTAnalyzer(ResultCallback listener) {
+    Map<Integer, FFT> fftMap = new HashMap<>(3);
+
+    public FFTAnalyzer(ResultListener listener) {
         buffer = new short[BUFFER_SIZE];
         this.listener = listener;
     }
@@ -72,7 +69,7 @@ public class FFTAnalyzer {
     /**
      * Startet die Analyse von Stereo-Samples
      *
-     * @param samples
+     * @param samples Array aus Samples
      */
     private void analyzeSamples(short[] samples) {
         int sampleFrame = samples.length / 2;
@@ -85,11 +82,12 @@ public class FFTAnalyzer {
             rightSamples[i] = samples[i * 2 + 1];
         }
 
-        double[] left = analyzeChannelNew(leftSamples);
-        double[] right = analyzeChannelNew(rightSamples);
+        double[] left = analyzeChannel(leftSamples);
+        double[] right = analyzeChannel(rightSamples);
 
         List<Map.Entry<Double, Double>> result = new ArrayList<>();
         for (int i = 0; i < left.length; i++) {
+            //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
             double freq = ((1.0 * SAMPLE_RATE) / (1.0 * sampleFrame)) * i;
 
             result.add(new AbstractMap.SimpleEntry<>(freq, left[i] + right[i]));
@@ -105,10 +103,9 @@ public class FFTAnalyzer {
      *
      * @param samples Array aus Samples
      */
-    public static double[] analyzeChannelNew(short[] samples) {
+    private double[] analyzeChannel(short[] samples) {
         int sampleFrame = samples.length;
 
-        FFT fft = new FFT(sampleFrame);
 
         double[] real = new double[sampleFrame];
         double[] imag = new double[sampleFrame];
@@ -118,7 +115,16 @@ public class FFTAnalyzer {
             imag[i] = 0;
         }
 
+        FFT fft;
+        if (fftMap.containsKey(sampleFrame)) {
+            fft = fftMap.get(sampleFrame);
+        } else {
+            fft = new FFT(sampleFrame);
+            fftMap.put(sampleFrame, fft);
+        }
+
         fft.fft(real, imag);
+
         double[] amps = new double[sampleFrame / 2];
 
         //nur die erste hälfte ist wichtig, der Rest ist "gespiegelt"
@@ -135,33 +141,19 @@ public class FFTAnalyzer {
      *
      * @param samples Array aus Samples
      */
-    public static List<Map.Entry<Double, Double>> analyzeChannel(short[] samples) {
+    public List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {
         int sampleFrame = samples.length;
+        double[] amps = analyzeChannel(samples);
 
-        FFT fft = new FFT(sampleFrame);
-
-        double[] real = new double[sampleFrame];
-        double[] imag = new double[sampleFrame];
-
-        for (int i = 0; i < sampleFrame; i++) {
-            real[i] = samples[i];
-            imag[i] = 0;
-        }
-
-        fft.fft(real, imag);
-        List<Map.Entry<Double, Double>> list = new ArrayList<>();
-
-        //nur die erste hälfte ist wichtig, der Rest ist "gespiegelt"
-        for (int i = 0; i < sampleFrame / 2; i++) {
+        List<Map.Entry<Double, Double>> result = new ArrayList<>();
+        for (int i = 0; i < amps.length; i++) {
+            //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
             double freq = ((1.0 * SAMPLE_RATE) / (1.0 * sampleFrame)) * i;
 
-            double amp = Math.hypot(real[i], imag[i]) / sampleFrame;
-            //amp = Math.pow(Math.log10(amp), 2);
-            //amp = 10 * Math.log10(Math.pow(amp, 2));
-            list.add(new AbstractMap.SimpleEntry<>(freq, amp));
+            result.add(new AbstractMap.SimpleEntry<>(freq, amps[i]));
         }
-        return list;
-        //return findLocalMaxima(list);
+
+        return findLocalMaxima(result);
     }
 
     /**
@@ -214,7 +206,7 @@ public class FFTAnalyzer {
         return maximaList;
     }
 
-    interface ResultCallback {
+    public interface ResultListener {
         void newResults(List<Map.Entry<Double, Double>> list);
     }
 }

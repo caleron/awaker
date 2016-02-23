@@ -1,5 +1,8 @@
 package com.awaker;
 
+import com.awaker.audio.CustomPlayer;
+import com.awaker.audio.FFTAnalyzer;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
@@ -7,7 +10,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker extends JPanel implements FFTAnalyzer.ResultCallback {
+public class Awaker extends JPanel implements FFTAnalyzer.ResultListener {
 
     List<Map.Entry<Double, Double>> list;
 
