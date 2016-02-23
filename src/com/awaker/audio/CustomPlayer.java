@@ -158,7 +158,6 @@ public class CustomPlayer {
                     out.write(output.getBuffer(), 0, output.getBufferLength());
                 }
             }
-
             bitstream.closeFrame();
         } catch (RuntimeException ex) {
             throw new JavaLayerException("Exception decoding audio frame", ex);

@@ -1,6 +1,6 @@
 package com.awaker;
 
-import com.awaker.audio.FFT;
+import com.awaker.analyzer.FFT;
 import com.awaker.princeton.Complex;
 
 public class FFTBenchmark {

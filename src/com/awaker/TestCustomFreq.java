@@ -1,6 +1,6 @@
 package com.awaker;
 
-import com.awaker.audio.FFTAnalyzer;
+import com.awaker.analyzer.FFTAnalyzer;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -11,18 +11,17 @@ import javax.sound.sampled.SourceDataLine;
 public class TestCustomFreq {
 
     static final int sampleRate = 44100;
-    static final int sampleFrame = 2048 * 64;
+    static final int sampleFrame = 44100 * 5;
 
     //sinus verwendet Bogenmaß, also mit Pi bzw. Wellenlänge = 2*PI
     public static void main(String[] args) {
 
-        short[] samples = SignalGenerator.create(sampleFrame).addFrequency(50, 1000)
-                .addFrequency(200, 5000).addFrequency(600, 5000)
-                .addFrequency(1500, 5000).addFrequency(2700, 8000).getSamples();
+        short[] samples = SignalGenerator.create(sampleFrame).addFrequency(400, 5000)
+                .addFrequency(4000, 500).addFrequency(100, 5000).getSamples();
 
-        FFTAnalyzer fftAnalyzer = new FFTAnalyzer(null);
+        //FFTAnalyzer fftAnalyzer = new FFTAnalyzer(null);
 
-        fftAnalyzer.analyzeChannelOld(samples);
+        //fftAnalyzer.analyzeChannelOld(samples);
 
         AudioFormat audioFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, sampleRate, 16, 1, 2, sampleRate, false);
         SourceDataLine sourceLine;

@@ -1,6 +1,6 @@
 package com.awaker;
 
-import com.awaker.audio.FFTAnalyzer;
+import com.awaker.analyzer.FFTAnalyzer;
 
 public class SignalGenerator {
     int sampleCount;

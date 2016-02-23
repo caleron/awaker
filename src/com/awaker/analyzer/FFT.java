@@ -1,4 +1,4 @@
-package com.awaker.audio;
+package com.awaker.analyzer;
 
 /*
  *  Copyright 2006-2007 Columbia University.

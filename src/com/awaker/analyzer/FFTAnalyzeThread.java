@@ -1,69 +1,63 @@
-package com.awaker.audio;
+package com.awaker.analyzer;
 
 import java.util.*;
 
-public class FFTAnalyzer {
+public class FFTAnalyzeThread extends Thread {
+    public static final int SAMPLE_RATE = FFTAnalyzer.SAMPLE_RATE;
 
-    public static final int SAMPLE_RATE = 44100;
-
-    private final short[] buffer;
-    private int bufferedSampleCount = 0;
-
-    //1024 Samples entsprechen bei 44100Hz Abtastrate etwa 23ms
-    //Samples für einen Channel, also insgesamt 2048 werden gebraucht
-    private static final int MIN_ANALYZE_SIZE = 1024;
-    private static final int BUFFER_SIZE = MIN_ANALYZE_SIZE * 2;
-
-    ResultListener listener;
+    Queue<short[]> queue;
 
     Map<Integer, FFT> fftMap = new HashMap<>(3);
 
-    public FFTAnalyzer(ResultListener listener) {
-        buffer = new short[BUFFER_SIZE];
+    ResultListener listener;
+
+    boolean standby = true;
+    long lastCalculationDuration = 0;
+
+    private static final int ANALYZE_THRESHOLD = 15;
+
+    public FFTAnalyzeThread(ResultListener listener) {
         this.listener = listener;
+        queue = new LinkedList<>();
     }
 
-    /**
-     * Fügt Stereo-Samples ein
-     *
-     * @param samples der Sample-Array, wobei die Samples abwechselnd für einen Kanal stehen
-     */
-    public synchronized void pushSamples(short[] samples) {
-        final int channels = 2;
+    @Override
+    public void run() {
+        while (!isInterrupted()) {
+            try {
+                while (standby) {
+                    sleep(1);
+                }
 
-        if (bufferedSampleCount + samples.length > MIN_ANALYZE_SIZE * channels) {
-            int newSamplesCount;
-            short[] analyzeSamples;
+                if (queue.size() > ANALYZE_THRESHOLD) {
+                    short[] samples = queue.poll();
 
-            if (bufferedSampleCount + samples.length > MIN_ANALYZE_SIZE * channels * 2) {
-                analyzeSamples = new short[1024 * 2 * channels];
-                newSamplesCount = MIN_ANALYZE_SIZE * channels * 2 - bufferedSampleCount;
-            } else {
-                analyzeSamples = new short[1024 * channels];
-                newSamplesCount = MIN_ANALYZE_SIZE * channels - bufferedSampleCount;
+                    long samplePlayTime = (long) (((samples.length * 0.5 * 1000) / (SAMPLE_RATE * 1.0)) - 1);
+                    if (queue.size() > ANALYZE_THRESHOLD + 10) {
+                        //Falls zu viele Samples drin sind, Wartezeit reduzieren
+                        samplePlayTime = Math.max(samplePlayTime - 10, 0);
+                        System.out.println("shit: " + queue.size());
+                    }
+                    sleep(samplePlayTime - lastCalculationDuration);
+
+                    long start = System.nanoTime();
+
+                    analyzeSamples(samples);
+
+                    lastCalculationDuration = (long) ((System.nanoTime() - start) / 1000000.0);
+
+                } else {
+                    sleep(1);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            //Samples aus dem buffer schreiben
-            System.arraycopy(buffer, 0, analyzeSamples, 0, bufferedSampleCount);
-            //Samples im Buffer = bufferedSampleCount
-
-            //Neue Samples schreiben
-            System.arraycopy(samples, 0, analyzeSamples, bufferedSampleCount, newSamplesCount);
-            //Samples im Buffer = bufferedSampleCount + newSamplescount = bufferedSampleCount + 1024*2 - bufferedSampleCount
-            //  = 1024*2 (oder 1024 * 2 * 2) 1024 hier als MIN_ANALYZE_SIZE
-
-            //Überschüssige neue Samples in den buffer schreiben
-            //Alle Samples aus dem Buffer wurden verwendet, deshalb alte überschreiben
-            bufferedSampleCount = samples.length - newSamplesCount;
-            System.arraycopy(samples, newSamplesCount, buffer, 0, bufferedSampleCount);
-
-            //Samples analysieren
-            analyzeSamples(analyzeSamples);
-        } else {
-            //Nicht genug Samples für eine Analyse da, neue Samples in Buffer schreiben
-            System.arraycopy(samples, 0, buffer, bufferedSampleCount, samples.length);
-            bufferedSampleCount += samples.length;
         }
+    }
+
+    public void pushAnalyzeArray(short[] samples) {
+        standby = false;
+        queue.add(samples);
     }
 
     /**
@@ -136,25 +130,6 @@ public class FFTAnalyzer {
         return amps;
     }
 
-    /**
-     * samples.length = sampleframe
-     *
-     * @param samples Array aus Samples
-     */
-    public List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {
-        int sampleFrame = samples.length;
-        double[] amps = analyzeChannel(samples);
-
-        List<Map.Entry<Double, Double>> result = new ArrayList<>();
-        for (int i = 0; i < amps.length; i++) {
-            //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
-            double freq = ((1.0 * SAMPLE_RATE) / (1.0 * sampleFrame)) * i;
-
-            result.add(new AbstractMap.SimpleEntry<>(freq, amps[i]));
-        }
-
-        return findLocalMaxima(result);
-    }
 
     /**
      * Findet Einträge, die größer sind als beide Benachbarten und filtert alle raus, die kleiner als 1% des größten
@@ -206,7 +181,23 @@ public class FFTAnalyzer {
         return maximaList;
     }
 
-    public interface ResultListener {
-        void newResults(List<Map.Entry<Double, Double>> list);
+    /**
+     * samples.length = sampleframe
+     *
+     * @param samples Array aus Samples
+     */
+    public List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {
+        int sampleFrame = samples.length;
+        double[] amps = analyzeChannel(samples);
+
+        List<Map.Entry<Double, Double>> result = new ArrayList<>();
+        for (int i = 0; i < amps.length; i++) {
+            //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
+            double freq = ((1.0 * SAMPLE_RATE) / (1.0 * sampleFrame)) * i;
+
+            result.add(new AbstractMap.SimpleEntry<>(freq, amps[i]));
+        }
+
+        return findLocalMaxima(result);
     }
 }
