@@ -1,18 +1,21 @@
 package com.awaker;
 
+import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.analyzer.ResultListener;
 import com.awaker.audio.CustomPlayer;
-import com.awaker.analyzer.FFTAnalyzer;
-import com.awaker.audio.NewSamplesListener;
+import com.awaker.audio.PlayerListener;
+import javazoom.jl.decoder.JavaLayerException;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker extends JPanel implements ResultListener, NewSamplesListener {
+public class Awaker extends JPanel implements ResultListener, PlayerListener {
 
     List<Map.Entry<Double, Double>> list;
 
@@ -26,16 +29,30 @@ public class Awaker extends JPanel implements ResultListener, NewSamplesListener
         timer = new Timer(1000, e1 -> System.out.println(player.getPosition()));
         //timer.start();
 
-        new Thread(() -> {
-            InputStream is = null;
-            try {
-                is = new FileInputStream("media/furelise.mp3");
-                player = new CustomPlayer(is, this);
-                player.play();
-            } catch (Exception e) {
-                e.printStackTrace();
+        InputStream is = null;
+        try {
+            is = new FileInputStream("media/music.mp3");
+            player = new CustomPlayer(this);
+            player.setStream(is);
+            player.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (player.isPlaying()) {
+                    player.pause();
+                } else {
+                    try {
+                        player.resume();
+                    } catch (JavaLayerException e1) {
+                        e1.printStackTrace();
+                    }
+                }
             }
-        }).start();
+        });
     }
 
     @Override
@@ -66,11 +83,32 @@ public class Awaker extends JPanel implements ResultListener, NewSamplesListener
         analyzer.pushSamples(samples);
     }
 
+    @Override
+    public void playbackStarted() {
+
+    }
+
+    @Override
+    public void playbackFinished() {
+
+    }
+
+    @Override
+    public void playbackStopped() {
+
+    }
+
+    @Override
+    public void playbackPaused() {
+
+    }
+
     public static void main(String[] args) {
         Awaker awaker = new Awaker();
 
         JFrame frame = new JFrame("Awaker");
         frame.setContentPane(awaker);
+
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(800, 500);
         frame.setLocationRelativeTo(null);

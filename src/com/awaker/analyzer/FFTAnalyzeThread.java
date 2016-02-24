@@ -5,16 +5,16 @@ import java.util.*;
 class FFTAnalyzeThread extends Thread {
     public static final int SAMPLE_RATE = FFTAnalyzer.SAMPLE_RATE;
 
-    Queue<short[]> queue;
+    private Queue<short[]> queue;
 
-    Map<Integer, FFT> fftMap = new HashMap<>(3);
+    private Map<Integer, FFT> fftMap = new HashMap<>(3);
 
-    ResultListener listener;
+    private ResultListener listener;
 
     /**
      * Wenn standby, läuft der Thread im Standby, also prüft nicht auf neue Samples.
      */
-    boolean standby = true;
+    private boolean standby = true;
 
     /**
      * Dadurch wird die Analyse um etwa 12 * 23ms verzögert und damit synchron zur Tonausgabe.

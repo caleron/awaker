@@ -10,7 +10,8 @@ import java.io.InputStream;
 public class CustomPlayer {
     /**
      * The MPEG audio bitstream.
-     */private Bitstream bitstream;
+     */
+    private Bitstream bitstream;
 
     /**
      * The MPEG audio decoder.
@@ -32,60 +33,114 @@ public class CustomPlayer {
      */
     private boolean complete = false;
 
+    private boolean isPlaying = false;
+
     private int lastPosition = 0;
 
-    private NewSamplesListener samplesListener;
+    private PlayerListener samplesListener;
 
     /**
      * Creates a new <code>Player</code> instance.
      */
-    public CustomPlayer(InputStream stream, NewSamplesListener a) throws JavaLayerException {
-        this(stream, null, a);
-    }
-
-    public CustomPlayer(InputStream stream, AudioDevice device, NewSamplesListener a) throws JavaLayerException {
+    public CustomPlayer(PlayerListener a) throws JavaLayerException {
         samplesListener = a;
-        bitstream = new Bitstream(stream);
         decoder = new Decoder();
 
-        if (device != null) {
-            audio = device;
-        } else {
+        openAudio();
+    }
+
+    public synchronized void openAudio() throws JavaLayerException {
+        if (audio == null) {
             FactoryRegistry r = FactoryRegistry.systemRegistry();
             audio = r.createAudioDevice();
         }
         audio.open(decoder);
     }
 
-    public void play() throws JavaLayerException {
-        play(Integer.MAX_VALUE);
+    public synchronized void setStream(InputStream stream) {
+        bitstream = new Bitstream(stream);
     }
 
     /**
-     * Plays a number of MPEG audio frames.
+     * Spielt die aktuelle Datei ab.
      *
-     * @param frames The number of frames to play.
      * @return true if the last frame was played, or false if there are more frames.
      */
-    public boolean play(int frames) throws JavaLayerException {
-        boolean ret = true;
+    public void play() throws JavaLayerException {
+        play(0);
+    }
 
-        while (frames-- > 0 && ret) {
+    /**
+     * Spielt die aktuelle Datei ab einem bestimmten Frame ab.
+     *
+     * @param start The first frame to play
+     */
+    public void play(final int start) throws JavaLayerException {
+        new Thread(() -> {
+            try {
+                runPlayback(start);
+            } catch (JavaLayerException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void runPlayback(final int start) throws JavaLayerException {
+        isPlaying = true;
+        samplesListener.playbackStarted();
+
+        boolean ret = true;
+        int offset = start;
+        while (offset-- > 0 && ret)
+            ret = skipFrame();
+
+        //ret = true;
+
+        while (ret) {
             ret = decodeFrame();
         }
 
-        if (!ret) {
-            // last frame, ensure all data flushed to the audio device.
-            AudioDevice out = audio;
-            if (out != null) {
-                out.flush();
-                synchronized (this) {
-                    complete = !closed;
-                    close();
-                }
+        //if (!ret) {
+        // last frame, ensure all data flushed to the audio device.
+        AudioDevice out = audio;
+        if (out != null) {
+            out.flush();
+            synchronized (this) {
+                complete = !closed;
+                close();
             }
         }
-        return ret;
+        //}
+        samplesListener.playbackFinished();
+    }
+
+    /**
+     * closes the player and notifies <code>PlaybackListener</code>
+     */
+    public void stop() {
+        samplesListener.playbackStopped();
+        close();
+    }
+
+    public void pause() {
+        samplesListener.playbackPaused();
+        isPlaying = false;
+
+        AudioDevice out = audio;
+        if (out != null) {
+            audio = null;
+            out.close();
+        }
+    }
+
+    /**
+     * Resumes the player.
+     *
+     * @throws JavaLayerException
+     */
+    public void resume() throws JavaLayerException {
+        openAudio();
+        play(0);
     }
 
     /**
@@ -95,6 +150,7 @@ public class CustomPlayer {
         AudioDevice out = audio;
         if (out != null) {
             closed = true;
+            isPlaying = false;
             audio = null;
             // this may fail, so ensure object state is set up before
             // calling this method.
@@ -105,6 +161,10 @@ public class CustomPlayer {
             } catch (BitstreamException ex) {
             }
         }
+    }
+
+    public boolean isPlaying() {
+        return isPlaying;
     }
 
     /**
@@ -164,5 +224,18 @@ public class CustomPlayer {
         return true;
     }
 
+    /**
+     * skips over a single frame
+     *
+     * @return false    if there are no more frames to decode, true otherwise.
+     */
+    protected boolean skipFrame() throws JavaLayerException {
+        Header h = bitstream.readFrame();
 
+        if (h == null)
+            return false;
+
+        bitstream.closeFrame();
+        return true;
+    }
 }
