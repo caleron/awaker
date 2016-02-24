@@ -6,7 +6,6 @@ import javazoom.jl.player.FactoryRegistry;
 
 import java.io.InputStream;
 
-@SuppressWarnings("Duplicates")
 public class CustomPlayer {
     /**
      * The MPEG audio bitstream.
@@ -23,21 +22,11 @@ public class CustomPlayer {
      */
     private AudioDevice audio;
 
-    /**
-     * Has the player been closed?
-     */
-    private boolean closed = false;
-
-    /**
-     * Has the player played back all frames from the stream?
-     */
-    private boolean complete = false;
-
-    private boolean isPlaying = false;
-
     private int lastPosition = 0;
 
     private PlayerListener samplesListener;
+
+    private PlaybackStatus status = PlaybackStatus.STOPPED;
 
     /**
      * Creates a new <code>Player</code> instance.
@@ -45,26 +34,32 @@ public class CustomPlayer {
     public CustomPlayer(PlayerListener a) throws JavaLayerException {
         samplesListener = a;
         decoder = new Decoder();
-
-        openAudio();
     }
 
+    /**
+     * Öffnet das Audiogerät
+     *
+     * @throws JavaLayerException
+     */
     public synchronized void openAudio() throws JavaLayerException {
         if (audio == null) {
             FactoryRegistry r = FactoryRegistry.systemRegistry();
             audio = r.createAudioDevice();
+            audio.open(decoder);
         }
-        audio.open(decoder);
     }
 
+    /**
+     * Setzt den Inputstream. Darf nur gemacht werden, während nicht abgespielt wird.
+     *
+     * @param stream Inputstream, aus dem abgespielt werden soll.
+     */
     public synchronized void setStream(InputStream stream) {
         bitstream = new Bitstream(stream);
     }
 
     /**
      * Spielt die aktuelle Datei ab.
-     *
-     * @return true if the last frame was played, or false if there are more frames.
      */
     public void play() throws JavaLayerException {
         play(0);
@@ -76,6 +71,7 @@ public class CustomPlayer {
      * @param start The first frame to play
      */
     public void play(final int start) throws JavaLayerException {
+        openAudio();
         new Thread(() -> {
             try {
                 runPlayback(start);
@@ -85,8 +81,14 @@ public class CustomPlayer {
         }).start();
     }
 
+    /**
+     * Spielt die aktuelle Datei ab. Blockiert die Ausführung, sollte also in einem eigenen Thread ausgeführt werden.
+     *
+     * @param start Die Anzahl an Frames, die übersprungen werden sollen.
+     * @throws JavaLayerException
+     */
     private void runPlayback(final int start) throws JavaLayerException {
-        isPlaying = true;
+        status = PlaybackStatus.PLAYING;
         samplesListener.playbackStarted();
 
         boolean ret = true;
@@ -106,7 +108,7 @@ public class CustomPlayer {
         if (out != null) {
             out.flush();
             synchronized (this) {
-                complete = !closed;
+                status = PlaybackStatus.COMPLETED;
                 close();
             }
         }
@@ -115,26 +117,31 @@ public class CustomPlayer {
     }
 
     /**
-     * closes the player and notifies <code>PlaybackListener</code>
+     * Stoppt die Wiedergabe und schließt alle verbundenen Streams.
      */
     public void stop() {
+        status = PlaybackStatus.STOPPED;
         samplesListener.playbackStopped();
         close();
     }
 
-    public void pause() {
+    /**
+     * Pausiert die Wiedergabe.
+     */
+    public synchronized void pause() {
+        status = PlaybackStatus.PAUSED;
         samplesListener.playbackPaused();
-        isPlaying = false;
 
         AudioDevice out = audio;
         if (out != null) {
+            lastPosition = out.getPosition();
             audio = null;
             out.close();
         }
     }
 
     /**
-     * Resumes the player.
+     * Setzt die Wiedergabe fort.
      *
      * @throws JavaLayerException
      */
@@ -144,13 +151,11 @@ public class CustomPlayer {
     }
 
     /**
-     * Cloases this player. Any audio currently playing is stopped immediately.
+     * Schließt den Player. Eine aktuelle Wiedergabe wird sofort abgebrochen.
      */
     public synchronized void close() {
         AudioDevice out = audio;
         if (out != null) {
-            closed = true;
-            isPlaying = false;
             audio = null;
             // this may fail, so ensure object state is set up before
             // calling this method.
@@ -158,13 +163,18 @@ public class CustomPlayer {
             lastPosition = out.getPosition();
             try {
                 bitstream.close();
-            } catch (BitstreamException ex) {
+            } catch (BitstreamException ignored) {
             }
         }
     }
 
+    /**
+     * Gibt wieder, ob gerade abgespielt wird
+     *
+     * @return true, wenn abgespielt wird
+     */
     public boolean isPlaying() {
-        return isPlaying;
+        return status == PlaybackStatus.PLAYING;
     }
 
     /**
@@ -173,7 +183,16 @@ public class CustomPlayer {
      * @return true if all available MPEG audio frames have been decoded, or false otherwise.
      */
     public synchronized boolean isComplete() {
-        return complete;
+        return status == PlaybackStatus.COMPLETED;
+    }
+
+    /**
+     * Gibt den Playback-Status wieder.
+     *
+     * @return Playback-Status
+     */
+    public PlaybackStatus getStatus() {
+        return status;
     }
 
     /**
@@ -195,7 +214,7 @@ public class CustomPlayer {
      *
      * @return true if there are no more frames to decode, false otherwise.
      */
-    protected boolean decodeFrame() throws JavaLayerException {
+    private boolean decodeFrame() throws JavaLayerException {
         try {
             AudioDevice out = audio;
             if (out == null)
@@ -227,9 +246,9 @@ public class CustomPlayer {
     /**
      * skips over a single frame
      *
-     * @return false    if there are no more frames to decode, true otherwise.
+     * @return false if there are no more frames to decode, true otherwise.
      */
-    protected boolean skipFrame() throws JavaLayerException {
+    private boolean skipFrame() throws JavaLayerException {
         Header h = bitstream.readFrame();
 
         if (h == null)
