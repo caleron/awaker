@@ -1,4 +1,4 @@
-package com.awaker;
+package com.awaker.test;
 
 import com.awaker.analyzer.FFT;
 import com.awaker.princeton.Complex;

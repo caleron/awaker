@@ -3,6 +3,7 @@ package com.awaker;
 import com.awaker.analyzer.ResultListener;
 import com.awaker.audio.CustomPlayer;
 import com.awaker.analyzer.FFTAnalyzer;
+import com.awaker.audio.NewSamplesListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +12,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker extends JPanel implements ResultListener {
+public class Awaker extends JPanel implements ResultListener, NewSamplesListener {
 
     List<Map.Entry<Double, Double>> list;
 
@@ -60,6 +61,7 @@ public class Awaker extends JPanel implements ResultListener {
         }
     }
 
+    @Override
     public void newSamples(short[] samples) {
         analyzer.pushSamples(samples);
     }

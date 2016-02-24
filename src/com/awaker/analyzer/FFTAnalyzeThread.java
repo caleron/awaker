@@ -2,7 +2,7 @@ package com.awaker.analyzer;
 
 import java.util.*;
 
-public class FFTAnalyzeThread extends Thread {
+class FFTAnalyzeThread extends Thread {
     public static final int SAMPLE_RATE = FFTAnalyzer.SAMPLE_RATE;
 
     Queue<short[]> queue;
@@ -11,10 +11,15 @@ public class FFTAnalyzeThread extends Thread {
 
     ResultListener listener;
 
+    /**
+     * Wenn standby, läuft der Thread im Standby, also prüft nicht auf neue Samples.
+     */
     boolean standby = true;
-    long lastCalculationDuration = 0;
 
-    private static final int ANALYZE_THRESHOLD = 15;
+    /**
+     * Dadurch wird die Analyse um etwa 12 * 23ms verzögert und damit synchron zur Tonausgabe.
+     */
+    private static final int ANALYZE_THRESHOLD = 12;
 
     public FFTAnalyzeThread(ResultListener listener) {
         this.listener = listener;
@@ -26,27 +31,35 @@ public class FFTAnalyzeThread extends Thread {
         while (!isInterrupted()) {
             try {
                 while (standby) {
-                    sleep(1);
+                    //Standby, solange keine Samples kommen
+                    sleep(5);
                 }
 
                 if (queue.size() > ANALYZE_THRESHOLD) {
+                    //Samples aus der Queue nehmen
                     short[] samples = queue.poll();
 
+                    //Spielzeit der Samples berechnen und 1 ms abziehen
                     long samplePlayTime = (long) (((samples.length * 0.5 * 1000) / (SAMPLE_RATE * 1.0)) - 1);
+
                     if (queue.size() > ANALYZE_THRESHOLD + 10) {
                         //Falls zu viele Samples drin sind, Wartezeit reduzieren
                         samplePlayTime = Math.max(samplePlayTime - 10, 0);
                         System.out.println("shit: " + queue.size());
                     }
-                    sleep(samplePlayTime - lastCalculationDuration);
 
                     long start = System.nanoTime();
-
+                    //Samples analysieren
                     analyzeSamples(samples);
 
-                    lastCalculationDuration = (long) ((System.nanoTime() - start) / 1000000.0);
+                    //Berechnungszeit in ms bestimmen
+                    int calculationDuration = (int) ((System.nanoTime() - start) / 1000000.0);
+
+                    //Schlafen
+                    sleep(samplePlayTime - calculationDuration);
 
                 } else {
+                    //Schlafen, wenn nicht genug Samples da sind
                     sleep(1);
                 }
             } catch (InterruptedException e) {

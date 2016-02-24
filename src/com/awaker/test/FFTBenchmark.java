@@ -1,4 +1,4 @@
-package com.awaker;
+package com.awaker.test;
 
 import com.awaker.analyzer.FFT;
 import com.awaker.princeton.Complex;
@@ -12,7 +12,7 @@ public class FFTBenchmark {
     //Columbia braucht ~200ms, Princeton über 8 Sekunden
     public static void main(String[] args) {
         short[] samples = SignalGenerator.create(sampleFrame).addFrequency(3000, 2000)
-                .addFrequency(500, 5000).addFrequency(600, 3000).getSamples();
+                .addFrequency(500, 5000).addFrequency(600, 3000).getMonoSamples();
 
         FFT fft = new FFT(sampleFrame);
 

@@ -1,6 +1,5 @@
 package com.awaker.audio;
 
-import com.awaker.Awaker;
 import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
 import javazoom.jl.player.FactoryRegistry;
@@ -35,17 +34,17 @@ public class CustomPlayer {
 
     private int lastPosition = 0;
 
-    private Awaker awaker;
+    private NewSamplesListener samplesListener;
 
     /**
      * Creates a new <code>Player</code> instance.
      */
-    public CustomPlayer(InputStream stream, Awaker a) throws JavaLayerException {
+    public CustomPlayer(InputStream stream, NewSamplesListener a) throws JavaLayerException {
         this(stream, null, a);
     }
 
-    public CustomPlayer(InputStream stream, AudioDevice device, Awaker a) throws JavaLayerException {
-        awaker = a;
+    public CustomPlayer(InputStream stream, AudioDevice device, NewSamplesListener a) throws JavaLayerException {
+        samplesListener = a;
         bitstream = new Bitstream(stream);
         decoder = new Decoder();
 
@@ -150,7 +149,7 @@ public class CustomPlayer {
             // sample buffer set when decoder constructed
             SampleBuffer output = (SampleBuffer) decoder.decodeFrame(h, bitstream);
 
-            awaker.newSamples(output.getBuffer());
+            samplesListener.newSamples(output.getBuffer());
 
             synchronized (this) {
                 out = audio;

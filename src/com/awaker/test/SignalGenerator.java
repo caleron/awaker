@@ -1,4 +1,4 @@
-package com.awaker;
+package com.awaker.test;
 
 import com.awaker.analyzer.FFTAnalyzer;
 
@@ -23,12 +23,21 @@ public class SignalGenerator {
         final double wellenlänge = FFTAnalyzer.SAMPLE_RATE / freq;
 
         for (int i = 0; i < sampleCount; i++) {
-            samples[i] += (short) (Math.sin((i / wellenlänge) * Math.PI * 2) * amp);
+            samples[i] += (short) (Math.sin((i / wellenlänge) * Math.PI) * amp);
         }
         return this;
     }
 
-    public short[] getSamples() {
+    public short[] getStereoSamples() {
+        short[] stereoSamples = new short[samples.length * 2];
+        for (int i = 0; i < samples.length; i++) {
+            stereoSamples[i * 2] = samples[i];
+            stereoSamples[i * 2 + 1] = samples[i];
+        }
+        return stereoSamples;
+    }
+
+    public short[] getMonoSamples() {
         return samples;
     }
 }

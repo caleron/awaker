@@ -31,11 +31,11 @@ public class FFTAnalyzer {
     public synchronized void pushSamples(short[] samples) {
         final int channels = 2;
 
-        if (bufferedSampleCount + samples.length > MIN_ANALYZE_SIZE * channels) {
+        if (bufferedSampleCount + samples.length >= MIN_ANALYZE_SIZE * channels) {
             int newSamplesCount;
             short[] analyzeSamples;
 
-            if (bufferedSampleCount + samples.length > MIN_ANALYZE_SIZE * channels * 2) {
+            if (bufferedSampleCount + samples.length >= MIN_ANALYZE_SIZE * channels * 2) {
                 analyzeSamples = new short[1024 * 2 * channels];
                 newSamplesCount = MIN_ANALYZE_SIZE * channels * 2 - bufferedSampleCount;
             } else {
