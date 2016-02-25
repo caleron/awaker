@@ -17,7 +17,7 @@ class FFTAnalyzeThread extends Thread {
     private boolean standby = true;
 
     /**
-     * Dadurch wird die Analyse um etwa 12 * 23ms verzögert und damit synchron zur Tonausgabe.
+     * Dadurch wird die Analyse um etwa 12 * 23ms verzögert und damit möglichst synchron zur Tonausgabe.
      */
     private static final int ANALYZE_THRESHOLD = 12;
 
@@ -150,7 +150,7 @@ class FFTAnalyzeThread extends Thread {
      *
      * @param list Die Liste der Frequenz-Amplituden-Paare
      */
-    private static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list) {
+    public static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list, double threshold) {
         List<Map.Entry<Double, Double>> maximaList = new ArrayList<>();
 
         //lokale Maxima bestimmen
@@ -185,13 +185,24 @@ class FFTAnalyzeThread extends Thread {
 
         //Alle Maxima entfernen, die kleiner als 1% des größten Maximums sind
         for (int i = 0; i < maximaList.size(); i++) {
-            if (maximaList.get(i).getValue() < greatest.getValue() * 0.01) {
+            if (maximaList.get(i).getValue() < greatest.getValue() * threshold) {
                 maximaList.remove(i);
                 i--;
             }
         }
         //System.out.println(maximaList);
         return maximaList;
+    }
+
+
+    /**
+     * Findet Einträge, die größer sind als beide Benachbarten und filtert alle raus, die kleiner als 1% des größten
+     * Maximums sind.
+     *
+     * @param list Die Liste der Frequenz-Amplituden-Paare
+     */
+    public static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list) {
+        return findLocalMaxima(list, 0.01);
     }
 
     /**

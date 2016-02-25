@@ -4,6 +4,8 @@ import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.analyzer.ResultListener;
 import com.awaker.audio.CustomPlayer;
 import com.awaker.audio.PlayerListener;
+import com.awaker.server.Server;
+import com.awaker.server.ServerListener;
 import javazoom.jl.decoder.JavaLayerException;
 
 import javax.swing.*;
@@ -15,7 +17,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker extends JPanel implements ResultListener, PlayerListener {
+public class Awaker extends JPanel implements ResultListener, PlayerListener, ServerListener {
 
     List<Map.Entry<Double, Double>> list;
 
@@ -28,8 +30,9 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener {
     public Awaker() {
         timer = new Timer(1000, e1 -> System.out.println(player.getPosition()));
         //timer.start();
+        Server server = new Server(this);
 
-        InputStream is = null;
+        InputStream is;
         try {
             is = new FileInputStream("media/music.mp3");
             player = new CustomPlayer(this);
@@ -62,7 +65,10 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener {
 
         int width = getWidth();
         int yBottom = getHeight() - 10;
-        g.setColor(Color.white);
+
+        //g.setColor(ColorTranslator.translateGewichtet(list));
+
+        g.setColor(Color.GRAY);
         g.fillRect(0, 0, width, getHeight());
         ((Graphics2D) g).setStroke(new BasicStroke(3));
 
@@ -76,6 +82,18 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener {
             }
 
         }
+    }
+
+    public static void main(String[] args) {
+        Awaker awaker = new Awaker();
+
+        JFrame frame = new JFrame("Awaker");
+        frame.setContentPane(awaker);
+
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setSize(800, 500);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     @Override
@@ -103,21 +121,58 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener {
 
     }
 
-    public static void main(String[] args) {
-        Awaker awaker = new Awaker();
-
-        JFrame frame = new JFrame("Awaker");
-        frame.setContentPane(awaker);
-
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(800, 500);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-    }
 
     @Override
     public void newResults(List<Map.Entry<Double, Double>> list) {
         this.list = list;
         SwingUtilities.invokeLater(this::repaint);
+    }
+
+    @Override
+    public boolean playFile(String name) {
+        return false;
+    }
+
+    @Override
+    public void play() {
+        try {
+            player.play();
+        } catch (JavaLayerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void playFromPosition(int position) {
+        try {
+            player.play(position);
+        } catch (JavaLayerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void setBrightness(int brightness) {
+
+    }
+
+    @Override
+    public void changeVisualisation(String newType) {
+
+    }
+
+    @Override
+    public String getStatus() {
+        return null;
     }
 }
