@@ -28,12 +28,19 @@ public class CustomPlayer {
 
     private PlaybackStatus status = PlaybackStatus.STOPPED;
 
+    private Thread playerThread;
+
     /**
      * Creates a new <code>Player</code> instance.
+     *
+     * @param a      PlayerListener, der über Playback-Events informiert wird
+     * @param stream Inputstream, aus dem abgespielt werden soll.
+     * @throws JavaLayerException
      */
-    public CustomPlayer(PlayerListener a) throws JavaLayerException {
+    public CustomPlayer(PlayerListener a, InputStream stream) throws JavaLayerException {
         samplesListener = a;
         decoder = new Decoder();
+        bitstream = new Bitstream(stream);
     }
 
     /**
@@ -41,21 +48,12 @@ public class CustomPlayer {
      *
      * @throws JavaLayerException
      */
-    public synchronized void openAudio() throws JavaLayerException {
+    private synchronized void openAudio() throws JavaLayerException {
         if (audio == null) {
             FactoryRegistry r = FactoryRegistry.systemRegistry();
             audio = r.createAudioDevice();
             audio.open(decoder);
         }
-    }
-
-    /**
-     * Setzt den Inputstream. Darf nur gemacht werden, während nicht abgespielt wird.
-     *
-     * @param stream Inputstream, aus dem abgespielt werden soll.
-     */
-    public synchronized void setStream(InputStream stream) {
-        bitstream = new Bitstream(stream);
     }
 
     /**
@@ -71,14 +69,62 @@ public class CustomPlayer {
      * @param start The first frame to play
      */
     public void play(final int start) throws JavaLayerException {
+        if (status == PlaybackStatus.PLAYING)
+            return;
+
+        if (status == PlaybackStatus.COMPLETED) {
+            //Wenn completed oder stopped, dann ist der Bitstream schon geschlossen
+            throw new JavaLayerException("Can't start playback: Bitstream already closed.");
+        }
+
         openAudio();
-        new Thread(() -> {
+        playerThread = new Thread(() -> {
             try {
                 runPlayback(start);
             } catch (JavaLayerException e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
+        playerThread.start();
+    }
+
+    //funktioniert nur, wenn noch nichts abgespielt wurde
+    /*private void playFromPosition(int targetSecond) throws JavaLayerException {
+        if (isPlaying()) {
+            throw new JavaLayerException("cant seek while playing");
+        }
+        int positionInSeconds = lastPosition / 1000;
+        Header h = bitstream.readFrame();
+        int msPerFrame = (int) h.ms_per_frame();
+
+        int distance = Math.abs(targetSecond - positionInSeconds);
+        int skipCount = (distance * 1000) / msPerFrame;
+
+        if (targetSecond > positionInSeconds) {
+            play(skipCount);
+        } else {
+            play(-skipCount);
+        }
+    }*/
+
+    /**
+     * Überspringt die angegebene Zahl an Frames
+     *
+     * @param count Anzahl zu überspringender Frames
+     * @return False, wenn das Ende des Streams erreicht wurde
+     * @throws JavaLayerException
+     */
+    private boolean skipFrames(int count) throws JavaLayerException {
+        boolean ret = true;
+        if (count > 0) {
+            while (count-- > 0 && ret)
+                ret = skipFrame();
+        } else {
+            count = -count;
+            while (count-- > 0)
+                bitstream.unreadFrame();
+        }
+        return ret;
     }
 
     /**
@@ -91,13 +137,9 @@ public class CustomPlayer {
         status = PlaybackStatus.PLAYING;
         samplesListener.playbackStarted();
 
+        skipFrames(start);
+
         boolean ret = true;
-        int offset = start;
-        while (offset-- > 0 && ret)
-            ret = skipFrame();
-
-        //ret = true;
-
         while (ret) {
             ret = decodeFrame();
         }
@@ -146,6 +188,9 @@ public class CustomPlayer {
      * @throws JavaLayerException
      */
     public void resume() throws JavaLayerException {
+        if (status != PlaybackStatus.PAUSED)
+            return;
+
         openAudio();
         play(0);
     }

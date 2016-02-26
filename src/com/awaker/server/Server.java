@@ -28,6 +28,10 @@ public class Server {
         new Thread(this::runServer).start();
     }
 
+    public void stopServer() {
+        interrupt = true;
+    }
+
     /**
      * http://stackoverflow.com/questions/10618441/java-read-from-binary-file-send-bytes-over-socket
      * https://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html

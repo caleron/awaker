@@ -35,8 +35,7 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
         InputStream is;
         try {
             is = new FileInputStream("media/music.mp3");
-            player = new CustomPlayer(this);
-            player.setStream(is);
+            player = new CustomPlayer(this, is);
             player.play();
         } catch (Exception e) {
             e.printStackTrace();
@@ -144,21 +143,17 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
 
     @Override
     public void playFromPosition(int position) {
-        try {
-            player.play(position);
-        } catch (JavaLayerException e) {
-            e.printStackTrace();
-        }
+
     }
 
     @Override
     public void pause() {
-
+        player.pause();
     }
 
     @Override
     public void stop() {
-
+        player.stop();
     }
 
     @Override
@@ -173,6 +168,6 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
 
     @Override
     public String getStatus() {
-        return null;
+        return player.getStatus().toString();
     }
 }
