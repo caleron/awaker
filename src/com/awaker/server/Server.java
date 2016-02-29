@@ -1,11 +1,14 @@
 package com.awaker.server;
 
-import java.io.FileOutputStream;
+import com.awaker.data.TrackWrapper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Soll alle Anfragen beantworten
@@ -41,9 +44,13 @@ public class Server {
         while (!interrupt) {
             try {
                 clientSocket = serverSocket.accept();
-
+                System.out.println("new socket");
                 while (!clientSocket.isClosed()) {
+                    System.out.println("processagain");
                     processSocket(clientSocket);
+                }
+                if (clientSocket.isClosed()) {
+                    System.out.println("socket closed");
                 }
 
             } catch (IOException e) {
@@ -59,13 +66,23 @@ public class Server {
 
         int readByte;
         StringBuilder sb = new StringBuilder();
+        byte[] commandBuffer = new byte[100];
+        int byteCount = 0;
         while ((readByte = socketIn.read()) > -1) {
-            char b = ((char) ((byte) readByte));
-            if (b == '\n') {
+            //10 entspricht dem Zeilenumbruch \n
+            if (readByte == 10) {
                 break;
             }
-            sb.append(b);
+
+            commandBuffer[byteCount++] = (byte) readByte;
+            if (byteCount == 100) {
+                //Wenn buffer voll ist, dann leeren
+                sb.append(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(commandBuffer)).toString());
+                byteCount = 0;
+            }
         }
+        //Dekodieren mit UTF-8, ist etwa für Dateinamen nötig
+        sb.append(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(commandBuffer, 0, byteCount)));
 
         String inputLine = sb.toString();
 
@@ -89,40 +106,21 @@ public class Server {
                 socketOut.println("stopped");
                 break;
             case "playFile":
-                if (!listener.playFile(args[1])) {
+                String title = args[1];
+                String artist = args[2];
+
+                if (!listener.playFile(new TrackWrapper(title, artist))) {
                     socketOut.println("file not found");
+                } else {
+                    socketOut.println("playing");
                 }
-                socketOut.println("playing");
                 break;
             case "uploadAndPlayFile":
                 String fileName = args[1];
                 int fileLength = Integer.parseInt(args[2]);
 
-                final int BUFFER_SIZE = 8096;
-                byte[] buffer = new byte[BUFFER_SIZE];
-
-                FileOutputStream fos = new FileOutputStream(fileName);
-
-                //Anzahl gelesener Bytes beim letzten Aufruf von read()
-                int readCount = socketIn.read(buffer);
-                //Insgesamt gelesene Bytes
-                int totalBytesRead = readCount;
-                while (readCount > 0) {
-                    //Gelesene Bytes schreiben
-                    fos.write(buffer, 0, readCount);
-
-                    if (fileLength - totalBytesRead < BUFFER_SIZE) {
-                        //Nur so viele Bytes lesen wie nötig
-                        readCount = socketIn.read(buffer, 0, fileLength - totalBytesRead);
-                    } else {
-                        readCount = socketIn.read(buffer);
-                    }
-                    totalBytesRead += readCount;
-                }
-                //fertig
-                fos.close();
                 //abspielen
-                listener.playFile(fileName);
+                listener.downloadFile(socketIn, fileLength, fileName, true);
                 socketOut.println("playing");
                 break;
             case "setBrightness":
@@ -140,6 +138,15 @@ public class Server {
                 break;
             default:
                 clientSocket.close();
+        }
+    }
+
+    public void closeSocket() {
+        try {
+            serverSocket.close();
+            System.out.println("serversocket closed by kill");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

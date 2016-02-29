@@ -4,6 +4,9 @@ import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.analyzer.ResultListener;
 import com.awaker.audio.CustomPlayer;
 import com.awaker.audio.PlayerListener;
+import com.awaker.data.DbManager;
+import com.awaker.data.MediaManager;
+import com.awaker.data.TrackWrapper;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
 import javazoom.jl.decoder.JavaLayerException;
@@ -32,11 +35,14 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
         //timer.start();
         Server server = new Server(this);
 
+        DbManager.init();
+        MediaManager.startScanFiles();
+
         InputStream is;
         try {
             is = new FileInputStream("media/music.mp3");
             player = new CustomPlayer(this, is);
-            player.play();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,7 +71,7 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
         int width = getWidth();
         int yBottom = getHeight() - 10;
 
-        //g.setColor(ColorTranslator.translateGewichtet(list));
+        //g.setColor(ColorTranslator.translateDurchschnitt(list));
 
         g.setColor(Color.GRAY);
         g.fillRect(0, 0, width, getHeight());
@@ -128,8 +134,28 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
     }
 
     @Override
-    public boolean playFile(String name) {
+    public boolean playFile(TrackWrapper track) {
+        FileInputStream fis = MediaManager.getFileStream(track);
+
+        if (fis != null) {
+            player.stop();
+            try {
+                player = new CustomPlayer(this, fis);
+                player.play();
+                return true;
+            } catch (JavaLayerException e) {
+                e.printStackTrace();
+            }
+        }
         return false;
+    }
+
+    @Override
+    public void downloadFile(InputStream is, int length, String fileName, boolean play) {
+        TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
+        if (play) {
+            playFile(track);
+        }
     }
 
     @Override

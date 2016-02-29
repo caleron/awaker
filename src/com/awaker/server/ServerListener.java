@@ -1,7 +1,13 @@
 package com.awaker.server;
 
+import com.awaker.data.TrackWrapper;
+
+import java.io.InputStream;
+
 public interface ServerListener {
-    boolean playFile(String name);
+    void downloadFile(InputStream is, int length, String fileName, boolean play);
+
+    boolean playFile(TrackWrapper track);
 
     void play();
 

@@ -45,7 +45,6 @@ class FFTAnalyzeThread extends Thread {
                     if (queue.size() > ANALYZE_THRESHOLD + 10) {
                         //Falls zu viele Samples drin sind, Wartezeit reduzieren
                         samplePlayTime = Math.max(samplePlayTime - 10, 0);
-                        System.out.println("shit: " + queue.size());
                     }
 
                     long start = System.nanoTime();
@@ -56,8 +55,10 @@ class FFTAnalyzeThread extends Thread {
                     int calculationDuration = (int) ((System.nanoTime() - start) / 1000000.0);
 
                     //Schlafen
-                    sleep(samplePlayTime - calculationDuration);
-
+                    long sleepTime = samplePlayTime - calculationDuration;
+                    if (sleepTime > 0) {
+                        sleep(sleepTime);
+                    }
                 } else {
                     //Schlafen, wenn nicht genug Samples da sind
                     sleep(1);
