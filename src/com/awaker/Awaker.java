@@ -153,7 +153,7 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
     @Override
     public void downloadFile(InputStream is, int length, String fileName, boolean play) {
         TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
-        if (play) {
+        if (play && track != null) {
             playFile(track);
         }
     }

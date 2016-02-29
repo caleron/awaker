@@ -66,6 +66,15 @@ public class MediaManager {
             //fertig
             fos.close();
 
+            if (totalBytesRead < length) {
+                System.out.println("Lengths do not match, cancelling integration in Database");
+                File deleteFile = new File(fileName);
+                if (deleteFile.delete()) {
+                    System.out.println("File deleted");
+                }
+                return null;
+            }
+
             System.out.println("download finished");
 
             //Tags lesen und in Datenbank packen
