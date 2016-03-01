@@ -26,7 +26,7 @@ public class CustomPlayer {
 
     private PlayerListener samplesListener;
 
-    private PlaybackStatus status = PlaybackStatus.STOPPED;
+    private PlaybackStatus status = PlaybackStatus.CREATED;
 
     private Thread playerThread;
 
@@ -57,10 +57,14 @@ public class CustomPlayer {
     }
 
     /**
-     * Spielt die aktuelle Datei ab.
+     * Spielt die aktuelle Datei ab oder setzt diese fort, falls pausiert wurde.
      */
     public void play() throws JavaLayerException {
-        play(0);
+        if (status == PlaybackStatus.PAUSED) {
+            resume();
+        } else {
+            play(0);
+        }
     }
 
     /**
@@ -68,11 +72,11 @@ public class CustomPlayer {
      *
      * @param start The first frame to play
      */
-    public void play(final int start) throws JavaLayerException {
+    private void play(final int start) throws JavaLayerException {
         if (status == PlaybackStatus.PLAYING)
             return;
 
-        if (status == PlaybackStatus.COMPLETED) {
+        if (status == PlaybackStatus.STOPPED) {
             //Wenn completed oder stopped, dann ist der Bitstream schon geschlossen
             throw new JavaLayerException("Can't start playback: Bitstream already closed.");
         }
@@ -88,44 +92,21 @@ public class CustomPlayer {
         playerThread.start();
     }
 
-    //funktioniert nur, wenn noch nichts abgespielt wurde
-    /*private void playFromPosition(int targetSecond) throws JavaLayerException {
-        if (isPlaying()) {
-            throw new JavaLayerException("cant seek while playing");
-        }
-        int positionInSeconds = lastPosition / 1000;
+    /**
+     * Beginnt die Wiedergabe ab einer bestimmten Position
+     *
+     * @param targetSecond Die Position in Sekunden
+     * @throws JavaLayerException
+     */
+    public void playFromPosition(int targetSecond) throws JavaLayerException {
         Header h = bitstream.readFrame();
         int msPerFrame = (int) h.ms_per_frame();
 
-        int distance = Math.abs(targetSecond - positionInSeconds);
-        int skipCount = (distance * 1000) / msPerFrame;
+        int skipCount = (targetSecond * 1000) / msPerFrame;
 
-        if (targetSecond > positionInSeconds) {
-            play(skipCount);
-        } else {
-            play(-skipCount);
-        }
-    }*/
-
-    /**
-     * Überspringt die angegebene Zahl an Frames
-     *
-     * @param count Anzahl zu überspringender Frames
-     * @return False, wenn das Ende des Streams erreicht wurde
-     * @throws JavaLayerException
-     */
-    private boolean skipFrames(int count) throws JavaLayerException {
-        boolean ret = true;
-        if (count > 0) {
-            while (count-- > 0 && ret)
-                ret = skipFrame();
-        } else {
-            count = -count;
-            while (count-- > 0)
-                bitstream.unreadFrame();
-        }
-        return ret;
+        play(skipCount);
     }
+
 
     /**
      * Spielt die aktuelle Datei ab. Blockiert die Ausführung, sollte also in einem eigenen Thread ausgeführt werden.
@@ -150,7 +131,7 @@ public class CustomPlayer {
         if (out != null) {
             out.flush();
             synchronized (this) {
-                status = PlaybackStatus.COMPLETED;
+                status = PlaybackStatus.STOPPED;
                 close();
             }
         }
@@ -223,15 +204,6 @@ public class CustomPlayer {
     }
 
     /**
-     * Returns the completed status of this player.
-     *
-     * @return true if all available MPEG audio frames have been decoded, or false otherwise.
-     */
-    public synchronized boolean isComplete() {
-        return status == PlaybackStatus.COMPLETED;
-    }
-
-    /**
      * Gibt den Playback-Status wieder.
      *
      * @return Playback-Status
@@ -286,6 +258,21 @@ public class CustomPlayer {
             throw new JavaLayerException("Exception decoding audio frame", ex);
         }
         return true;
+    }
+
+    /**
+     * Überspringt die angegebene Zahl an Frames
+     *
+     * @param count Anzahl zu überspringender Frames
+     * @return False, wenn das Ende des Streams erreicht wurde
+     * @throws JavaLayerException
+     */
+    private boolean skipFrames(int count) throws JavaLayerException {
+        boolean ret = true;
+        while (count-- > 0 && ret)
+            ret = skipFrame();
+
+        return ret;
     }
 
     /**

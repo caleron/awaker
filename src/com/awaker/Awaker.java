@@ -1,64 +1,39 @@
 package com.awaker;
 
-import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.analyzer.ResultListener;
-import com.awaker.audio.CustomPlayer;
-import com.awaker.audio.PlayerListener;
+import com.awaker.audio.PlayerMaster;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
-import javazoom.jl.decoder.JavaLayerException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker extends JPanel implements ResultListener, PlayerListener, ServerListener {
+public class Awaker extends JPanel implements ResultListener, ServerListener {
 
     List<Map.Entry<Double, Double>> list;
 
-    FFTAnalyzer analyzer = new FFTAnalyzer(this);
-
-    Timer timer;
-
-    CustomPlayer player;
+    PlayerMaster playerMaster;
 
     public Awaker() {
-        timer = new Timer(1000, e1 -> System.out.println(player.getPosition()));
-        //timer.start();
-        Server server = new Server(this);
+        new Server(this);
 
         DbManager.init();
         MediaManager.startScanFiles();
 
-        InputStream is;
-        try {
-            is = new FileInputStream("media/music.mp3");
-            player = new CustomPlayer(this, is);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        playerMaster = new PlayerMaster(this);
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (player.isPlaying()) {
-                    player.pause();
-                } else {
-                    try {
-                        player.resume();
-                    } catch (JavaLayerException e1) {
-                        e1.printStackTrace();
-                    }
-                }
+                playerMaster.tooglePlayPause();
             }
         });
     }
@@ -101,31 +76,6 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
         frame.setVisible(true);
     }
 
-    @Override
-    public void newSamples(short[] samples) {
-        analyzer.pushSamples(samples);
-    }
-
-    @Override
-    public void playbackStarted() {
-
-    }
-
-    @Override
-    public void playbackFinished() {
-
-    }
-
-    @Override
-    public void playbackStopped() {
-
-    }
-
-    @Override
-    public void playbackPaused() {
-
-    }
-
 
     @Override
     public void newResults(List<Map.Entry<Double, Double>> list) {
@@ -135,19 +85,7 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
 
     @Override
     public boolean playFile(TrackWrapper track) {
-        FileInputStream fis = MediaManager.getFileStream(track);
-
-        if (fis != null) {
-            player.stop();
-            try {
-                player = new CustomPlayer(this, fis);
-                player.play();
-                return true;
-            } catch (JavaLayerException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
+        return playerMaster.playFile(track);
     }
 
     @Override
@@ -160,26 +98,22 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
 
     @Override
     public void play() {
-        try {
-            player.play();
-        } catch (JavaLayerException e) {
-            e.printStackTrace();
-        }
+        playerMaster.play();
     }
 
     @Override
     public void playFromPosition(int position) {
-
+        //TODO playerMaster.playFromPosition(position);
     }
 
     @Override
     public void pause() {
-        player.pause();
+        playerMaster.pause();
     }
 
     @Override
     public void stop() {
-        player.stop();
+        playerMaster.stop();
     }
 
     @Override
@@ -194,6 +128,6 @@ public class Awaker extends JPanel implements ResultListener, PlayerListener, Se
 
     @Override
     public String getStatus() {
-        return player.getStatus().toString();
+        return playerMaster.getStatus();
     }
 }

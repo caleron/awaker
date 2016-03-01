@@ -9,13 +9,6 @@ public class Test {
         String command = "aäß@\n";
 
         System.out.println(Arrays.toString(command.getBytes(StandardCharsets.UTF_8)));
-        System.out.println(System.getProperty("user.home"));
-
-        File folder = new File("media/");
-        File[] files = folder.listFiles(file -> file.isFile() && file.getPath().endsWith(".mp3"));
-
-        System.out.println(files[0].getName());
-
-        System.out.println(Arrays.toString(files));
+        System.out.println(String.format("%s hochgeladen (%s/%s)", 23 + "%", 300000, 400535));
     }
 }

@@ -9,7 +9,9 @@ public class DbManager {
     private static Connection connection;
     private static final String DB_PATH = "media.sqlite";
 
-
+    /**
+     * http://www.tutorialspoint.com/sqlite/sqlite_java.htm
+     */
     static {
         try {
             Class.forName("org.sqlite.JDBC");

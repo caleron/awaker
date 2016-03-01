@@ -9,6 +9,9 @@ import java.util.Random;
 
 public class MediaManager {
 
+    /**
+     * Verwendet Mp3agic https://github.com/mpatric/mp3agic
+     */
     public MediaManager() {
 
     }
@@ -96,6 +99,13 @@ public class MediaManager {
         System.out.println("Dateiscan gestartet");
 
         File folder = new File("media/");
+        if (!folder.exists()) {
+            if (!folder.mkdir()) {
+                System.out.println("Cant create media folder");
+                return;
+            }
+        }
+
         //Pfade der dateien sind relativ, also beginnen mit media/
         File[] files = folder.listFiles(file -> file.isFile() && file.getPath().endsWith(".mp3"));
 
