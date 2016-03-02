@@ -17,6 +17,19 @@ public interface ServerListener {
 
     void stop();
 
+    void playNext();
+
+    void playPrevious();
+
+    void setShuffle(boolean shuffle);
+
+    /**
+     * Setzt den Wiederholungsmodus. Keine Wiederholung 0, Datei wiederholen 1, Alles wiederholen 2
+     *
+     * @param repeatMode Der Modus
+     */
+    void setRepeatMode(int repeatMode);
+
     void setBrightness(int brightness);
 
     void changeVisualisation(String newType);

@@ -69,7 +69,7 @@ public class DbManager {
         }
     }
 
-    public static ArrayList<TrackWrapper> getMusic() {
+    public static ArrayList<TrackWrapper> getAllTracks() {
         try {
             ArrayList<TrackWrapper> res = new ArrayList<>();
             Statement statement = connection.createStatement();

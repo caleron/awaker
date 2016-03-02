@@ -37,5 +37,4 @@ public class TrackWrapper {
     public String getDeleteSql() {
         return String.format("DELETE FROM %s WHERE %s = %s", TABLE_NAME, ID, id);
     }
-
 }

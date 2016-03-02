@@ -125,8 +125,6 @@ public class CustomPlayer {
             ret = decodeFrame();
         }
 
-        //if (!ret) {
-        // last frame, ensure all data flushed to the audio device.
         AudioDevice out = audio;
         if (out != null) {
             out.flush();
@@ -134,9 +132,9 @@ public class CustomPlayer {
                 status = PlaybackStatus.STOPPED;
                 close();
             }
+            //Wenn out schon vorher null ist, dann wurde gestoppt, deshalb nur Event auslösen, wenn out noch nicht null war
+            samplesListener.playbackFinished();
         }
-        //}
-        samplesListener.playbackFinished();
     }
 
     /**

@@ -9,11 +9,16 @@ import java.util.Random;
 
 public class MediaManager {
 
+    private static ArrayList<TrackWrapper> allTracks;
+
     /**
      * Verwendet Mp3agic https://github.com/mpatric/mp3agic
      */
     public MediaManager() {
+    }
 
+    public static void loadTracks() {
+        allTracks = DbManager.getAllTracks();
     }
 
     public static FileInputStream getFileStream(TrackWrapper track) {
@@ -82,7 +87,17 @@ public class MediaManager {
 
             //Tags lesen und in Datenbank packen
             TrackWrapper track = readFile(new File(fileName));
+
+            if (track == null) {
+                System.out.println("Error reading Tags, integration cancelled.");
+                return null;
+            }
+
             DbManager.addTrack(track);
+
+            loadTracks();
+            //Neu aus Datenbank laden, damit ID und Referenzen richtig sind
+            track = DbManager.getTrack(track.title, track.artist);
 
             return track;
         } catch (IOException e) {
@@ -111,7 +126,7 @@ public class MediaManager {
 
         ArrayList<File> fileList = new ArrayList<>(Arrays.asList(files));
 
-        ArrayList<TrackWrapper> tracksOfDb = DbManager.getMusic();
+        ArrayList<TrackWrapper> tracksOfDb = DbManager.getAllTracks();
 
         //Schnittmenge der Listen entfernen
         if (tracksOfDb != null && fileList.size() > 0) {
@@ -152,6 +167,8 @@ public class MediaManager {
             tracksOfDb.forEach(DbManager::removeTrack);
         }
         System.out.println("Scan abgeschlossen");
+
+        loadTracks();
     }
 
     private static TrackWrapper readFile(File file) {
@@ -192,5 +209,9 @@ public class MediaManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static ArrayList<TrackWrapper> getAllTracks() {
+        return allTracks;
     }
 }

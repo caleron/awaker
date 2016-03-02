@@ -44,6 +44,7 @@ public class TestWav implements ResultListener {
         try {
             sourceLine = (SourceDataLine) AudioSystem.getLine(info);
             sourceLine.open(audioFormat);
+
         } catch (LineUnavailableException e) {
             e.printStackTrace();
             System.exit(1);

@@ -2,6 +2,7 @@ package com.awaker;
 
 import com.awaker.analyzer.ResultListener;
 import com.awaker.audio.PlayerMaster;
+import com.awaker.audio.RepeatMode;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
@@ -103,7 +104,7 @@ public class Awaker extends JPanel implements ResultListener, ServerListener {
 
     @Override
     public void playFromPosition(int position) {
-        //TODO playerMaster.playFromPosition(position);
+        playerMaster.playFromPosition(position);
     }
 
     @Override
@@ -114,6 +115,39 @@ public class Awaker extends JPanel implements ResultListener, ServerListener {
     @Override
     public void stop() {
         playerMaster.stop();
+    }
+
+    @Override
+    public void playNext() {
+        playerMaster.playNext();
+    }
+
+    @Override
+    public void playPrevious() {
+        playerMaster.playPrevious();
+    }
+
+    @Override
+    public void setShuffle(boolean shuffle) {
+        playerMaster.setShuffle(shuffle);
+    }
+
+    @Override
+    public void setRepeatMode(int repeatMode) {
+        RepeatMode mode;
+        switch (repeatMode) {
+            case 0:
+                mode = RepeatMode.REPEAT_MODE_NONE;
+                break;
+            case 1:
+                mode = RepeatMode.REPEAT_MODE_FILE;
+                break;
+            default:
+                mode = RepeatMode.REPEAT_MODE_ALL;
+                break;
+        }
+
+        playerMaster.setRepeatMode(mode);
     }
 
     @Override

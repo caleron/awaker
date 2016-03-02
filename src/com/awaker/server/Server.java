@@ -123,6 +123,28 @@ public class Server {
                 listener.downloadFile(socketIn, fileLength, fileName, true);
                 socketOut.println("playing");
                 break;
+            case "playNext":
+                listener.playNext();
+                socketOut.println("playing next");
+                break;
+
+            case "playPrevious":
+                listener.playPrevious();
+                socketOut.println("playing previous");
+                break;
+
+            case "setShuffle":
+                boolean shuffle = Boolean.parseBoolean(args[1]);
+                listener.setShuffle(shuffle);
+                socketOut.println("shuffle set to " + String.valueOf(shuffle));
+                break;
+
+            case "setRepeatMode":
+                int repeatMode = Integer.parseInt(args[1]);
+                listener.setRepeatMode(repeatMode);
+                socketOut.println("repeatMode set to" + String.valueOf(repeatMode));
+                break;
+
             case "setBrightness":
                 int brightness = Integer.parseInt(args[1]);
                 listener.setBrightness(brightness);
