@@ -45,10 +45,11 @@ public class Server {
             try {
                 clientSocket = serverSocket.accept();
                 System.out.println("new socket");
+
                 while (!clientSocket.isClosed()) {
-                    System.out.println("processagain");
                     processSocket(clientSocket);
                 }
+
                 if (clientSocket.isClosed()) {
                     System.out.println("socket closed");
                 }
@@ -85,82 +86,88 @@ public class Server {
         sb.append(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(commandBuffer, 0, byteCount)));
 
         String inputLine = sb.toString();
+        boolean printStatus = true;
 
         String[] args = inputLine.split(";");
         switch (args[0]) {
             case "play":
                 listener.play();
-                socketOut.println("playing");
                 break;
+
             case "playFromPosition":
                 int pos = Integer.parseInt(args[1]);
                 listener.playFromPosition(pos);
-                socketOut.println("playing");
                 break;
+
             case "pause":
                 listener.pause();
-                socketOut.println("paused");
                 break;
+
             case "stop":
                 listener.stop();
-                socketOut.println("stopped");
                 break;
+
+            case "togglePlayPause":
+                listener.togglePlayPause();
+                break;
+
             case "playFile":
                 String title = args[1];
                 String artist = args[2];
 
                 if (!listener.playFile(new TrackWrapper(title, artist))) {
                     socketOut.println("file not found");
-                } else {
-                    socketOut.println("playing");
+                    printStatus = false;
                 }
                 break;
+
             case "uploadAndPlayFile":
                 String fileName = args[1];
                 int fileLength = Integer.parseInt(args[2]);
 
                 //abspielen
                 listener.downloadFile(socketIn, fileLength, fileName, true);
-                socketOut.println("playing");
                 break;
+
             case "playNext":
                 listener.playNext();
-                socketOut.println("playing next");
                 break;
 
             case "playPrevious":
                 listener.playPrevious();
-                socketOut.println("playing previous");
                 break;
 
             case "setShuffle":
                 boolean shuffle = Boolean.parseBoolean(args[1]);
                 listener.setShuffle(shuffle);
-                socketOut.println("shuffle set to " + String.valueOf(shuffle));
                 break;
 
             case "setRepeatMode":
                 int repeatMode = Integer.parseInt(args[1]);
                 listener.setRepeatMode(repeatMode);
-                socketOut.println("repeatMode set to" + String.valueOf(repeatMode));
                 break;
 
             case "setBrightness":
                 int brightness = Integer.parseInt(args[1]);
                 listener.setBrightness(brightness);
-                socketOut.println("success");
                 break;
+
             case "changeVisualization":
                 listener.changeVisualisation(args[1]);
-                socketOut.println("success");
                 break;
+
             case "getStatus":
-                String status = listener.getStatus();
-                socketOut.println(status);
+                //Status wird sowieso ausgegeben
                 break;
+
             default:
                 clientSocket.close();
         }
+
+        if (printStatus) {
+            socketOut.println(listener.getStatus());
+        }
+        System.out.println("Processed: " + inputLine);
     }
 
     public void closeSocket() {

@@ -8,30 +8,33 @@ public class TrackWrapper {
     public static final String ARTIST = "artist";
     public static final String TITLE = "title";
     public static final String FILE_PATH = "file";
+    public static final String TRACK_LENGTH = "length";
 
     public int id;
     public String title;
     public String artist;
     public String album;
     public String filePath;
+    public int trackLength; //in Sekunden
 
     public TrackWrapper(String title, String artist) {
         this.title = title;
         this.artist = artist;
     }
 
-    public TrackWrapper(int id, String title, String artist, String album, String filePath) {
+    public TrackWrapper(int id, String title, String artist, String album, String filePath, int trackLength) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.filePath = filePath;
+        this.trackLength = trackLength;
     }
 
     public String getInsertSQL() {
-        return String.format("INSERT INTO %s (%s,%s,%s,%s) VALUES (\"%s\",\"%s\",\"%s\",\"%s\")", TABLE_NAME,
-                ARTIST, TITLE, ALBUM, FILE_PATH,
-                artist, title, album, filePath);
+        return String.format("INSERT INTO %s (%s,%s,%s,%s, %s) VALUES (\"%s\",\"%s\",\"%s\",\"%s\", \"%s\")", TABLE_NAME,
+                ARTIST, TITLE, ALBUM, FILE_PATH, TRACK_LENGTH,
+                artist, title, album, filePath, trackLength);
     }
 
     public String getDeleteSql() {

@@ -4,8 +4,6 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class DbManager {
-    private static DbManager dbManager = new DbManager();
-
     private static Connection connection;
     private static final String DB_PATH = "media.sqlite";
 
@@ -21,10 +19,9 @@ public class DbManager {
         }
     }
 
-    public static DbManager getInstance() {
-        return dbManager;
-    }
-
+    /**
+     * Initialisiert die Datenbankverbindung und fügt einen ShutdownHook hinzu, um die Verbindung zu schließen.
+     */
     public static void init() {
         try {
             if (connection != null)
@@ -53,6 +50,9 @@ public class DbManager {
         setupDb();
     }
 
+    /**
+     * Erstellt die Datenbanktabellen (1)
+     */
     private static void setupDb() {
         try {
             Statement statement = connection.createStatement();
@@ -61,7 +61,8 @@ public class DbManager {
                     "\"title\" TEXT," +
                     "\"artist\" TEXT," +
                     "\"album\" TEXT," +
-                    "\"file\" TEXT)";
+                    "\"file\" TEXT,"
+                    + "\"length\" INTEGER)";
             statement.executeUpdate(sql);
             statement.close();
         } catch (SQLException e) {
@@ -69,6 +70,11 @@ public class DbManager {
         }
     }
 
+    /**
+     * Gibt alle Tracks zurück
+     *
+     * @return ArrayList mit allen Tracks
+     */
     public static ArrayList<TrackWrapper> getAllTracks() {
         try {
             ArrayList<TrackWrapper> res = new ArrayList<>();
@@ -88,6 +94,13 @@ public class DbManager {
         return null;
     }
 
+    /**
+     * Gibt einen Track mit den angegebenen Tags zurück
+     *
+     * @param title  Der Titel
+     * @param artist Der Künstler
+     * @return der gesuchte Track
+     */
     public static TrackWrapper getTrack(String title, String artist) {
         try {
             Statement statement = connection.createStatement();
@@ -114,16 +127,29 @@ public class DbManager {
         return null;
     }
 
+    /**
+     * Liest einen Track aus dem ResultSet aus
+     *
+     * @param resultSet Das ResultSet mit dem Cursor auf dem auszulesenden Track
+     * @return Der Track
+     * @throws SQLException
+     */
     private static TrackWrapper readTrack(ResultSet resultSet) throws SQLException {
         int id = resultSet.getInt(TrackWrapper.ID);
         String title = resultSet.getString(TrackWrapper.TITLE);
         String artist = resultSet.getString(TrackWrapper.ARTIST);
         String album = resultSet.getString(TrackWrapper.ALBUM);
         String file = resultSet.getString(TrackWrapper.FILE_PATH);
+        int length = resultSet.getInt(TrackWrapper.TRACK_LENGTH);
 
-        return new TrackWrapper(id, title, artist, album, file);
+        return new TrackWrapper(id, title, artist, album, file, length);
     }
 
+    /**
+     * Fügt einen Track zur Datenbank hinzu
+     *
+     * @param track Der hinzuzufügende Track
+     */
     public static void addTrack(TrackWrapper track) {
         try {
             Statement statement = connection.createStatement();
@@ -135,11 +161,17 @@ public class DbManager {
         }
     }
 
+    /**
+     * Fügt eine Liste an Tracks der Datenbank hinzu.
+     *
+     * @param tracks Die Liste an Tracks
+     */
     public static void addTracks(ArrayList<TrackWrapper> tracks) {
         Statement statement = null;
         try {
             statement = connection.createStatement();
             connection.setAutoCommit(false);
+
             for (TrackWrapper track : tracks) {
                 statement.executeUpdate(track.getInsertSQL());
             }
@@ -153,6 +185,11 @@ public class DbManager {
         }
     }
 
+    /**
+     * Entfernt einen Track aus der Datenbank
+     *
+     * @param track Der zu entfernende Track
+     */
     public static void removeTrack(TrackWrapper track) {
         try {
             Statement statement = connection.createStatement();

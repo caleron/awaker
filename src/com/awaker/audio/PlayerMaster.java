@@ -51,22 +51,6 @@ public class PlayerMaster implements PlayerListener {
     }
 
     /**
-     * Startet die Wiedergabe. wählt den nächsten Song aus, falls die Wiedergabe gestoppt wurde.
-     */
-    public void play() {
-        if (player.getStatus() == PlaybackStatus.STOPPED) {
-            playNext();
-        } else {
-            try {
-                player.play();
-            } catch (JavaLayerException e) {
-                e.printStackTrace();
-                //playNext();
-            }
-        }
-    }
-
-    /**
      * Startet die Wiedergabe von einer bestimmten Position
      *
      * @param position Die Position in Sekunden
@@ -76,7 +60,9 @@ public class PlayerMaster implements PlayerListener {
         FileInputStream fis = MediaManager.getFileStream(currentPlayList.getCurrentTrack());
 
         if (fis != null) {
-            player.stop();
+            if (player != null) {
+                player.stop();
+            }
             try {
                 player = new CustomPlayer(this, fis);
                 player.playFromPosition(position);
@@ -86,6 +72,22 @@ public class PlayerMaster implements PlayerListener {
             }
         }
         return false;
+    }
+
+    /**
+     * Startet die Wiedergabe. wählt den nächsten Song aus, falls die Wiedergabe gestoppt wurde.
+     */
+    public void play() {
+        if (player == null || player.getStatus() == PlaybackStatus.STOPPED) {
+            playNext();
+        } else {
+            try {
+                player.play();
+            } catch (JavaLayerException e) {
+                e.printStackTrace();
+                //playNext();
+            }
+        }
     }
 
     /**
@@ -106,7 +108,7 @@ public class PlayerMaster implements PlayerListener {
      * Wechselt zwischen Play und Pause.
      */
     public void tooglePlayPause() {
-        if (player.isPlaying()) {
+        if (player != null && player.isPlaying()) {
             pause();
         } else {
             play();
@@ -117,14 +119,18 @@ public class PlayerMaster implements PlayerListener {
      * Pausiert die Wiedergabe
      */
     public void pause() {
-        player.pause();
+        if (player != null) {
+            player.pause();
+        }
     }
 
     /**
      * Stoppt die Wiedergabe
      */
     public void stop() {
-        player.stop();
+        if (player != null) {
+            player.stop();
+        }
     }
 
     public void setShuffle(boolean shuffle) {
@@ -136,7 +142,49 @@ public class PlayerMaster implements PlayerListener {
     }
 
     public String getStatus() {
-        return player.getStatus().toString();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("playing:");
+        if (player != null) {
+            sb.append(String.valueOf(player.isPlaying()));
+        } else {
+            sb.append("false");
+        }
+
+        sb.append(";shuffle:");
+        sb.append(String.valueOf(currentPlayList.isShuffle()));
+
+        sb.append(";repeat:");
+        if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_ALL) {
+            sb.append("2");
+        } else if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_FILE) {
+            sb.append("1");
+        } else {
+            sb.append("0");
+        }
+        TrackWrapper currentTrack = currentPlayList.getCurrentTrack();
+        if (currentTrack != null) {
+            if (currentTrack.title.length() > 0) {
+                sb.append(";currentTitle:");
+                sb.append(currentTrack.title);
+            }
+            if (currentTrack.artist != null && currentTrack.artist.length() > 0) {
+                sb.append(";currentArtist:");
+                sb.append(currentTrack.artist);
+            }
+            if (currentTrack.album != null && currentTrack.album.length() > 0) {
+                sb.append(";currentAlbum:");
+                sb.append(currentTrack.album);
+            }
+
+            sb.append(";trackLength:");
+            sb.append(currentTrack.trackLength);
+
+            sb.append(";playPosition:");
+            sb.append((int) (player.getPosition() / 1000.0));
+        }
+
+        return sb.toString();
     }
 
     @Override

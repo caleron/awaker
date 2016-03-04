@@ -59,7 +59,7 @@ public class PlayList {
             return currentTrack;
         } else if (currentTrackIndex == -1 || shuffle) {
             //Zufälligen Track auswählen
-            int nextIndex = Math.round(rand.nextFloat() * tracks.size());
+            int nextIndex = Math.round(rand.nextFloat() * (tracks.size() - 1));
             currentTrack = tracks.get(nextIndex);
 
             trackHistory.add(currentTrack);
@@ -84,7 +84,8 @@ public class PlayList {
         if (currentTrack == null || trackHistory.isEmpty()) {
             return nextTrack();
         } else {
-            currentTrack = trackHistory.pop();
+            trackHistory.pop();
+            currentTrack = trackHistory.peek();
             return currentTrack;
         }
     }

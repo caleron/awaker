@@ -164,4 +164,9 @@ public class Awaker extends JPanel implements ResultListener, ServerListener {
     public String getStatus() {
         return playerMaster.getStatus();
     }
+
+    @Override
+    public void togglePlayPause() {
+        playerMaster.tooglePlayPause();
+    }
 }

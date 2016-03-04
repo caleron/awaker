@@ -24,6 +24,13 @@ public class CustomPlayer {
 
     private int lastPosition = 0;
 
+    /**
+     * Die Anzahl ms, die abgespielt oder übersprungen wurden, bevor pausiert wurde. Dies ist notwendig, da beim
+     * Schließen und erneuten Öffnen des AudioDevice als Position die bis dahin auf der Instanz abgespielte Zeit
+     * zurückgegeben wird. Folglich wird die Position bei jedem Pausieren zurückgesetzt.
+     */
+    private int offsetPlayedMs = 0;
+
     private PlayerListener samplesListener;
 
     private PlaybackStatus status = PlaybackStatus.CREATED;
@@ -82,6 +89,11 @@ public class CustomPlayer {
         }
 
         openAudio();
+        /**
+         * Muss hier schon gesetzt werden, damit der Status nach Ausführung dieser Methode auf PLAYING ist,
+         * ansonsten bekommt die App eine falsche Antwort.
+         */
+        status = PlaybackStatus.PLAYING;
         playerThread = new Thread(() -> {
             try {
                 runPlayback(start);
@@ -103,6 +115,7 @@ public class CustomPlayer {
         int msPerFrame = (int) h.ms_per_frame();
 
         int skipCount = (targetSecond * 1000) / msPerFrame;
+        offsetPlayedMs = targetSecond * 1000;
 
         play(skipCount);
     }
@@ -115,7 +128,6 @@ public class CustomPlayer {
      * @throws JavaLayerException
      */
     private void runPlayback(final int start) throws JavaLayerException {
-        status = PlaybackStatus.PLAYING;
         samplesListener.playbackStarted();
 
         skipFrames(start);
@@ -143,6 +155,8 @@ public class CustomPlayer {
     public void stop() {
         status = PlaybackStatus.STOPPED;
         samplesListener.playbackStopped();
+        offsetPlayedMs += getPosition();
+
         close();
     }
 
@@ -156,6 +170,8 @@ public class CustomPlayer {
         AudioDevice out = audio;
         if (out != null) {
             lastPosition = out.getPosition();
+            offsetPlayedMs += lastPosition;
+
             audio = null;
             out.close();
         }
@@ -185,6 +201,7 @@ public class CustomPlayer {
             // calling this method.
             out.close();
             lastPosition = out.getPosition();
+            offsetPlayedMs += lastPosition;
             try {
                 bitstream.close();
             } catch (BitstreamException ignored) {
@@ -215,13 +232,13 @@ public class CustomPlayer {
      * <code> AudioDevice</code> that is used by this player to sound the decoded audio samples.
      */
     public int getPosition() {
-        int position = lastPosition;
-
         AudioDevice out = audio;
         if (out != null) {
-            position = out.getPosition();
+            //Falls gerade abgespielt wird, wurden die
+            return offsetPlayedMs + out.getPosition();
         }
-        return position;
+
+        return offsetPlayedMs;
     }
 
     /**

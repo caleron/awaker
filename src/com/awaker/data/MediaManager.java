@@ -21,7 +21,16 @@ public class MediaManager {
         allTracks = DbManager.getAllTracks();
     }
 
+    /**
+     * Gibt den InputStream zu einem Track zurück
+     *
+     * @param track Der Track
+     * @return Der InputStream
+     */
     public static FileInputStream getFileStream(TrackWrapper track) {
+        if (track == null)
+            return null;
+
         try {
             if (track.filePath != null && track.filePath.length() > 0) {
                 return new FileInputStream(track.filePath);
@@ -37,6 +46,14 @@ public class MediaManager {
         return null;
     }
 
+    /**
+     * Lädt einen Track in eine Datei und integriert diesen in die Datenbank.
+     *
+     * @param is       Der InputStream
+     * @param length   Die Dateilänge
+     * @param fileName Der Dateiname
+     * @return TrackWrapper zum Track
+     */
     public static TrackWrapper downloadFile(InputStream is, int length, String fileName) {
         fileName = "media/" + fileName;
 
@@ -171,11 +188,18 @@ public class MediaManager {
         loadTracks();
     }
 
+    /**
+     * Liest die Tracks einer mp3-Datei aus
+     *
+     * @param file Die auszulesende mp3-Datei
+     * @return TrackWrapper mit den ausgelesenen Tags
+     */
     private static TrackWrapper readFile(File file) {
         try {
             Mp3File mp3File = new Mp3File(file);
 
             String title = null, artist = null, album = null;
+            int lengthInSeconds = (int) mp3File.getLengthInSeconds();
 
             if (mp3File.hasId3v2Tag()) {
                 ID3v2 tag = mp3File.getId3v2Tag();
@@ -188,8 +212,7 @@ public class MediaManager {
                 artist = tag.getArtist();
                 album = tag.getAlbum();
             } else {
-                //Wenn keine/falsche Tags, überspringen
-                System.out.println("Track " + file.getPath() + " beim Scan übersprungen");
+                System.out.println("Track " + file.getPath() + " hat keine Tags");
             }
 
             if (title == null || title.length() == 0) {
@@ -201,9 +224,9 @@ public class MediaManager {
                 artist = "";
 
             if (album == null)
-                artist = "";
+                album = "";
 
-            return new TrackWrapper(-1, title, artist, album, file.getPath());
+            return new TrackWrapper(-1, title, artist, album, file.getPath(), lengthInSeconds);
 
         } catch (IOException | UnsupportedTagException | InvalidDataException e) {
             e.printStackTrace();

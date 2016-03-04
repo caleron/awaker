@@ -35,4 +35,6 @@ public interface ServerListener {
     void changeVisualisation(String newType);
 
     String getStatus();
+
+    void togglePlayPause();
 }
