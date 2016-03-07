@@ -46,6 +46,9 @@ public class PlayList {
             tracks = MediaManager.getAllTracks();
         }
 
+        if (tracks.size() == 0)
+            return null;
+
         //index des aktuellen Tracks bestimmen
         int currentTrackIndex;
         if (currentTrack == null) {

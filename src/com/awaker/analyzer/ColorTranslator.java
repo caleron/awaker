@@ -52,7 +52,7 @@ public class ColorTranslator {
 
         hue = Math.max(0, Math.min(1, hue));
 
-        System.out.println(list.size() + ": hue: " + hue + ", brightness: " + brightness);
+        //System.out.println(list.size() + ": hue: " + hue + ", brightness: " + brightness);
 
         return Color.getHSBColor(1 - hue, 1, brightness);
     }
@@ -86,7 +86,7 @@ public class ColorTranslator {
 
         hue = Math.max(0, Math.min(1, hue));
 
-        System.out.println(list.size() + ": hue: " + hue + ", brightness: " + brightness);
+        //System.out.println(list.size() + ": hue: " + hue + ", brightness: " + brightness);
 
         return Color.getHSBColor(1 - hue, 1, brightness);
     }

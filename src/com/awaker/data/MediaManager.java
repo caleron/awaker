@@ -19,6 +19,11 @@ public class MediaManager {
 
     public static void loadTracks() {
         allTracks = DbManager.getAllTracks();
+        if (allTracks != null) {
+            System.out.println("Mediathek enthält " + allTracks.size() + " Tracks");
+        } else {
+            System.out.println("allTracks ist null");
+        }
     }
 
     /**

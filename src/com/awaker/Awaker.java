@@ -1,11 +1,13 @@
 package com.awaker;
 
+import com.awaker.analyzer.ColorTranslator;
 import com.awaker.analyzer.ResultListener;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.audio.RepeatMode;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.light.LightController;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
 
@@ -17,13 +19,17 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker extends JPanel implements ResultListener, ServerListener {
+public class Awaker implements ResultListener, ServerListener {
 
     List<Map.Entry<Double, Double>> list;
 
     PlayerMaster playerMaster;
 
-    public Awaker() {
+    AwakerPanel panel = null;
+
+    LightController lightController = null;
+
+    public Awaker(boolean isWindows) {
         new Server(this);
 
         DbManager.init();
@@ -31,57 +37,42 @@ public class Awaker extends JPanel implements ResultListener, ServerListener {
 
         playerMaster = new PlayerMaster(this);
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                playerMaster.tooglePlayPause();
-            }
-        });
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        final int FREQ_AREA = 5000;
-        final int MAX_AMP = 5000;
-
-        int width = getWidth();
-        int yBottom = getHeight() - 10;
-
-        //g.setColor(ColorTranslator.translateDurchschnitt(list));
-
-        g.setColor(Color.GRAY);
-        g.fillRect(0, 0, width, getHeight());
-        ((Graphics2D) g).setStroke(new BasicStroke(3));
-
-        if (list != null && !list.isEmpty()) {
-            g.setColor(Color.BLACK);
-
-            for (Map.Entry<Double, Double> entry : list) {
-                int x = (int) ((entry.getKey() / FREQ_AREA) * width);
-                int y = (int) (yBottom - ((entry.getValue() / MAX_AMP) * yBottom));
-                g.drawLine(x, yBottom, x, y);
-            }
-
+        if (isWindows) {
+            panel = new AwakerPanel();
+        } else {
+            lightController = new LightController();
         }
     }
 
+
     public static void main(String[] args) {
-        Awaker awaker = new Awaker();
+        String OS = System.getProperty("os.name").toLowerCase();
 
-        JFrame frame = new JFrame("Awaker");
-        frame.setContentPane(awaker);
+        if (OS.contains("win")) {
+            Awaker awaker = new Awaker(true);
 
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(800, 500);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+            JFrame frame = new JFrame("Awaker");
+            frame.setContentPane(awaker.panel);
+
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setSize(800, 500);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        } else {
+            new Awaker(false);
+        }
     }
 
 
     @Override
     public void newResults(List<Map.Entry<Double, Double>> list) {
         this.list = list;
-        SwingUtilities.invokeLater(this::repaint);
+
+        if (panel != null) {
+            SwingUtilities.invokeLater(panel::repaint);
+        } else if (lightController != null) {
+            lightController.updateColor(ColorTranslator.translateDurchschnitt(list));
+        }
     }
 
     @Override
@@ -168,5 +159,43 @@ public class Awaker extends JPanel implements ResultListener, ServerListener {
     @Override
     public void togglePlayPause() {
         playerMaster.tooglePlayPause();
+    }
+
+    public class AwakerPanel extends JPanel {
+
+        public AwakerPanel() {
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    playerMaster.tooglePlayPause();
+                }
+            });
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            final int FREQ_AREA = 5000;
+            final int MAX_AMP = 5000;
+
+            int width = getWidth();
+            int yBottom = getHeight() - 10;
+
+            //g.setColor(ColorTranslator.translateDurchschnitt(list));
+
+            g.setColor(Color.GRAY);
+            g.fillRect(0, 0, width, getHeight());
+            ((Graphics2D) g).setStroke(new BasicStroke(3));
+
+            if (list != null && !list.isEmpty()) {
+                g.setColor(Color.BLACK);
+
+                for (Map.Entry<Double, Double> entry : list) {
+                    int x = (int) ((entry.getKey() / FREQ_AREA) * width);
+                    int y = (int) (yBottom - ((entry.getValue() / MAX_AMP) * yBottom));
+                    g.drawLine(x, yBottom, x, y);
+                }
+
+            }
+        }
     }
 }

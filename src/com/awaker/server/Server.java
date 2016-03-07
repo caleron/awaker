@@ -4,9 +4,11 @@ import com.awaker.data.TrackWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -40,11 +42,14 @@ public class Server {
      * https://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html
      */
     private void runServer() {
-        Socket clientSocket;
+        Socket clientSocket = null;
         while (!interrupt) {
             try {
                 clientSocket = serverSocket.accept();
                 System.out.println("new socket");
+
+                //10 Sekunden timeout setzen
+                clientSocket.setSoTimeout(10000);
 
                 while (!clientSocket.isClosed()) {
                     processSocket(clientSocket);
@@ -53,7 +58,16 @@ public class Server {
                 if (clientSocket.isClosed()) {
                     System.out.println("socket closed");
                 }
-
+            } catch (SocketTimeoutException e) {
+                //Falls der 10-Sekunden-Timeout überschritten wurde, socket schließen
+                if (clientSocket != null) {
+                    try {
+                        clientSocket.close();
+                        System.out.println("socket closed due to timeout");
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -61,7 +75,7 @@ public class Server {
     }
 
     private void processSocket(Socket clientSocket) throws IOException {
-        PrintWriter socketOut = new PrintWriter(clientSocket.getOutputStream(), true);
+        PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true);
 
         InputStream socketIn = clientSocket.getInputStream();
 
