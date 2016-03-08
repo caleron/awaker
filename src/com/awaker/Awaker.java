@@ -71,7 +71,7 @@ public class Awaker implements ResultListener, ServerListener {
         if (panel != null) {
             SwingUtilities.invokeLater(panel::repaint);
         } else if (lightController != null) {
-            lightController.updateColor(ColorTranslator.translateDurchschnitt(list));
+            lightController.updateColor(ColorTranslator.translateGewichtet(list));
         }
     }
 
@@ -142,8 +142,26 @@ public class Awaker implements ResultListener, ServerListener {
     }
 
     @Override
-    public void setBrightness(int brightness) {
+    public void setColorBrightness(int brightness) {
 
+    }
+
+    @Override
+    public void setColor(Color color) {
+        lightController.updateColor(color);
+    }
+
+    @Override
+    public void setColorMode(boolean custom) {
+
+    }
+
+    @Override
+    public void setWhiteBrightness(int brightness) {
+        //wert zwischen 0 und 100 sicherstellen
+        brightness = Math.max(0, Math.min(100, brightness));
+
+        lightController.setWhiteBrightness(brightness);
     }
 
     @Override

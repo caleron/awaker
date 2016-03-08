@@ -7,11 +7,13 @@ import java.awt.*;
 
 public class LightController {
 
-    private int maxBrightness = 100;
+    private int colorBrightness = 50;
+    private int whiteBrightness = 0;
 
     static final int PWM_PIN_RED = 1;
     static final int PWM_PIN_GREEN = 4;
     static final int PWM_PIN_BLUE = 5;
+    static final int PWM_PIN_WHITE = 6;
 
     int red, green, blue;
     private boolean interrupt = false;
@@ -24,15 +26,25 @@ public class LightController {
         SoftPwm.softPwmCreate(PWM_PIN_RED, 0, 100);
         SoftPwm.softPwmCreate(PWM_PIN_GREEN, 0, 100);
         SoftPwm.softPwmCreate(PWM_PIN_BLUE, 0, 100);
+        SoftPwm.softPwmCreate(PWM_PIN_WHITE, 0, 100);
 
         //new Thread(this::fadeLightsOut).start();
         System.out.println("Lightcontroller initialized");
     }
 
+    public int getWhiteBrightness() {
+        return whiteBrightness;
+    }
+
+    public void setWhiteBrightness(int brightness) {
+        whiteBrightness = brightness;
+        SoftPwm.softPwmWrite(PWM_PIN_WHITE, whiteBrightness);
+    }
+
     public void updateColor(Color color) {
-        red = (int) (color.getRed() / 255.0) * maxBrightness;
-        green = (int) (color.getGreen() / 255.0) * maxBrightness;
-        blue = (int) (color.getBlue() / 255.0) * maxBrightness;
+        red = (int) ((color.getRed() / 255.0) * colorBrightness);
+        green = (int) ((color.getGreen() / 255.0) * colorBrightness);
+        blue = (int) ((color.getBlue() / 255.0) * colorBrightness);
 
         refreshPins();
     }
@@ -58,9 +70,9 @@ public class LightController {
         }
     }
 
-    public void setMaxBrightness(int newValue) {
+    public void setColorBrightness(int newValue) {
         if (newValue > 0 && newValue <= 100) {
-            maxBrightness = newValue;
+            colorBrightness = newValue;
         }
     }
 

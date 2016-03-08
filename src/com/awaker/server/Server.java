@@ -2,6 +2,7 @@ package com.awaker.server;
 
 import com.awaker.data.TrackWrapper;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -161,9 +162,28 @@ public class Server {
                 listener.setRepeatMode(repeatMode);
                 break;
 
-            case "setBrightness":
+            case "setWhiteBrightness":
                 int brightness = Integer.parseInt(args[1]);
-                listener.setBrightness(brightness);
+                listener.setWhiteBrightness(brightness);
+                break;
+
+            case "setColorMode":
+                String mode = args[1];
+                listener.setColorMode(mode.equals("custom"));
+                break;
+
+            case "setColor":
+                int color = Integer.parseInt(args[1]);
+                listener.setColor(new Color(color, false));
+
+                break;
+
+            case "setRGBColor":
+                int red = Integer.parseInt(args[1]);
+                int green = Integer.parseInt(args[2]);
+                int blue = Integer.parseInt(args[3]);
+
+                listener.setColor(new Color(red, green, blue));
                 break;
 
             case "changeVisualization":

@@ -2,6 +2,7 @@ package com.awaker.server;
 
 import com.awaker.data.TrackWrapper;
 
+import java.awt.*;
 import java.io.InputStream;
 
 public interface ServerListener {
@@ -30,11 +31,17 @@ public interface ServerListener {
      */
     void setRepeatMode(int repeatMode);
 
-    void setBrightness(int brightness);
+    void setColorBrightness(int brightness);
+
+    void setColor(Color color);
+
+    void setWhiteBrightness(int brightness);
 
     void changeVisualisation(String newType);
 
     String getStatus();
 
     void togglePlayPause();
+
+    void setColorMode(boolean custom);
 }
