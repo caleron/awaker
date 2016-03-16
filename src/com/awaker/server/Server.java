@@ -3,10 +3,7 @@ package com.awaker.server;
 import com.awaker.data.TrackWrapper;
 
 import java.awt.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -78,8 +75,8 @@ public class Server {
     private void processSocket(Socket clientSocket) throws IOException {
         PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true);
 
-        InputStream socketIn = clientSocket.getInputStream();
-
+        BufferedInputStream socketIn = new BufferedInputStream(clientSocket.getInputStream());
+        
         int readByte;
         StringBuilder sb = new StringBuilder();
         byte[] commandBuffer = new byte[100];

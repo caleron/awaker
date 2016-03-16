@@ -77,7 +77,7 @@ public class Awaker implements ResultListener, ServerListener {
         if (panel != null) {
             SwingUtilities.invokeLater(panel::repaint);
         } else if (lightController != null) {
-            lightController.updateColor(ColorTranslator.translatePartition(list));
+            lightController.updateColor(ColorTranslator.translatePartition2(list));
         }
     }
 
@@ -223,9 +223,8 @@ public class Awaker implements ResultListener, ServerListener {
             int width = getWidth();
             int yBottom = getHeight() - 10;
 
-            g.setColor(ColorTranslator.translatePartition(list));
 
-            //g.setColor(Color.GRAY);
+            g.setColor(Color.GRAY);
             g.fillRect(0, 0, width, getHeight());
             ((Graphics2D) g).setStroke(new BasicStroke(3));
 
@@ -239,6 +238,19 @@ public class Awaker implements ResultListener, ServerListener {
                 }
 
             }
+            Color color = ColorTranslator.translatePartition2(list);
+            int fieldWidth = width / 4;
+            int fieldHeight = 100;//getHeight() / 3;
+            int space = width / 16;
+
+            g.setColor(new Color(color.getRed(), 0, 0));
+            g.fillRect(space, 0, fieldWidth, fieldHeight);
+
+            g.setColor(new Color(0, color.getGreen(), 0));
+            g.fillRect(space * 2 + fieldWidth, 0, fieldWidth, fieldHeight);
+
+            g.setColor(new Color(0, 0, color.getBlue()));
+            g.fillRect(space * 3 + fieldWidth * 2, 0, fieldWidth, fieldHeight);
         }
     }
 }

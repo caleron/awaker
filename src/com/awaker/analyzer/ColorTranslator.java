@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("Duplicates")
+@SuppressWarnings({"Duplicates", "unused"})
 public class ColorTranslator {
 
     public static Color translateMaximum(List<Map.Entry<Double, Double>> list) {
@@ -90,7 +90,7 @@ public class ColorTranslator {
 
     public static Color translatePartition(List<Map.Entry<Double, Double>> list) {
         if (list == null || list.isEmpty())
-            return Color.gray;
+            return Color.black;
 
         final int freqDivider1 = 200;
         final int freqDivider2 = 1000;
@@ -106,8 +106,8 @@ public class ColorTranslator {
         Map.Entry<Double, Double> max3 = findMaxima(partition3);
 
         float red = Math.min((float) Math.pow(max1.getValue() / 13000.0, 2), 1);
-        float green = Math.min((float) Math.pow(max2.getValue() / 8000.0, 2), 1);
-        float blue = Math.min((float) Math.pow(max3.getValue() / 7000.0, 2), 1);
+        float green = Math.min((float) Math.pow(max2.getValue() / 8000.0, 1.5) + 0.2f, 1);
+        float blue = Math.min((float) Math.pow(max3.getValue() / 7000.0, 1.5) + 0.2f, 1);
 
         if (Awaker.isMSWindows) {
             System.out.println("red = " + red + " green = " + green + " blue = " + blue
@@ -115,6 +115,73 @@ public class ColorTranslator {
         }
 
         return new Color(red, green, blue);
+    }
+
+    public static Color translatePartition2(List<Map.Entry<Double, Double>> list) {
+        if (list == null || list.isEmpty())
+            return Color.black;
+
+        final int freqDivider1 = 200;
+        final int freqDivider2 = 800;
+        final int freqDivider3 = 1500;
+
+        List<Map.Entry<Double, Double>> partition1 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() < freqDivider1).collect(Collectors.toList()));
+        List<Map.Entry<Double, Double>> partition2 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() > freqDivider1 && entry.getKey() < freqDivider2).collect(Collectors.toList()));
+        List<Map.Entry<Double, Double>> partition3 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() > freqDivider2 && entry.getKey() < freqDivider3).collect(Collectors.toList()));
+        List<Map.Entry<Double, Double>> partition4 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() > freqDivider3).collect(Collectors.toList()));
+
+        Map.Entry<Double, Double> max1 = findMaxima(partition1);
+        Map.Entry<Double, Double> max2 = findMaxima(partition2);
+        Map.Entry<Double, Double> max3 = findMaxima(partition3);
+        Map.Entry<Double, Double> max4 = findMaxima(partition4);
+
+        float red = cap((float) Math.pow(max1.getValue() / 13000.0, 2));
+        float green = cap((float) Math.pow(max2.getValue() / 10000.0, 2));
+        float blue = cap((float) Math.pow(max4.getValue() / 7000.0, 2));
+
+        green += Math.pow(((1 - (max3.getKey() - 500) / 1000)) * (max3.getValue() / 10000.0), 2);
+        blue += Math.pow(((max3.getKey() - 500) / 1000) * (max3.getValue() / 5000.0), 2);
+
+        green = cap(green);
+        blue = cap(blue);
+
+        //float green = cap((float) (Math.pow(1.6 * ((max2.getValue() / 8000.0) - 0.5), 3) + 0.5f + (max2.getValue() / 8000.0)) / 2f);
+        //float blue = cap((float) (Math.pow(1.6 * ((max3.getValue() / 7000.0) - 0.5), 3) + 0.5f+ (max3.getValue() / 8000.0)) / 2f);
+
+        if (Awaker.isMSWindows) {
+            System.out.println("red = " + red + " green = " + green + " blue = " + blue
+                    + " band1max = " + max1.getValue() + " band2max = " + max2.getValue() + " band3max = " + max3.getValue());
+        }
+
+        return new Color(red, green, blue);
+    }
+
+
+    public static Color translatePartitionAndGewichtet(List<Map.Entry<Double, Double>> list) {
+        if (list == null || list.isEmpty())
+            return Color.black;
+
+        final int freqDivider1 = 200;
+        List<Map.Entry<Double, Double>> partition1 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() < freqDivider1).collect(Collectors.toList()));
+        List<Map.Entry<Double, Double>> partition2 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() >= freqDivider1).collect(Collectors.toList()));
+
+        Map.Entry<Double, Double> max1 = findMaxima(partition1);
+
+        float red = Math.min((float) Math.pow(max1.getValue() / 13000.0, 2), 1);
+
+        Color color2 = translateGewichtet(partition2);
+
+        if (Awaker.isMSWindows) {
+            System.out.println("red = " + red + " green = " + color2.getGreen() + " blue = " + color2.getBlue());
+        }
+
+        return new Color(red, color2.getGreen() / 255f, color2.getBlue() / 255f);
     }
 
     public static Map.Entry<Double, Double> findMaxima(List<Map.Entry<Double, Double>> list) {
@@ -127,5 +194,9 @@ public class ColorTranslator {
             }
         }
         return maxAmp;
+    }
+
+    public static float cap(float f) {
+        return Math.max(0, Math.min(f, 1));
     }
 }
