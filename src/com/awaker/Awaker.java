@@ -21,6 +21,8 @@ import java.util.Map;
 
 public class Awaker implements ResultListener, ServerListener {
 
+    JFrame stringOutputFrame = null;
+    JTextArea stringOutputBox = null;
     List<Map.Entry<Double, Double>> list;
 
     PlayerMaster playerMaster;
@@ -29,7 +31,11 @@ public class Awaker implements ResultListener, ServerListener {
 
     LightController lightController = null;
 
+    public static boolean isMSWindows = true;
+
     public Awaker(boolean isWindows) {
+        isMSWindows = isWindows;
+
         new Server(this);
 
         DbManager.init();
@@ -71,7 +77,7 @@ public class Awaker implements ResultListener, ServerListener {
         if (panel != null) {
             SwingUtilities.invokeLater(panel::repaint);
         } else if (lightController != null) {
-            lightController.updateColor(ColorTranslator.translateGewichtet(list));
+            lightController.updateColor(ColorTranslator.translatePartition(list));
         }
     }
 
@@ -148,12 +154,31 @@ public class Awaker implements ResultListener, ServerListener {
 
     @Override
     public void setColor(Color color) {
-        lightController.updateColor(color);
+        if (lightController != null) {
+            lightController.updateColor(color);
+        }
     }
 
     @Override
     public void setColorMode(boolean custom) {
 
+    }
+
+    @Override
+    public void stringReceived(String str) {
+        if (isMSWindows) {
+            if (stringOutputFrame == null) {
+                stringOutputFrame = new JFrame("Ausgabe");
+                stringOutputFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+
+                stringOutputBox = new JTextArea(30, 50);
+                JScrollPane scrollPane = new JScrollPane(stringOutputBox);
+                stringOutputFrame.setContentPane(scrollPane);
+                stringOutputFrame.pack();
+            }
+            stringOutputFrame.setVisible(true);
+            stringOutputBox.setText(stringOutputBox.getText() + "\n" + str);
+        }
     }
 
     @Override
@@ -198,9 +223,9 @@ public class Awaker implements ResultListener, ServerListener {
             int width = getWidth();
             int yBottom = getHeight() - 10;
 
-            //g.setColor(ColorTranslator.translateDurchschnitt(list));
+            g.setColor(ColorTranslator.translatePartition(list));
 
-            g.setColor(Color.GRAY);
+            //g.setColor(Color.GRAY);
             g.fillRect(0, 0, width, getHeight());
             ((Graphics2D) g).setStroke(new BasicStroke(3));
 

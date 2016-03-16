@@ -1,22 +1,19 @@
 package com.awaker.analyzer;
 
+import com.awaker.Awaker;
+
 import java.awt.*;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("Duplicates")
 public class ColorTranslator {
 
     public static Color translateMaximum(List<Map.Entry<Double, Double>> list) {
-        Map.Entry<Double, Double> maxAmp = new AbstractMap.SimpleEntry<>(0.0, 0.0);
-
-        //Maximalen Ausschlag bestimmen
-        for (Map.Entry<Double, Double> entry : list) {
-            if (maxAmp.getValue() < entry.getValue()) {
-                maxAmp = entry;
-            }
-        }
+        Map.Entry<Double, Double> maxAmp = findMaxima(list);
 
         double freq = maxAmp.getKey();
         double amp = maxAmp.getValue();
@@ -89,5 +86,46 @@ public class ColorTranslator {
         //System.out.println(list.size() + ": hue: " + hue + ", brightness: " + brightness);
 
         return Color.getHSBColor(1 - hue, 1, brightness);
+    }
+
+    public static Color translatePartition(List<Map.Entry<Double, Double>> list) {
+        if (list == null || list.isEmpty())
+            return Color.gray;
+
+        final int freqDivider1 = 200;
+        final int freqDivider2 = 1000;
+        List<Map.Entry<Double, Double>> partition1 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() < freqDivider1).collect(Collectors.toList()));
+        List<Map.Entry<Double, Double>> partition2 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() > freqDivider1 && entry.getKey() < freqDivider2).collect(Collectors.toList()));
+        List<Map.Entry<Double, Double>> partition3 = new ArrayList<>(
+                list.stream().filter(entry -> entry.getKey() > freqDivider2).collect(Collectors.toList()));
+
+        Map.Entry<Double, Double> max1 = findMaxima(partition1);
+        Map.Entry<Double, Double> max2 = findMaxima(partition2);
+        Map.Entry<Double, Double> max3 = findMaxima(partition3);
+
+        float red = Math.min((float) Math.pow(max1.getValue() / 13000.0, 2), 1);
+        float green = Math.min((float) Math.pow(max2.getValue() / 8000.0, 2), 1);
+        float blue = Math.min((float) Math.pow(max3.getValue() / 7000.0, 2), 1);
+
+        if (Awaker.isMSWindows) {
+            System.out.println("red = " + red + " green = " + green + " blue = " + blue
+                    + " band1max = " + max1.getValue() + " band2max = " + max2.getValue() + " band3max = " + max3.getValue());
+        }
+
+        return new Color(red, green, blue);
+    }
+
+    public static Map.Entry<Double, Double> findMaxima(List<Map.Entry<Double, Double>> list) {
+        Map.Entry<Double, Double> maxAmp = new AbstractMap.SimpleEntry<>(0.0, 0.0);
+
+        //Maximalen Ausschlag bestimmen
+        for (Map.Entry<Double, Double> entry : list) {
+            if (maxAmp.getValue() < entry.getValue()) {
+                maxAmp = entry;
+            }
+        }
+        return maxAmp;
     }
 }

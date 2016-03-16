@@ -44,4 +44,6 @@ public interface ServerListener {
     void togglePlayPause();
 
     void setColorMode(boolean custom);
+
+    void stringReceived(String str);
 }

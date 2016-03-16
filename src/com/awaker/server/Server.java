@@ -104,6 +104,7 @@ public class Server {
         boolean printStatus = true;
 
         String[] args = inputLine.split(";");
+        //args[0] ist die Aktion, die nächsten args die Argumente/Parameter
         switch (args[0]) {
             case "play":
                 listener.play();
@@ -194,6 +195,10 @@ public class Server {
                 //Status wird sowieso ausgegeben
                 break;
 
+            case "sendString":
+                int length = Integer.parseInt(args[1]);
+                listener.stringReceived(readString(socketIn, length));
+                break;
             default:
                 clientSocket.close();
         }
@@ -211,5 +216,22 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String readString(InputStream is, int length) throws IOException {
+        byte[] bytes = new byte[length];
+
+        int readByte;
+        StringBuilder sb = new StringBuilder();
+        int byteCount = 0;
+        while ((readByte = is.read()) > -1) {
+            if (byteCount >= length)
+                break;
+
+            bytes[byteCount++] = (byte) readByte;
+        }
+        //Dekodieren mit UTF-8
+        sb.append(StandardCharsets.UTF_8.decode(ByteBuffer.wrap(bytes, 0, byteCount)));
+        return sb.toString();
     }
 }
