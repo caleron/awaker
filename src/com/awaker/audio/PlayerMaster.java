@@ -12,16 +12,18 @@ public class PlayerMaster implements PlayerListener {
     PlayList currentPlayList = PlayList.ALL_TRACKS;
 
     CustomPlayer player;
-
     FFTAnalyzer analyzer;
+
+    PlaybackListener playbackListener;
 
     /**
      * Erstellt eine neue Instanz
      *
      * @param resultListener Der Listener für die Ergebnisse der Analyse mit FFT
      */
-    public PlayerMaster(ResultListener resultListener) {
+    public PlayerMaster(PlaybackListener playbackListener, ResultListener resultListener) {
         analyzer = new FFTAnalyzer(resultListener);
+        this.playbackListener = playbackListener;
     }
 
     /**
@@ -122,6 +124,7 @@ public class PlayerMaster implements PlayerListener {
         if (player != null) {
             player.pause();
         }
+        playbackListener.playbackPaused();
     }
 
     /**
@@ -131,6 +134,7 @@ public class PlayerMaster implements PlayerListener {
         if (player != null) {
             player.stop();
         }
+        playbackListener.playbackPaused();
     }
 
     public void setShuffle(boolean shuffle) {

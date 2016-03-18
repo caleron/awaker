@@ -2,6 +2,7 @@ package com.awaker;
 
 import com.awaker.analyzer.ColorTranslator;
 import com.awaker.analyzer.ResultListener;
+import com.awaker.audio.PlaybackListener;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.audio.RepeatMode;
 import com.awaker.data.DbManager;
@@ -19,7 +20,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker implements ResultListener, ServerListener {
+public class Awaker implements ResultListener, ServerListener, PlaybackListener {
 
     JFrame stringOutputFrame = null;
     JTextArea stringOutputBox = null;
@@ -41,7 +42,7 @@ public class Awaker implements ResultListener, ServerListener {
         DbManager.init();
         MediaManager.startScanFiles();
 
-        playerMaster = new PlayerMaster(this);
+        playerMaster = new PlayerMaster(this, this);
 
         if (isWindows) {
             panel = new AwakerPanel();
@@ -202,6 +203,13 @@ public class Awaker implements ResultListener, ServerListener {
     @Override
     public void togglePlayPause() {
         playerMaster.tooglePlayPause();
+    }
+
+    @Override
+    public void playbackPaused() {
+        if (lightController != null) {
+            lightController.fadeOutColorLights();
+        }
     }
 
     public class AwakerPanel extends JPanel {

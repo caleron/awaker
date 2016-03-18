@@ -140,17 +140,16 @@ public class ColorTranslator {
         Map.Entry<Double, Double> max4 = findMaxima(partition4);
 
         float red = cap((float) Math.pow(max1.getValue() / 13000.0, 2));
-        float green = cap((float) Math.pow(max2.getValue() / 10000.0, 2));
-        float blue = cap((float) Math.pow(max4.getValue() / 7000.0, 2));
+        float green = (float) (max2.getValue() / 15000.0);
+        float blue = (float) (max4.getValue() / 8000.0);
 
-        green += Math.pow(((1 - (max3.getKey() - 500) / 1000)) * (max3.getValue() / 10000.0), 2);
-        blue += Math.pow(((max3.getKey() - 500) / 1000) * (max3.getValue() / 5000.0), 2);
+        int range = freqDivider3 - freqDivider2;
 
-        green = cap(green);
-        blue = cap(blue);
+        green += (1 - ((max3.getKey() - freqDivider2) / range)) * (max3.getValue() / 15000.0);
+        blue += ((max3.getKey() - freqDivider2) / range) * (max3.getValue() / 7000.0);
 
-        //float green = cap((float) (Math.pow(1.6 * ((max2.getValue() / 8000.0) - 0.5), 3) + 0.5f + (max2.getValue() / 8000.0)) / 2f);
-        //float blue = cap((float) (Math.pow(1.6 * ((max3.getValue() / 7000.0) - 0.5), 3) + 0.5f+ (max3.getValue() / 8000.0)) / 2f);
+        green = cap(Math.pow(green, 2));
+        blue = cap(Math.pow(blue, 2));
 
         if (Awaker.isMSWindows) {
             System.out.println("red = " + red + " green = " + green + " blue = " + blue
@@ -198,5 +197,8 @@ public class ColorTranslator {
 
     public static float cap(float f) {
         return Math.max(0, Math.min(f, 1));
+    }
+    public static float cap(double f) {
+        return (float) Math.max(0, Math.min(f, 1));
     }
 }

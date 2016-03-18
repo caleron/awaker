@@ -16,7 +16,6 @@ public class LightController {
     static final int PWM_PIN_WHITE = 6;
 
     int red, green, blue;
-    private boolean interrupt = false;
 
     public LightController() {
         // initialize wiringPi library
@@ -28,8 +27,11 @@ public class LightController {
         SoftPwm.softPwmCreate(PWM_PIN_BLUE, 0, 100);
         SoftPwm.softPwmCreate(PWM_PIN_WHITE, 0, 100);
 
-        //new Thread(this::fadeLightsOut).start();
         System.out.println("Lightcontroller initialized");
+    }
+
+    public void fadeOutColorLights() {
+        new Thread(this::fadeColorLightsOut).start();
     }
 
     public int getWhiteBrightness() {
@@ -46,27 +48,27 @@ public class LightController {
         green = (int) ((color.getGreen() / 255.0) * colorBrightness);
         blue = (int) ((color.getBlue() / 255.0) * colorBrightness);
 
-        refreshPins();
+        refreshColorPins();
     }
 
-    private void refreshPins() {
+    private void refreshColorPins() {
         SoftPwm.softPwmWrite(PWM_PIN_RED, red);
         SoftPwm.softPwmWrite(PWM_PIN_GREEN, green);
         SoftPwm.softPwmWrite(PWM_PIN_BLUE, blue);
     }
 
-    private void fadeLightsOut() {
-        while (!interrupt) {
+    private void fadeColorLightsOut() {
+        while (red > 0 || green > 0 || blue > 0) {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            red = Math.max(red - 3, 0);
-            green = Math.max(green - 3, 0);
-            blue = Math.max(blue - 3, 0);
+            red = Math.max(red - 1, 0);
+            green = Math.max(green - 1, 0);
+            blue = Math.max(blue - 1, 0);
 
-            refreshPins();
+            refreshColorPins();
         }
     }
 
@@ -75,9 +77,4 @@ public class LightController {
             colorBrightness = newValue;
         }
     }
-
-    public void setInterrupt(boolean interrupt) {
-        this.interrupt = interrupt;
-    }
-
 }
