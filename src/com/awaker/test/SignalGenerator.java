@@ -1,7 +1,5 @@
 package com.awaker.test;
 
-import com.awaker.analyzer.FFTAnalyzer;
-
 public class SignalGenerator {
     int sampleCount;
     short[] samples;
@@ -20,7 +18,7 @@ public class SignalGenerator {
     }
 
     public SignalGenerator addFrequency(int freq, int amp) {
-        final double wellenlänge = FFTAnalyzer.SAMPLE_RATE / freq;
+        final double wellenlänge = 44100 / freq;
 
         for (int i = 0; i < sampleCount; i++) {
             samples[i] += (short) (Math.sin((i / wellenlänge) * Math.PI) * amp);

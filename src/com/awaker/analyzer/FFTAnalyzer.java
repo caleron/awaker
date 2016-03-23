@@ -5,8 +5,6 @@ import java.util.Map;
 
 public class FFTAnalyzer {
 
-    public static final int SAMPLE_RATE = 44100;
-
     private final short[] buffer;
     private int bufferedSampleCount = 0;
 
@@ -15,7 +13,7 @@ public class FFTAnalyzer {
     private static final int MIN_ANALYZE_SIZE = 1024;
     private static final int BUFFER_SIZE = MIN_ANALYZE_SIZE * 2;
 
-    FFTAnalyzeThread analyzeThread;
+    private FFTAnalyzeThread analyzeThread;
 
     public FFTAnalyzer(ResultListener listener) {
         buffer = new short[BUFFER_SIZE];
@@ -63,6 +61,21 @@ public class FFTAnalyzer {
             System.arraycopy(samples, 0, buffer, bufferedSampleCount, samples.length);
             bufferedSampleCount += samples.length;
         }
+    }
+
+    public void updateAudioParams(int sampleRate, float msPerFrame) {
+        analyzeThread.updateAudioParams(sampleRate, msPerFrame);
+    }
+
+    public long getAnalyzedSamplesCount() {
+        return analyzeThread.getAnalyzedSamplesCount();
+    }
+
+    /**
+     * Setzt den Samplezähler und die Warteschlange zurück
+     */
+    public void reset() {
+        analyzeThread.reset();
     }
 
     public List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {

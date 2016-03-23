@@ -1,15 +1,16 @@
 package com.awaker.analyzer;
 
+import com.awaker.Awaker;
+
 import java.util.*;
 
 class FFTAnalyzeThread extends Thread {
-    public static final int SAMPLE_RATE = FFTAnalyzer.SAMPLE_RATE;
-
     private Queue<short[]> queue;
-
     private Map<Integer, FFT> fftMap = new HashMap<>(3);
-
     private ResultListener listener;
+
+    private int currentSampleRate;
+    private long analyzedSamplesCount = 0;
 
     /**
      * Wenn standby, läuft der Thread im Standby, also prüft nicht auf neue Samples.
@@ -19,9 +20,9 @@ class FFTAnalyzeThread extends Thread {
     /**
      * Dadurch wird die Analyse um etwa 12 * 23ms verzögert und damit möglichst synchron zur Tonausgabe.
      */
-    private static final int ANALYZE_THRESHOLD = 12;
+    private int analyzeThreshold = 12;
 
-    public FFTAnalyzeThread(ResultListener listener) {
+    FFTAnalyzeThread(ResultListener listener) {
         this.listener = listener;
         queue = new LinkedList<>();
     }
@@ -35,14 +36,14 @@ class FFTAnalyzeThread extends Thread {
                     sleep(5);
                 }
 
-                if (queue.size() > ANALYZE_THRESHOLD) {
+                if (queue.size() > analyzeThreshold) {
                     //Samples aus der Queue nehmen
                     short[] samples = queue.poll();
 
                     //Spielzeit der Samples berechnen und 1 ms abziehen
-                    long samplePlayTime = (long) (((samples.length * 0.5 * 1000) / (SAMPLE_RATE * 1.0)) - 1);
+                    long samplePlayTime = (long) (((samples.length * 0.5 * 1000) / (currentSampleRate * 1.0)) - 1);
 
-                    if (queue.size() > ANALYZE_THRESHOLD + 10) {
+                    if (queue.size() > analyzeThreshold + 10) {
                         //Falls zu viele Samples drin sind, Wartezeit reduzieren
                         samplePlayTime = Math.max(samplePlayTime - 20, 0);
                     }
@@ -50,6 +51,7 @@ class FFTAnalyzeThread extends Thread {
                     long start = System.nanoTime();
                     //Samples analysieren
                     analyzeSamples(samples);
+                    analyzedSamplesCount += samples.length / 2;
 
                     //Berechnungszeit in ms bestimmen
                     int calculationDuration = (int) ((System.nanoTime() - start) / 1000000.0);
@@ -69,7 +71,25 @@ class FFTAnalyzeThread extends Thread {
         }
     }
 
-    public void pushAnalyzeArray(short[] samples) {
+    void updateAudioParams(int sampleRate, float msPerFrame) {
+        if (currentSampleRate != sampleRate && sampleRate > 0) {
+            currentSampleRate = sampleRate;
+
+            //verzögerung in ms
+
+            final int delay;
+            if (Awaker.isMSWindows) {
+                delay = 440;
+            } else {
+                delay = 370;
+            }
+
+            analyzeThreshold = (int) (delay / msPerFrame);
+            System.out.println("analyzeThreshold = " + analyzeThreshold);
+        }
+    }
+
+    void pushAnalyzeArray(short[] samples) {
         standby = false;
         queue.add(samples);
     }
@@ -96,7 +116,7 @@ class FFTAnalyzeThread extends Thread {
         List<Map.Entry<Double, Double>> result = new ArrayList<>();
         for (int i = 0; i < left.length; i++) {
             //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
-            double freq = ((1.0 * SAMPLE_RATE) / (1.0 * sampleFrame)) * i;
+            double freq = ((1.0 * currentSampleRate) / (1.0 * sampleFrame)) * i;
 
             result.add(new AbstractMap.SimpleEntry<>(freq, left[i] + right[i]));
         }
@@ -151,7 +171,7 @@ class FFTAnalyzeThread extends Thread {
      *
      * @param list Die Liste der Frequenz-Amplituden-Paare
      */
-    public static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list, double threshold) {
+    static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list, double threshold) {
         List<Map.Entry<Double, Double>> maximaList = new ArrayList<>();
 
         //lokale Maxima bestimmen
@@ -202,7 +222,7 @@ class FFTAnalyzeThread extends Thread {
      *
      * @param list Die Liste der Frequenz-Amplituden-Paare
      */
-    public static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list) {
+    private static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list) {
         return findLocalMaxima(list, 0.01);
     }
 
@@ -211,18 +231,30 @@ class FFTAnalyzeThread extends Thread {
      *
      * @param samples Array aus Samples
      */
-    public List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {
+    List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {
         int sampleFrame = samples.length;
         double[] amps = analyzeChannel(samples);
 
         List<Map.Entry<Double, Double>> result = new ArrayList<>();
         for (int i = 0; i < amps.length; i++) {
             //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
-            double freq = ((1.0 * SAMPLE_RATE) / (1.0 * sampleFrame)) * i;
+            double freq = ((1.0 * currentSampleRate) / (1.0 * sampleFrame)) * i;
 
             result.add(new AbstractMap.SimpleEntry<>(freq, amps[i]));
         }
 
         return findLocalMaxima(result);
+    }
+
+    long getAnalyzedSamplesCount() {
+        return analyzedSamplesCount;
+    }
+
+    /**
+     * Setzt den Samplezähler und die Warteschlange zurück
+     */
+    void reset() {
+        analyzedSamplesCount = 0;
+        queue.clear();
     }
 }

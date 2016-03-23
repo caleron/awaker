@@ -35,7 +35,8 @@ public class CustomPlayer {
 
     private PlaybackStatus status = PlaybackStatus.CREATED;
 
-    private Thread playerThread;
+    private Header lastHeader;
+    private boolean sampleRateReported = false;
 
     /**
      * Creates a new <code>Player</code> instance.
@@ -44,7 +45,7 @@ public class CustomPlayer {
      * @param stream Inputstream, aus dem abgespielt werden soll.
      * @throws JavaLayerException
      */
-    public CustomPlayer(PlayerListener a, InputStream stream) throws JavaLayerException {
+    CustomPlayer(PlayerListener a, InputStream stream) throws JavaLayerException {
         samplesListener = a;
         decoder = new Decoder();
         bitstream = new Bitstream(stream);
@@ -66,7 +67,7 @@ public class CustomPlayer {
     /**
      * Spielt die aktuelle Datei ab oder setzt diese fort, falls pausiert wurde.
      */
-    public void play() throws JavaLayerException {
+    void play() throws JavaLayerException {
         if (status == PlaybackStatus.PAUSED) {
             resume();
         } else {
@@ -94,7 +95,7 @@ public class CustomPlayer {
          * ansonsten bekommt die App eine falsche Antwort.
          */
         status = PlaybackStatus.PLAYING;
-        playerThread = new Thread(() -> {
+        Thread playerThread = new Thread(() -> {
             try {
                 runPlayback(start);
             } catch (JavaLayerException e) {
@@ -110,9 +111,9 @@ public class CustomPlayer {
      * @param targetSecond Die Position in Sekunden
      * @throws JavaLayerException
      */
-    public void playFromPosition(int targetSecond) throws JavaLayerException {
-        Header h = bitstream.readFrame();
-        int msPerFrame = (int) h.ms_per_frame();
+    void playFromPosition(int targetSecond) throws JavaLayerException {
+        lastHeader = bitstream.readFrame();
+        int msPerFrame = (int) lastHeader.ms_per_frame();
 
         int skipCount = (targetSecond * 1000) / msPerFrame;
         offsetPlayedMs = targetSecond * 1000;
@@ -152,7 +153,7 @@ public class CustomPlayer {
     /**
      * Stoppt die Wiedergabe und schließt alle verbundenen Streams.
      */
-    public void stop() {
+    void stop() {
         status = PlaybackStatus.STOPPED;
         samplesListener.playbackStopped();
         offsetPlayedMs += getPosition();
@@ -163,7 +164,7 @@ public class CustomPlayer {
     /**
      * Pausiert die Wiedergabe.
      */
-    public synchronized void pause() {
+    synchronized void pause() {
         status = PlaybackStatus.PAUSED;
         samplesListener.playbackPaused();
 
@@ -182,7 +183,7 @@ public class CustomPlayer {
      *
      * @throws JavaLayerException
      */
-    public void resume() throws JavaLayerException {
+    private void resume() throws JavaLayerException {
         if (status != PlaybackStatus.PAUSED)
             return;
 
@@ -193,7 +194,7 @@ public class CustomPlayer {
     /**
      * Schließt den Player. Eine aktuelle Wiedergabe wird sofort abgebrochen.
      */
-    public synchronized void close() {
+    private synchronized void close() {
         AudioDevice out = audio;
         if (out != null) {
             audio = null;
@@ -214,7 +215,7 @@ public class CustomPlayer {
      *
      * @return true, wenn abgespielt wird
      */
-    public boolean isPlaying() {
+    boolean isPlaying() {
         return status == PlaybackStatus.PLAYING;
     }
 
@@ -223,7 +224,7 @@ public class CustomPlayer {
      *
      * @return Playback-Status
      */
-    public PlaybackStatus getStatus() {
+    PlaybackStatus getStatus() {
         return status;
     }
 
@@ -231,7 +232,7 @@ public class CustomPlayer {
      * Retrieves the position in milliseconds of the current audio sample being played. This method delegates to the
      * <code> AudioDevice</code> that is used by this player to sound the decoded audio samples.
      */
-    public int getPosition() {
+    int getPosition() {
         AudioDevice out = audio;
         if (out != null) {
             //Falls gerade abgespielt wird, wurden die
@@ -252,13 +253,19 @@ public class CustomPlayer {
             if (out == null)
                 return false;
 
-            Header h = bitstream.readFrame();
+            lastHeader = bitstream.readFrame();
 
-            if (h == null)
+            if (lastHeader == null)
                 return false;
 
+            if (!sampleRateReported) {
+                //lastHeader ist jetzt != null
+                samplesListener.reportAudioParams(getSampleRate(), lastHeader.ms_per_frame());
+                sampleRateReported = true;
+            }
+
             // sample buffer set when decoder constructed
-            SampleBuffer output = (SampleBuffer) decoder.decodeFrame(h, bitstream);
+            SampleBuffer output = (SampleBuffer) decoder.decodeFrame(lastHeader, bitstream);
 
             samplesListener.newSamples(output.getBuffer());
 
@@ -296,12 +303,25 @@ public class CustomPlayer {
      * @return false if there are no more frames to decode, true otherwise.
      */
     private boolean skipFrame() throws JavaLayerException {
-        Header h = bitstream.readFrame();
+        lastHeader = bitstream.readFrame();
 
-        if (h == null)
+        if (lastHeader == null)
             return false;
+
+        if (!sampleRateReported) {
+            //lastHeader ist jetzt != null
+            samplesListener.reportAudioParams(getSampleRate(), lastHeader.ms_per_frame());
+            sampleRateReported = true;
+        }
 
         bitstream.closeFrame();
         return true;
+    }
+
+    int getSampleRate() {
+        if (lastHeader != null) {
+            return lastHeader.frequency();
+        }
+        return 0;
     }
 }

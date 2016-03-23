@@ -151,10 +151,10 @@ public class ColorTranslator {
         green = cap(Math.pow(green, 2));
         blue = cap(Math.pow(blue, 2));
 
-        if (Awaker.isMSWindows) {
+        /*if (Awaker.isMSWindows) {
             System.out.println("red = " + red + " green = " + green + " blue = " + blue
                     + " band1max = " + max1.getValue() + " band2max = " + max2.getValue() + " band3max = " + max3.getValue());
-        }
+        }*/
 
         return new Color(red, green, blue);
     }
@@ -183,7 +183,7 @@ public class ColorTranslator {
         return new Color(red, color2.getGreen() / 255f, color2.getBlue() / 255f);
     }
 
-    public static Map.Entry<Double, Double> findMaxima(List<Map.Entry<Double, Double>> list) {
+    private static Map.Entry<Double, Double> findMaxima(List<Map.Entry<Double, Double>> list) {
         Map.Entry<Double, Double> maxAmp = new AbstractMap.SimpleEntry<>(0.0, 0.0);
 
         //Maximalen Ausschlag bestimmen
@@ -195,10 +195,10 @@ public class ColorTranslator {
         return maxAmp;
     }
 
-    public static float cap(float f) {
+    private static float cap(float f) {
         return Math.max(0, Math.min(f, 1));
     }
-    public static float cap(double f) {
+    private static float cap(double f) {
         return (float) Math.max(0, Math.min(f, 1));
     }
 }

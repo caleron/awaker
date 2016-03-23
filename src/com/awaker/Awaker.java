@@ -22,22 +22,26 @@ import java.util.Map;
 
 public class Awaker implements ResultListener, ServerListener, PlaybackListener {
 
-    JFrame stringOutputFrame = null;
-    JTextArea stringOutputBox = null;
-    List<Map.Entry<Double, Double>> list;
+    private JFrame stringOutputFrame = null;
+    private JTextArea stringOutputBox = null;
+    private List<Map.Entry<Double, Double>> list;
 
-    PlayerMaster playerMaster;
+    private PlayerMaster playerMaster;
 
-    AwakerPanel panel = null;
+    private AwakerPanel panel = null;
 
-    LightController lightController = null;
+    private LightController lightController = null;
 
     public static boolean isMSWindows = true;
 
-    public Awaker(boolean isWindows) {
+    private Awaker(boolean isWindows) {
         isMSWindows = isWindows;
 
         new Server(this);
+
+        if (isMSWindows)
+            new Timer(1000, e -> playerMaster.printPosition()).start();
+
 
         DbManager.init();
         MediaManager.startScanFiles();
@@ -212,13 +216,19 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
         }
     }
 
-    public class AwakerPanel extends JPanel {
+    private class AwakerPanel extends JPanel {
 
-        public AwakerPanel() {
+        AwakerPanel() {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    playerMaster.tooglePlayPause();
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        //linke Maustaste
+                        playerMaster.tooglePlayPause();
+                    } else if (e.getButton() == MouseEvent.BUTTON3) {
+                        //rechte Maustaste
+                        playerMaster.playNext();
+                    }
                 }
             });
         }

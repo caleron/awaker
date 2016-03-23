@@ -9,12 +9,12 @@ import javazoom.jl.decoder.JavaLayerException;
 import java.io.FileInputStream;
 
 public class PlayerMaster implements PlayerListener {
-    PlayList currentPlayList = PlayList.ALL_TRACKS;
+    private PlayList currentPlayList = PlayList.ALL_TRACKS;
 
-    CustomPlayer player;
-    FFTAnalyzer analyzer;
+    private CustomPlayer player;
+    private FFTAnalyzer analyzer;
 
-    PlaybackListener playbackListener;
+    private PlaybackListener playbackListener;
 
     /**
      * Erstellt eine neue Instanz
@@ -35,12 +35,15 @@ public class PlayerMaster implements PlayerListener {
     public boolean playFile(TrackWrapper track) {
         FileInputStream fis = MediaManager.getFileStream(track);
 
+        analyzer.reset();
+
         if (fis != null) {
             currentPlayList.setCurrentTrack(track);
 
             if (player != null) {
                 player.stop();
             }
+            analyzer.reset();
             try {
                 player = new CustomPlayer(this, fis);
                 player.play();
@@ -65,6 +68,7 @@ public class PlayerMaster implements PlayerListener {
             if (player != null) {
                 player.stop();
             }
+            analyzer.reset();
             try {
                 player = new CustomPlayer(this, fis);
                 player.playFromPosition(position);
@@ -145,6 +149,32 @@ public class PlayerMaster implements PlayerListener {
         currentPlayList.setRepeatMode(repeatMode);
     }
 
+    /**
+     * Gibt die Position in Millisekunden zurück
+     *
+     * @return Position
+     */
+    public int getPosition() {
+        return player.getPosition();
+    }
+
+    public void printPosition() {
+        if (player == null)
+            return;
+
+        int sampleRate = player.getSampleRate();
+        int analyzePosition = 0;
+
+        if (sampleRate > 0) {
+            analyzePosition = (int) ((analyzer.getAnalyzedSamplesCount() * 1.0) / (sampleRate / 1000.0));
+        }
+
+        System.out.println("sampleRate: " + sampleRate
+                + " playerPosition: " + getPosition()
+                + " analyzePosition: " + analyzePosition
+                + " difference: " + (getPosition() - analyzePosition));
+    }
+
     public String getStatus() {
         StringBuilder sb = new StringBuilder();
 
@@ -194,6 +224,11 @@ public class PlayerMaster implements PlayerListener {
     @Override
     public void newSamples(short[] samples) {
         analyzer.pushSamples(samples);
+    }
+
+    @Override
+    public void reportAudioParams(int sampleRate, float msPerFrame) {
+        analyzer.updateAudioParams(sampleRate, msPerFrame);
     }
 
     @Override

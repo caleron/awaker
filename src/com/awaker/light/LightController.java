@@ -10,12 +10,12 @@ public class LightController {
     private int colorBrightness = 50;
     private int whiteBrightness = 0;
 
-    static final int PWM_PIN_RED = 1;
-    static final int PWM_PIN_GREEN = 4;
-    static final int PWM_PIN_BLUE = 5;
-    static final int PWM_PIN_WHITE = 6;
+    private static final int PWM_PIN_RED = 1;
+    private static final int PWM_PIN_GREEN = 4;
+    private static final int PWM_PIN_BLUE = 5;
+    private static final int PWM_PIN_WHITE = 6;
 
-    int red, green, blue;
+    private int red, green, blue;
 
     public LightController() {
         // initialize wiringPi library
