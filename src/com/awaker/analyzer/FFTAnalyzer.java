@@ -1,8 +1,5 @@
 package com.awaker.analyzer;
 
-import java.util.List;
-import java.util.Map;
-
 public class FFTAnalyzer {
 
     private final short[] buffer;
@@ -13,7 +10,7 @@ public class FFTAnalyzer {
     private static final int MIN_ANALYZE_SIZE = 1024;
     private static final int BUFFER_SIZE = MIN_ANALYZE_SIZE * 2;
 
-    private FFTAnalyzeThread analyzeThread;
+    private final FFTAnalyzeThread analyzeThread;
 
     public FFTAnalyzer(ResultListener listener) {
         buffer = new short[BUFFER_SIZE];
@@ -78,7 +75,4 @@ public class FFTAnalyzer {
         analyzeThread.reset();
     }
 
-    public List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {
-        return analyzeThread.analyzeChannelOld(samples);
-    }
 }

@@ -29,13 +29,13 @@ package com.awaker.analyzer;
  */
 public class FFT {
 
-    int n, m;
+    private final int n, m;
 
     // Lookup tables.  Only need to recompute when size of FFT changes.
-    double[] cos;
-    double[] sin;
+    private double[] cos;
+    private double[] sin;
 
-    double[] window;
+    private double[] window;
 
     public FFT(int n) {
         this.n = n;

@@ -56,14 +56,7 @@ public class DbManager {
     private static void setupDb() {
         try {
             Statement statement = connection.createStatement();
-            String sql = "CREATE TABLE IF NOT EXISTS \"music\" " +
-                    "(\"id\" INTEGER PRIMARY KEY, " +
-                    "\"title\" TEXT," +
-                    "\"artist\" TEXT," +
-                    "\"album\" TEXT," +
-                    "\"file\" TEXT,"
-                    + "\"length\" INTEGER)";
-            statement.executeUpdate(sql);
+            statement.executeUpdate(TrackWrapper.getCreateTableSql());
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -167,7 +160,7 @@ public class DbManager {
      * @param tracks Die Liste an Tracks
      */
     public static void addTracks(ArrayList<TrackWrapper> tracks) {
-        Statement statement = null;
+        Statement statement;
         try {
             statement = connection.createStatement();
             connection.setAutoCommit(false);

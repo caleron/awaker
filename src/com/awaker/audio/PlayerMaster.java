@@ -12,9 +12,9 @@ public class PlayerMaster implements PlayerListener {
     private PlayList currentPlayList = PlayList.ALL_TRACKS;
 
     private CustomPlayer player;
-    private FFTAnalyzer analyzer;
+    private final FFTAnalyzer analyzer;
 
-    private PlaybackListener playbackListener;
+    private final PlaybackListener playbackListener;
 
     /**
      * Erstellt eine neue Instanz
@@ -154,7 +154,7 @@ public class PlayerMaster implements PlayerListener {
      *
      * @return Position
      */
-    public int getPosition() {
+    private int getPosition() {
         return player.getPosition();
     }
 

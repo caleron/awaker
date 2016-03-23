@@ -3,7 +3,7 @@ package com.awaker.test;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-public class Test {
+class Test {
     public static void main(String[] args) {
         String command = "aäß@\n";
 

@@ -14,12 +14,12 @@ import java.nio.charset.StandardCharsets;
  * Soll alle Anfragen beantworten
  */
 public class Server {
-    public static final int PORT_NUMBER = 4732;
+    private static final int PORT_NUMBER = 4732;
     private ServerSocket serverSocket;
 
     private boolean interrupt = false;
 
-    ServerListener listener;
+    private final ServerListener listener;
 
     public Server(ServerListener listener) {
         this.listener = listener;

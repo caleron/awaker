@@ -6,16 +6,16 @@ import javazoom.jl.player.FactoryRegistry;
 
 import java.io.InputStream;
 
-public class CustomPlayer {
+class CustomPlayer {
     /**
      * The MPEG audio bitstream.
      */
-    private Bitstream bitstream;
+    private final Bitstream bitstream;
 
     /**
      * The MPEG audio decoder.
      */
-    private Decoder decoder;
+    private final Decoder decoder;
 
     /**
      * The AudioDevice the audio samples are written to.
@@ -31,7 +31,7 @@ public class CustomPlayer {
      */
     private int offsetPlayedMs = 0;
 
-    private PlayerListener samplesListener;
+    private final PlayerListener samplesListener;
 
     private PlaybackStatus status = PlaybackStatus.CREATED;
 
@@ -43,9 +43,8 @@ public class CustomPlayer {
      *
      * @param a      PlayerListener, der über Playback-Events informiert wird
      * @param stream Inputstream, aus dem abgespielt werden soll.
-     * @throws JavaLayerException
      */
-    CustomPlayer(PlayerListener a, InputStream stream) throws JavaLayerException {
+    CustomPlayer(PlayerListener a, InputStream stream) {
         samplesListener = a;
         decoder = new Decoder();
         bitstream = new Bitstream(stream);

@@ -5,9 +5,9 @@ import com.awaker.Awaker;
 import java.util.*;
 
 class FFTAnalyzeThread extends Thread {
-    private Queue<short[]> queue;
-    private Map<Integer, FFT> fftMap = new HashMap<>(3);
-    private ResultListener listener;
+    private final Queue<short[]> queue;
+    private final Map<Integer, FFT> fftMap = new HashMap<>(3);
+    private final ResultListener listener;
 
     private int currentSampleRate;
     private long analyzedSamplesCount = 0;
@@ -224,26 +224,6 @@ class FFTAnalyzeThread extends Thread {
      */
     private static List<Map.Entry<Double, Double>> findLocalMaxima(List<Map.Entry<Double, Double>> list) {
         return findLocalMaxima(list, 0.01);
-    }
-
-    /**
-     * samples.length = sampleframe
-     *
-     * @param samples Array aus Samples
-     */
-    List<Map.Entry<Double, Double>> analyzeChannelOld(short[] samples) {
-        int sampleFrame = samples.length;
-        double[] amps = analyzeChannel(samples);
-
-        List<Map.Entry<Double, Double>> result = new ArrayList<>();
-        for (int i = 0; i < amps.length; i++) {
-            //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
-            double freq = ((1.0 * currentSampleRate) / (1.0 * sampleFrame)) * i;
-
-            result.add(new AbstractMap.SimpleEntry<>(freq, amps[i]));
-        }
-
-        return findLocalMaxima(result);
     }
 
     long getAnalyzedSamplesCount() {

@@ -7,17 +7,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Verwendet Mp3agic https://github.com/mpatric/mp3agic
+ */
 public class MediaManager {
 
     private static ArrayList<TrackWrapper> allTracks;
 
-    /**
-     * Verwendet Mp3agic https://github.com/mpatric/mp3agic
-     */
-    public MediaManager() {
-    }
-
-    public static void loadTracks() {
+    private static void loadTracks() {
         allTracks = DbManager.getAllTracks();
         if (allTracks != null) {
             System.out.println("Mediathek enthält " + allTracks.size() + " Tracks");

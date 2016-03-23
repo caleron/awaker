@@ -11,8 +11,8 @@ import java.util.Stack;
 public class PlayList {
     public static final PlayList ALL_TRACKS = new PlayList("Alle", null);
 
-    private Random rand = new Random();
-    private String name;
+    private final Random rand = new Random();
+    private final String name;
 
     /**
      * Wenn tracks == null, dann umfasst die Playlist alle Tracks
@@ -23,7 +23,7 @@ public class PlayList {
     private boolean shuffle = true;
     private RepeatMode repeatMode = RepeatMode.REPEAT_MODE_ALL;
 
-    private Stack<TrackWrapper> trackHistory = new Stack<>();
+    private final Stack<TrackWrapper> trackHistory = new Stack<>();
 
     /**
      * Erstellt eine neue Playlist

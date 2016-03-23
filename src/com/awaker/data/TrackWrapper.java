@@ -22,7 +22,7 @@ public class TrackWrapper {
         this.artist = artist;
     }
 
-    public TrackWrapper(int id, String title, String artist, String album, String filePath, int trackLength) {
+    TrackWrapper(int id, String title, String artist, String album, String filePath, int trackLength) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -31,13 +31,23 @@ public class TrackWrapper {
         this.trackLength = trackLength;
     }
 
-    public String getInsertSQL() {
+    String getInsertSQL() {
         return String.format("INSERT INTO %s (%s,%s,%s,%s, %s) VALUES (\"%s\",\"%s\",\"%s\",\"%s\", \"%s\")", TABLE_NAME,
                 ARTIST, TITLE, ALBUM, FILE_PATH, TRACK_LENGTH,
                 artist, title, album, filePath, trackLength);
     }
 
-    public String getDeleteSql() {
+    String getDeleteSql() {
         return String.format("DELETE FROM %s WHERE %s = %s", TABLE_NAME, ID, id);
+    }
+
+    static String getCreateTableSql() {
+        return String.format("CREATE TABLE IF NOT EXISTS \"%s\" " +
+                "(\"%s\" INTEGER PRIMARY KEY, " +
+                "\"%s\" TEXT," +
+                "\"%s\" TEXT," +
+                "\"%s\" TEXT," +
+                "\"%s\" TEXT,"
+                + "\"length\" INTEGER)", TABLE_NAME, ID, TITLE,ARTIST,ALBUM, FILE_PATH);
     }
 }
