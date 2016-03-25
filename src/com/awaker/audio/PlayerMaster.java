@@ -13,6 +13,7 @@ public class PlayerMaster implements PlayerListener {
 
     private CustomPlayer player;
     private final FFTAnalyzer analyzer;
+    private boolean customColorMode = false;
 
     private final PlaybackListener playbackListener;
 
@@ -222,9 +223,21 @@ public class PlayerMaster implements PlayerListener {
         return sb.toString();
     }
 
+    /**
+     * Setzt den Beleuchtungsmodus
+     *
+     * @param customColorMode True, wenn Lichtfarbe manuell gesetzt wird
+     */
+    public void setCustomColorMode(boolean customColorMode) {
+        this.customColorMode = customColorMode;
+    }
+
     @Override
     public void newSamples(short[] samples) {
-        analyzer.pushSamples(samples);
+        if (!customColorMode) {
+            //Falls manuelle Lichtfarbe, keine Analyse auslösen
+            analyzer.pushSamples(samples);
+        }
     }
 
     @Override

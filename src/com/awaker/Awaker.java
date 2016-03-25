@@ -79,9 +79,9 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
     public void newResults(List<Map.Entry<Double, Double>> list) {
         this.list = list;
 
-        if (panel != null) {
+        if (isMSWindows) {
             SwingUtilities.invokeLater(panel::repaint);
-        } else if (lightController != null) {
+        } else {
             lightController.updateColor(ColorTranslator.translatePartition2(list));
         }
     }
@@ -159,14 +159,16 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
 
     @Override
     public void setColor(Color color) {
-        if (lightController != null) {
+        if (!isMSWindows) {
             lightController.updateColor(color);
         }
     }
 
     @Override
     public void setColorMode(boolean custom) {
-
+        if (!isMSWindows) {
+            playerMaster.setCustomColorMode(custom);
+        }
     }
 
     @Override
@@ -191,7 +193,9 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
 
-        lightController.setWhiteBrightness(brightness);
+        if (!isMSWindows) {
+            lightController.setWhiteBrightness(brightness);
+        }
     }
 
     @Override
@@ -211,7 +215,7 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
 
     @Override
     public void playbackPaused() {
-        if (lightController != null) {
+        if (!isMSWindows) {
             lightController.fadeOutColorLights();
         }
     }
