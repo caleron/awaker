@@ -127,6 +127,7 @@ public class PlayerMaster implements PlayerListener {
     public void pause() {
         if (player != null) {
             player.pause();
+            analyzer.reset();
         }
         playbackListener.playbackPaused();
     }
@@ -166,7 +167,7 @@ public class PlayerMaster implements PlayerListener {
         int analyzePosition = 0;
 
         if (sampleRate > 0) {
-            analyzePosition = (int) ((analyzer.getAnalyzedSamplesCount() * 1.0) / (sampleRate / 1000.0));
+            analyzePosition = (int) ((analyzer.getAnalyzedSamplesCount() * 1.0) / (sampleRate / 1000.0)) + player.getOffsetPlayedMs();
         }
 
         System.out.println("sampleRate: " + sampleRate

@@ -241,6 +241,10 @@ class CustomPlayer {
         return offsetPlayedMs;
     }
 
+    int getOffsetPlayedMs() {
+        return offsetPlayedMs;
+    }
+
     /**
      * Decodes a single frame.
      *
