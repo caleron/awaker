@@ -167,7 +167,7 @@ public class Server {
 
             case "setColorMode":
                 String mode = args[1];
-                listener.setColorMode(mode.equals("custom"));
+                listener.setColorMode(mode);
                 break;
 
             case "setColor":

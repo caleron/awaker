@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class LightController {
 
-    private int colorBrightness = 50;
+    private int colorBrightness = 100;
     private int whiteBrightness = 0;
 
     private static final int PWM_PIN_RED = 1;
@@ -15,7 +15,12 @@ public class LightController {
     private static final int PWM_PIN_BLUE = 5;
     private static final int PWM_PIN_WHITE = 6;
 
-    private int red, green, blue;
+    private float red, green, blue;
+    //Steht für die letzte über die Funktion updateColor gesetzte Farbe
+    private Color currentColor;
+
+    private String colorMode = "music";
+    private Thread animationThread;
 
     public LightController() {
         // initialize wiringPi library
@@ -31,11 +36,32 @@ public class LightController {
     }
 
     public void fadeOutColorLights() {
-        new Thread(this::fadeColorLightsOut).start();
+        startAnimationThread(this::doFadeColorLightsOut);
     }
 
-    public int getWhiteBrightness() {
-        return whiteBrightness;
+    private void animateColorCircle() {
+        startAnimationThread(this::doAnimateColor);
+    }
+
+    private void startAnimationThread(Runnable target) {
+        //bestehenden Thread beenden
+        while (animationThread != null && animationThread.isAlive()) {
+            animationThread.interrupt();
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        animationThread = new Thread(target);
+        animationThread.start();
+    }
+
+    private void cancelAnimation() {
+        if (animationThread != null && animationThread.isAlive()) {
+            animationThread.interrupt();
+        }
     }
 
     public void setWhiteBrightness(int brightness) {
@@ -43,32 +69,61 @@ public class LightController {
         SoftPwm.softPwmWrite(PWM_PIN_WHITE, whiteBrightness);
     }
 
-    public void updateColor(Color color) {
-        red = (int) ((color.getRed() / 255.0) * colorBrightness);
-        green = (int) ((color.getGreen() / 255.0) * colorBrightness);
-        blue = (int) ((color.getBlue() / 255.0) * colorBrightness);
-
+    public void updateColor(Color color, boolean smooth) {
+        currentColor = color;
+        if (smooth) {
+            red = avg(red, ((color.getRed() / 255f) * colorBrightness));
+            green = avg(green, ((color.getGreen() / 255f) * colorBrightness));
+            blue = avg(blue, ((color.getBlue() / 255f) * colorBrightness));
+        } else {
+            red = (color.getRed() / 255f) * colorBrightness;
+            green = (color.getGreen() / 255f) * colorBrightness;
+            blue = (color.getBlue() / 255f) * colorBrightness;
+        }
         refreshColorPins();
     }
 
     private void refreshColorPins() {
-        SoftPwm.softPwmWrite(PWM_PIN_RED, red);
-        SoftPwm.softPwmWrite(PWM_PIN_GREEN, green);
-        SoftPwm.softPwmWrite(PWM_PIN_BLUE, blue);
+        SoftPwm.softPwmWrite(PWM_PIN_RED, (int) red);
+        SoftPwm.softPwmWrite(PWM_PIN_GREEN, (int) green);
+        SoftPwm.softPwmWrite(PWM_PIN_BLUE, (int) blue);
     }
 
-    private void fadeColorLightsOut() {
-        while (red > 0 || green > 0 || blue > 0) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    private void doFadeColorLightsOut() {
+        while ((red > 0 || green > 0 || blue > 0) && !animationThread.isInterrupted()) {
             red = Math.max(red - 1, 0);
             green = Math.max(green - 1, 0);
             blue = Math.max(blue - 1, 0);
 
             refreshColorPins();
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ex) {
+                return;
+            }
+        }
+    }
+
+    private void doAnimateColor() {
+        float hue = 0f;
+
+        while (!animationThread.isInterrupted()) {
+            Color c = Color.getHSBColor(hue, 1, colorBrightness / 100f);
+
+            red = c.getRed();
+            green = c.getGreen();
+            blue = c.getBlue();
+
+            refreshColorPins();
+
+            hue = hue + 0.01f;
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ex) {
+                return;
+            }
         }
     }
 
@@ -76,5 +131,46 @@ public class LightController {
         if (newValue > 0 && newValue <= 100) {
             colorBrightness = newValue;
         }
+    }
+
+    public void setColorMode(String colorMode) {
+        this.colorMode = colorMode;
+
+        switch (colorMode) {
+            case "custom":
+                cancelAnimation();
+                //nichts zu tun
+                break;
+            case "colorCircle":
+                animateColorCircle();
+                break;
+            default: //also music
+                cancelAnimation();
+                break;
+        }
+    }
+
+    private static float avg(float a, float b) {
+        return (a + b) / 2f;
+    }
+
+    public String getStatus() {
+        StringBuilder sb = new StringBuilder(100);
+
+        sb.append("colorMode:");
+        sb.append(colorMode).append(";");
+
+        if (colorMode.equals("custom")) {
+            sb.append("currentColor:");
+            sb.append(currentColor.getRGB()).append(";");
+        }
+
+        sb.append("whiteBrightness:");
+        sb.append(whiteBrightness).append(";");
+
+        sb.append("colorBrightness:");
+        sb.append(colorBrightness).append(";");
+
+        return sb.toString();
     }
 }

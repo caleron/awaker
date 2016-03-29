@@ -82,7 +82,7 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
         if (isMSWindows) {
             SwingUtilities.invokeLater(panel::repaint);
         } else {
-            lightController.updateColor(ColorTranslator.translatePartition2(list));
+            lightController.updateColor(ColorTranslator.translatePartition2(list), true);
         }
     }
 
@@ -154,20 +154,23 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
 
     @Override
     public void setColorBrightness(int brightness) {
-
+        if (!isMSWindows) {
+            lightController.setColorBrightness(brightness);
+        }
     }
 
     @Override
     public void setColor(Color color) {
         if (!isMSWindows) {
-            lightController.updateColor(color);
+            lightController.updateColor(color, false);
         }
     }
 
     @Override
-    public void setColorMode(boolean custom) {
+    public void setColorMode(String mode) {
         if (!isMSWindows) {
-            playerMaster.setCustomColorMode(custom);
+            lightController.setColorMode(mode);
+            playerMaster.setCustomColorMode(!mode.equals("music"));
         }
     }
 
@@ -205,7 +208,11 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
 
     @Override
     public String getStatus() {
-        return playerMaster.getStatus();
+        String status = playerMaster.getStatus();
+        if (!isMSWindows) {
+            status += lightController.getStatus();
+        }
+        return status;
     }
 
     @Override

@@ -43,7 +43,12 @@ public interface ServerListener {
 
     void togglePlayPause();
 
-    void setColorMode(boolean custom);
+    /**
+     * Setzt den Farbmodus. Mögliche Werte sind: music, custom, colorCircle
+     *
+     * @param mode der Modus
+     */
+    void setColorMode(String mode);
 
     void stringReceived(String str);
 }
