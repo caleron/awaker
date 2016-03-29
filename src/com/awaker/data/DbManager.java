@@ -68,7 +68,7 @@ public class DbManager {
      *
      * @return ArrayList mit allen Tracks
      */
-    public static ArrayList<TrackWrapper> getAllTracks() {
+    static ArrayList<TrackWrapper> getAllTracks() {
         try {
             ArrayList<TrackWrapper> res = new ArrayList<>();
             Statement statement = connection.createStatement();
@@ -94,7 +94,7 @@ public class DbManager {
      * @param artist Der Künstler
      * @return der gesuchte Track
      */
-    public static TrackWrapper getTrack(String title, String artist) {
+    static TrackWrapper getTrack(String title, String artist) {
         try {
             Statement statement = connection.createStatement();
             String sql;
@@ -143,7 +143,7 @@ public class DbManager {
      *
      * @param track Der hinzuzufügende Track
      */
-    public static void addTrack(TrackWrapper track) {
+    static void addTrack(TrackWrapper track) {
         try {
             Statement statement = connection.createStatement();
 
@@ -159,7 +159,7 @@ public class DbManager {
      *
      * @param tracks Die Liste an Tracks
      */
-    public static void addTracks(ArrayList<TrackWrapper> tracks) {
+    static void addTracks(ArrayList<TrackWrapper> tracks) {
         Statement statement;
         try {
             statement = connection.createStatement();
@@ -183,7 +183,7 @@ public class DbManager {
      *
      * @param track Der zu entfernende Track
      */
-    public static void removeTrack(TrackWrapper track) {
+    static void removeTrack(TrackWrapper track) {
         try {
             Statement statement = connection.createStatement();
 

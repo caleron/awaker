@@ -7,7 +7,7 @@ import java.util.*;
 class FFTAnalyzeThread extends Thread {
     private final Queue<short[]> queue;
     private final Map<Integer, FFT> fftMap = new HashMap<>(3);
-    private final ResultListener listener;
+    private final AnalyzeResultListener listener;
 
     private int currentSampleRate;
     private long analyzedSamplesCount = 0;
@@ -18,11 +18,12 @@ class FFTAnalyzeThread extends Thread {
     private boolean standby = true;
 
     /**
-     * Dadurch wird die Analyse um etwa 12 * 23ms verzögert und damit möglichst synchron zur Tonausgabe.
+     * Dadurch wird die Analyse um etwa 12 * 23ms verzögert und damit möglichst synchron zur Tonausgabe. Wird durch
+     * Aktualisierung von Soundparametern in updateAudioParams angepasst.
      */
     private int analyzeThreshold = 12;
 
-    FFTAnalyzeThread(ResultListener listener) {
+    FFTAnalyzeThread(AnalyzeResultListener listener) {
         this.listener = listener;
         queue = new LinkedList<>();
     }
@@ -71,12 +72,20 @@ class FFTAnalyzeThread extends Thread {
         }
     }
 
+    /**
+     * Wird aufgerufen, um aktuelle Audioparameter zu übermitteln. Mit diesen Informationen wird die Analyse mit der
+     * Musik synchronisiert. Dies ist notwendig, da der Audiomixer (etwa Alsamixer auf dem Raspberry) einen Puffer oder
+     * ähnliches verwendet, also der Sound erst nach einer Verzögerung abgespielt wird, damit eine reibungslose
+     * Wiedergabe garantiert ist. Unter Windows ist diese Verzögerung anders als auf dem Raspberry.
+     *
+     * @param sampleRate Die aktuelle Samplerate
+     * @param msPerFrame Zeit pro Frame (und damit Sampleblock) in ms
+     */
     void updateAudioParams(int sampleRate, float msPerFrame) {
         if (currentSampleRate != sampleRate && sampleRate > 0) {
             currentSampleRate = sampleRate;
 
             //verzögerung in ms
-
             final int delay;
             if (Awaker.isMSWindows) {
                 delay = 440;
@@ -95,7 +104,7 @@ class FFTAnalyzeThread extends Thread {
     }
 
     /**
-     * Startet die Analyse von Stereo-Samples
+     * Startet die Analyse von Stereo-Samples. Die Amplituden der beiden Kanäle werden einfach addiert.
      *
      * @param samples Array aus Samples
      */

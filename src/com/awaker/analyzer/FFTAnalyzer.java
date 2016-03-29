@@ -12,7 +12,7 @@ public class FFTAnalyzer {
 
     private final FFTAnalyzeThread analyzeThread;
 
-    public FFTAnalyzer(ResultListener listener) {
+    public FFTAnalyzer(AnalyzeResultListener listener) {
         buffer = new short[BUFFER_SIZE];
         analyzeThread = new FFTAnalyzeThread(listener);
         analyzeThread.start();

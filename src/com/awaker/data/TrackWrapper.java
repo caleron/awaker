@@ -1,7 +1,7 @@
 package com.awaker.data;
 
 public class TrackWrapper {
-    public static final String TABLE_NAME = "music";
+    private static final String TABLE_NAME = "music";
 
     public static final String ID = "id";
     public static final String ALBUM = "album";
@@ -10,9 +10,9 @@ public class TrackWrapper {
     public static final String FILE_PATH = "file";
     public static final String TRACK_LENGTH = "length";
 
-    public int id;
-    public String title;
-    public String artist;
+    private int id;
+    public final String title;
+    public final String artist;
     public String album;
     public String filePath;
     public int trackLength; //in Sekunden

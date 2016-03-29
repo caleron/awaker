@@ -1,7 +1,7 @@
 package com.awaker.audio;
 
+import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.FFTAnalyzer;
-import com.awaker.analyzer.ResultListener;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import javazoom.jl.decoder.JavaLayerException;
@@ -20,10 +20,10 @@ public class PlayerMaster implements PlayerListener {
     /**
      * Erstellt eine neue Instanz
      *
-     * @param resultListener Der Listener für die Ergebnisse der Analyse mit FFT
+     * @param analyzeResultListener Der Listener für die Ergebnisse der Analyse mit FFT
      */
-    public PlayerMaster(PlaybackListener playbackListener, ResultListener resultListener) {
-        analyzer = new FFTAnalyzer(resultListener);
+    public PlayerMaster(PlaybackListener playbackListener, AnalyzeResultListener analyzeResultListener) {
+        analyzer = new FFTAnalyzer(analyzeResultListener);
         this.playbackListener = playbackListener;
     }
 

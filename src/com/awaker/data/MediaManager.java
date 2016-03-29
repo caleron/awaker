@@ -129,6 +129,9 @@ public class MediaManager {
         new Thread(MediaManager::scanFiles).start();
     }
 
+    /**
+     * Führt den Dateiscan im Ordner media durch
+     */
     private static void scanFiles() {
         System.out.println("Dateiscan gestartet");
 

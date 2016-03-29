@@ -1,7 +1,7 @@
 package com.awaker;
 
 import com.awaker.analyzer.ColorTranslator;
-import com.awaker.analyzer.ResultListener;
+import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.audio.PlaybackListener;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.audio.RepeatMode;
@@ -20,15 +20,13 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker implements ResultListener, ServerListener, PlaybackListener {
-
+public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackListener {
+    //Ausgabefenster und -feld beim Betrieb auf Windows
     private JFrame stringOutputFrame = null;
     private JTextArea stringOutputBox = null;
-    private List<Map.Entry<Double, Double>> list;
+    private AwakerPanel panel = null;
 
     private PlayerMaster playerMaster;
-
-    private AwakerPanel panel = null;
 
     private LightController lightController = null;
 
@@ -77,9 +75,8 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
 
     @Override
     public void newResults(List<Map.Entry<Double, Double>> list) {
-        this.list = list;
-
         if (isMSWindows) {
+            panel.fftResultList = list;
             SwingUtilities.invokeLater(panel::repaint);
         } else {
             lightController.updateColor(ColorTranslator.translatePartition2(list), true);
@@ -193,9 +190,6 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
 
     @Override
     public void setWhiteBrightness(int brightness) {
-        //wert zwischen 0 und 100 sicherstellen
-        brightness = Math.max(0, Math.min(100, brightness));
-
         if (!isMSWindows) {
             lightController.setWhiteBrightness(brightness);
         }
@@ -220,6 +214,7 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
         playerMaster.tooglePlayPause();
     }
 
+
     @Override
     public void playbackPaused() {
         if (!isMSWindows) {
@@ -227,7 +222,15 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
         }
     }
 
+    /**
+     * Panel zur grafischen Darstellung der Frequenzanalyse unter Windows
+     */
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     private class AwakerPanel extends JPanel {
+        private static final long serialVersionUID = 1646200901514802932L;
+
+        //Liste mit den Ergebnissen aus der Frequenzanalyse mit FFT
+        private List<Map.Entry<Double, Double>> fftResultList;
 
         AwakerPanel() {
             addMouseListener(new MouseAdapter() {
@@ -257,17 +260,17 @@ public class Awaker implements ResultListener, ServerListener, PlaybackListener 
             g.fillRect(0, 0, width, getHeight());
             ((Graphics2D) g).setStroke(new BasicStroke(3));
 
-            if (list != null && !list.isEmpty()) {
+            if (fftResultList != null && !fftResultList.isEmpty()) {
                 g.setColor(Color.BLACK);
 
-                for (Map.Entry<Double, Double> entry : list) {
+                for (Map.Entry<Double, Double> entry : fftResultList) {
                     int x = (int) ((entry.getKey() / FREQ_AREA) * width);
                     int y = (int) (yBottom - ((entry.getValue() / MAX_AMP) * yBottom));
                     g.drawLine(x, yBottom, x, y);
                 }
 
             }
-            Color color = ColorTranslator.translatePartition2(list);
+            Color color = ColorTranslator.translatePartition2(fftResultList);
             int fieldWidth = width / 4;
             int fieldHeight = 100;//getHeight() / 3;
             int space = width / 16;
