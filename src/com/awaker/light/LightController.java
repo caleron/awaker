@@ -17,7 +17,7 @@ public class LightController {
 
     private float red, green, blue;
     //Steht für die letzte über die Funktion updateColor gesetzte Farbe
-    private Color currentColor;
+    private Color currentColor = Color.BLACK;
 
     private String colorMode = "music";
     private Thread animationThread;

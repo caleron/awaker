@@ -200,10 +200,16 @@ public class Server {
                 clientSocket.close();
         }
 
+        if (clientSocket.isClosed())
+            return;
+
         if (printStatus) {
-            socketOut.println(listener.getStatus());
+            String status = listener.getStatus();
+            socketOut.println(status);
+            System.out.println("Processed: " + inputLine + ", Status: " + status);
+        } else {
+            System.out.println("Processed: " + inputLine);
         }
-        System.out.println("Processed: " + inputLine);
     }
 
     public void closeSocket() {

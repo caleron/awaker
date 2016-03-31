@@ -178,7 +178,7 @@ public class PlayerMaster implements PlayerListener {
     }
 
     public String getStatus() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(100);
 
         sb.append("playing:");
         if (player != null) {
@@ -186,11 +186,11 @@ public class PlayerMaster implements PlayerListener {
         } else {
             sb.append("false");
         }
+        sb.append(";").append("shuffle:");
 
-        sb.append(";shuffle:");
-        sb.append(String.valueOf(currentPlayList.isShuffle()));
+        sb.append(String.valueOf(currentPlayList.isShuffle())).append(";");
 
-        sb.append(";repeat:");
+        sb.append("repeat:");
         if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_ALL) {
             sb.append("2");
         } else if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_FILE) {
@@ -198,26 +198,28 @@ public class PlayerMaster implements PlayerListener {
         } else {
             sb.append("0");
         }
+        sb.append(";");
+
         TrackWrapper currentTrack = currentPlayList.getCurrentTrack();
         if (currentTrack != null) {
             if (currentTrack.title.length() > 0) {
-                sb.append(";currentTitle:");
-                sb.append(currentTrack.title);
+                sb.append("currentTitle:");
+                sb.append(currentTrack.title).append(";");
             }
             if (currentTrack.artist != null && currentTrack.artist.length() > 0) {
-                sb.append(";currentArtist:");
-                sb.append(currentTrack.artist);
+                sb.append("currentArtist:");
+                sb.append(currentTrack.artist).append(";");
             }
             if (currentTrack.album != null && currentTrack.album.length() > 0) {
-                sb.append(";currentAlbum:");
-                sb.append(currentTrack.album);
+                sb.append("currentAlbum:");
+                sb.append(currentTrack.album).append(";");
             }
 
-            sb.append(";trackLength:");
-            sb.append(currentTrack.trackLength);
+            sb.append("trackLength:");
+            sb.append(currentTrack.trackLength).append(";");
 
-            sb.append(";playPosition:");
-            sb.append((int) (player.getPosition() / 1000.0));
+            sb.append("playPosition:");
+            sb.append((int) (player.getPosition() / 1000.0)).append(";");
         }
 
         return sb.toString();
@@ -228,7 +230,7 @@ public class PlayerMaster implements PlayerListener {
      *
      * @param customColorMode True, wenn Lichtfarbe manuell gesetzt wird
      */
-    public void setCustomColorMode(boolean customColorMode) {
+    public void setColorMode(boolean customColorMode) {
         this.customColorMode = customColorMode;
     }
 

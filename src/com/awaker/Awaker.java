@@ -37,8 +37,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
         new Server(this);
 
-        if (isMSWindows)
-            new Timer(1000, e -> playerMaster.printPosition()).start();
+        /*if (isMSWindows)
+            new Timer(1000, e -> playerMaster.printPosition()).start();*/
 
 
         DbManager.init();
@@ -167,8 +167,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     public void setColorMode(String mode) {
         if (!isMSWindows) {
             lightController.setColorMode(mode);
-            playerMaster.setCustomColorMode(!mode.equals("music"));
         }
+        playerMaster.setColorMode(!mode.equals("music"));
     }
 
     @Override
