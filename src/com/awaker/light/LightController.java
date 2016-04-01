@@ -155,7 +155,7 @@ public class LightController {
     }
 
     /**
-     * Führt die Farbkreisanimation mit einer Zyklusdauer von 5s durch
+     * Führt die Farbkreisanimation mit einer Zyklusdauer von 12.5s durch
      */
     private void doAnimateColor() {
         float hue = 0f;
@@ -169,7 +169,7 @@ public class LightController {
 
             refreshColorPins();
 
-            hue = hue + 0.01f;
+            hue = hue + 0.004f;
 
             try {
                 Thread.sleep(50);
