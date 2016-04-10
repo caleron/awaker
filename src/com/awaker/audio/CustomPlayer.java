@@ -1,5 +1,6 @@
 package com.awaker.audio;
 
+import com.awaker.util.Log;
 import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
 import javazoom.jl.player.FactoryRegistry;
@@ -98,7 +99,7 @@ class CustomPlayer {
             try {
                 runPlayback(start);
             } catch (JavaLayerException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         });
         playerThread.start();

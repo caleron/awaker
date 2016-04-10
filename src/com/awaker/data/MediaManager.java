@@ -1,5 +1,6 @@
 package com.awaker.data;
 
+import com.awaker.util.Log;
 import com.mpatric.mp3agic.*;
 
 import java.io.*;
@@ -17,9 +18,9 @@ public class MediaManager {
     private static void loadTracks() {
         allTracks = DbManager.getAllTracks();
         if (allTracks != null) {
-            System.out.println("Mediathek enthält " + allTracks.size() + " Tracks");
+            Log.message("Mediathek enthält " + allTracks.size() + " Tracks");
         } else {
-            System.out.println("allTracks ist null");
+            Log.message("allTracks ist null");
         }
     }
 
@@ -43,7 +44,7 @@ public class MediaManager {
                 return new FileInputStream(newTrack.filePath);
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null;
     }
@@ -73,7 +74,7 @@ public class MediaManager {
                 fileName = "media/" + rand.nextInt() + ".mp3";
                 fos = new FileOutputStream(fileName);
             }
-            System.out.println("download begin");
+            Log.message("download begin");
             //Anzahl gelesener Bytes beim letzten Aufruf von read()
             int readCount = is.read(buffer);
             //Insgesamt gelesene Bytes
@@ -94,21 +95,21 @@ public class MediaManager {
             fos.close();
 
             if (totalBytesRead < length) {
-                System.out.println("Lengths do not match, cancelling integration in Database");
+                Log.message("Lengths do not match, cancelling integration in Database");
                 File deleteFile = new File(fileName);
                 if (deleteFile.delete()) {
-                    System.out.println("File deleted");
+                    Log.message("File deleted");
                 }
                 return null;
             }
 
-            System.out.println("download finished");
+            Log.message("download finished");
 
             //Tags lesen und in Datenbank packen
             TrackWrapper track = readFile(new File(fileName));
 
             if (track == null) {
-                System.out.println("Error reading Tags, integration cancelled.");
+                Log.message("Error reading Tags, integration cancelled.");
                 return null;
             }
 
@@ -120,7 +121,7 @@ public class MediaManager {
 
             return track;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null;
     }
@@ -133,12 +134,12 @@ public class MediaManager {
      * Führt den Dateiscan im Ordner media durch
      */
     private static void scanFiles() {
-        System.out.println("Dateiscan gestartet");
+        Log.message("Dateiscan gestartet");
 
         File folder = new File("media/");
         if (!folder.exists()) {
             if (!folder.mkdir()) {
-                System.out.println("Cant create media folder");
+                Log.message("Cant create media folder");
                 return;
             }
         }
@@ -188,7 +189,7 @@ public class MediaManager {
         if (tracksOfDb != null) {
             tracksOfDb.forEach(DbManager::removeTrack);
         }
-        System.out.println("Scan abgeschlossen");
+        Log.message("Scan abgeschlossen");
 
         loadTracks();
     }
@@ -217,7 +218,7 @@ public class MediaManager {
                 artist = tag.getArtist();
                 album = tag.getAlbum();
             } else {
-                System.out.println("Track " + file.getPath() + " hat keine Tags");
+                Log.message("Track " + file.getPath() + " hat keine Tags");
             }
 
             if (title == null || title.length() == 0) {
@@ -234,7 +235,7 @@ public class MediaManager {
             return new TrackWrapper(-1, title, artist, album, file.getPath(), lengthInSeconds);
 
         } catch (IOException | UnsupportedTagException | InvalidDataException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null;
     }

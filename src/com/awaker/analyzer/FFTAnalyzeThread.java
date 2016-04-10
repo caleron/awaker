@@ -1,6 +1,7 @@
 package com.awaker.analyzer;
 
 import com.awaker.Awaker;
+import com.awaker.util.Log;
 
 import java.util.*;
 
@@ -67,7 +68,7 @@ class FFTAnalyzeThread extends Thread {
                     sleep(1);
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
     }
@@ -94,7 +95,7 @@ class FFTAnalyzeThread extends Thread {
             }
 
             analyzeThreshold = (int) (delay / msPerFrame);
-            System.out.println("analyzeThreshold = " + analyzeThreshold);
+            Log.message("analyzeThreshold = " + analyzeThreshold);
         }
     }
 

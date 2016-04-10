@@ -4,6 +4,7 @@ import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.util.Log;
 import javazoom.jl.decoder.JavaLayerException;
 
 import java.io.FileInputStream;
@@ -50,7 +51,7 @@ public class PlayerMaster implements PlayerListener {
                 player.play();
                 return true;
             } catch (JavaLayerException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
         return false;
@@ -75,7 +76,7 @@ public class PlayerMaster implements PlayerListener {
                 player.playFromPosition(position);
                 return true;
             } catch (JavaLayerException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
         return false;
@@ -91,7 +92,7 @@ public class PlayerMaster implements PlayerListener {
             try {
                 player.play();
             } catch (JavaLayerException e) {
-                e.printStackTrace();
+                Log.error(e);
                 //playNext();
             }
         }
@@ -171,7 +172,7 @@ public class PlayerMaster implements PlayerListener {
             analyzePosition = (int) ((analyzer.getAnalyzedSamplesCount() * 1.0) / (sampleRate / 1000.0)) + player.getOffsetPlayedMs();
         }
 
-        System.out.println("sampleRate: " + sampleRate
+        Log.message("sampleRate: " + sampleRate
                 + " playerPosition: " + getPosition()
                 + " analyzePosition: " + analyzePosition
                 + " difference: " + (getPosition() - analyzePosition));

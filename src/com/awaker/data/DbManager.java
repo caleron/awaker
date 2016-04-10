@@ -1,5 +1,7 @@
 package com.awaker.data;
 
+import com.awaker.util.Log;
+
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -14,8 +16,8 @@ public class DbManager {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            System.err.println("Fehler beim Laden des JDBC-Treibers");
-            e.printStackTrace();
+            Log.error("Fehler beim Laden des JDBC-Treibers");
+            Log.error(e);
         }
     }
 
@@ -30,9 +32,10 @@ public class DbManager {
             connection = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
 
             if (!connection.isClosed()) {
-                System.out.println("Database Connection established");
+                Log.message("Database Connection established");
             }
         } catch (SQLException e) {
+            Log.error(e);
             throw new RuntimeException(e);
         }
 
@@ -43,7 +46,7 @@ public class DbManager {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Log.error(e);
                 }
             }
         });
@@ -59,7 +62,7 @@ public class DbManager {
             statement.executeUpdate(TrackWrapper.getCreateTableSql());
             statement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
@@ -82,7 +85,7 @@ public class DbManager {
             statement.close();
             return res;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null;
     }
@@ -115,7 +118,7 @@ public class DbManager {
             statement.close();
             return track;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null;
     }
@@ -150,7 +153,7 @@ public class DbManager {
             statement.executeUpdate(track.getInsertSQL());
             statement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
@@ -174,7 +177,7 @@ public class DbManager {
 
             statement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
@@ -190,7 +193,7 @@ public class DbManager {
             statement.executeUpdate(track.getDeleteSql());
             statement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.awaker.server;
 
 import com.awaker.data.TrackWrapper;
+import com.awaker.util.Log;
 
 import java.awt.*;
 import java.io.*;
@@ -26,7 +27,7 @@ public class Server {
         try {
             serverSocket = new ServerSocket(PORT_NUMBER);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         new Thread(this::runServer).start();
     }
@@ -44,7 +45,7 @@ public class Server {
         while (!interrupt) {
             try {
                 clientSocket = serverSocket.accept();
-                System.out.println("new socket");
+                Log.message("new socket");
 
                 //10 Sekunden timeout setzen
                 clientSocket.setSoTimeout(10000);
@@ -54,20 +55,20 @@ public class Server {
                 }
 
                 if (clientSocket.isClosed()) {
-                    System.out.println("socket closed");
+                    Log.message("socket closed");
                 }
             } catch (SocketTimeoutException e) {
                 //Falls der 10-Sekunden-Timeout überschritten wurde, socket schließen
                 if (clientSocket != null) {
                     try {
                         clientSocket.close();
-                        System.out.println("socket closed due to timeout");
+                        Log.message("socket closed due to timeout");
                     } catch (IOException e1) {
-                        e1.printStackTrace();
+                        Log.error(e1);
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
     }
@@ -76,7 +77,7 @@ public class Server {
         PrintWriter socketOut = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true);
 
         BufferedInputStream socketIn = new BufferedInputStream(clientSocket.getInputStream());
-        
+
         int readByte;
         StringBuilder sb = new StringBuilder();
         byte[] commandBuffer = new byte[100];
@@ -165,6 +166,11 @@ public class Server {
                 listener.setWhiteBrightness(brightness);
                 break;
 
+            case "setColorBrightness":
+                brightness = Integer.parseInt(args[1]);
+                listener.setColorBrightness(brightness);
+                break;
+
             case "setColorMode":
                 String mode = args[1];
                 listener.setColorMode(mode);
@@ -206,18 +212,18 @@ public class Server {
         if (printStatus) {
             String status = listener.getStatus();
             socketOut.println(status);
-            System.out.println("Processed: " + inputLine + ", Status: " + status);
+            Log.message("Processed: " + inputLine + ", Status: " + status);
         } else {
-            System.out.println("Processed: " + inputLine);
+            Log.message("Processed: " + inputLine);
         }
     }
 
     public void closeSocket() {
         try {
             serverSocket.close();
-            System.out.println("serversocket closed by kill");
+            Log.message("serversocket closed by kill");
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 

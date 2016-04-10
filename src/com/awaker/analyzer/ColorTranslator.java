@@ -1,6 +1,7 @@
 package com.awaker.analyzer;
 
 import com.awaker.Awaker;
+import com.awaker.util.Log;
 
 import java.awt.*;
 import java.util.AbstractMap;
@@ -110,7 +111,7 @@ public class ColorTranslator {
         float blue = Math.min((float) Math.pow(max3.getValue() / 7000.0, 1.5) + 0.2f, 1);
 
         if (Awaker.isMSWindows) {
-            System.out.println("red = " + red + " green = " + green + " blue = " + blue
+            Log.message("red = " + red + " green = " + green + " blue = " + blue
                     + " band1max = " + max1.getValue() + " band2max = " + max2.getValue() + " band3max = " + max3.getValue());
         }
 
@@ -177,7 +178,7 @@ public class ColorTranslator {
         Color color2 = translateGewichtet(partition2);
 
         if (Awaker.isMSWindows) {
-            System.out.println("red = " + red + " green = " + color2.getGreen() + " blue = " + color2.getBlue());
+            Log.message("red = " + red + " green = " + color2.getGreen() + " blue = " + color2.getBlue());
         }
 
         return new Color(red, color2.getGreen() / 255f, color2.getBlue() / 255f);

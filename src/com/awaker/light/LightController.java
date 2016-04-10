@@ -1,5 +1,6 @@
 package com.awaker.light;
 
+import com.awaker.util.Log;
 import com.pi4j.wiringpi.Gpio;
 import com.pi4j.wiringpi.SoftPwm;
 
@@ -36,7 +37,7 @@ public class LightController {
         SoftPwm.softPwmCreate(PWM_PIN_BLUE, 0, 100);
         SoftPwm.softPwmCreate(PWM_PIN_WHITE, 0, 100);
 
-        System.out.println("Lightcontroller initialisiert");
+        Log.message("Lightcontroller initialisiert");
     }
 
     /**
