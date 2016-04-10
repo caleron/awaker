@@ -1,6 +1,7 @@
 package com.awaker.util;
 
-import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -8,11 +9,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Übernimmt das Loggen in Datei und Konsole. Wird nur über statische Methoden aufgerufen.
+ * Übernimmt das Loggen in Datei und Konsole. Wird nur über statische Methoden verwendet.
  */
 public class Log {
-    private static PrintWriter writer;
+    //PrintWriter überschreibt alte Datei
+    private static PrintWriter logWriter;
+    //FileWriter hier verwendet, da neue Fehler nur angehängt werden sollen
+    private static FileWriter errorWriter;
     private static final String format = "%1s (%2s): %3s%n";
+    private static final String ERROR_FILE = "logs/errors.log";
+
 
     /**
      * Initialisieren des Loggers
@@ -22,9 +28,10 @@ public class Log {
         DateFormat format = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
 
         try {
-            writer = new PrintWriter("logs/log " + format.format(now) + ".log");
-        } catch (FileNotFoundException e) {
-            System.err.println("Can't open error file");
+            logWriter = new PrintWriter("logs/log " + format.format(now) + ".log");
+            errorWriter = new FileWriter(ERROR_FILE, true);
+        } catch (IOException e) {
+            System.err.println("Can't open log/error files");
             e.printStackTrace();
         }
     }
@@ -41,7 +48,9 @@ public class Log {
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
 
-        log("error", sw.toString());
+        String stacktrace = sw.toString();
+        log("error", stacktrace);
+        writeError(stacktrace);
     }
 
     /**
@@ -52,6 +61,21 @@ public class Log {
     public static void error(String err) {
         System.out.println(err);
         log("error", err);
+        writeError(err);
+    }
+
+    /**
+     * Schreibt einen String in die Fehlerdatei.
+     *
+     * @param err Der zu schreibende String
+     */
+    private static void writeError(String err) {
+        try {
+            errorWriter.write(err);
+            errorWriter.flush();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
     }
 
     /**
@@ -68,7 +92,7 @@ public class Log {
         Date date = new Date();
 
         String out = String.format(format, date, level, msg);
-        writer.print(out);
-        writer.flush();
+        logWriter.print(out);
+        logWriter.flush();
     }
 }
