@@ -11,6 +11,7 @@ import com.awaker.data.TrackWrapper;
 import com.awaker.light.LightController;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
+import com.awaker.util.Log;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,6 +37,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         isMSWindows = isWindows;
 
         new Server(this);
+
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Log.error(e));
 
         /*if (isMSWindows)
             new Timer(1000, e -> playerMaster.printPosition()).start();*/

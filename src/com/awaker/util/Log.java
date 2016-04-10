@@ -34,7 +34,7 @@ public class Log {
      *
      * @param e die Exception
      */
-    public static void error(Exception e) {
+    public static void error(Throwable e) {
         e.printStackTrace();
 
         StringWriter sw = new StringWriter();
