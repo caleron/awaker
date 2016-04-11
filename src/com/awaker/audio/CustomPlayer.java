@@ -113,9 +113,9 @@ class CustomPlayer {
      */
     void playFromPosition(int targetSecond) throws JavaLayerException {
         lastHeader = bitstream.readFrame();
-        int msPerFrame = (int) lastHeader.ms_per_frame();
+        float msPerFrame = (int) lastHeader.ms_per_frame();
 
-        int skipCount = (targetSecond * 1000) / msPerFrame;
+        int skipCount = (int) ((targetSecond * 1000f) / msPerFrame);
         offsetPlayedMs = targetSecond * 1000;
 
         play(skipCount);
