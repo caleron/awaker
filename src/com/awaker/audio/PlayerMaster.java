@@ -2,6 +2,7 @@ package com.awaker.audio;
 
 import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.FFTAnalyzer;
+import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.util.Log;
@@ -35,6 +36,11 @@ public class PlayerMaster implements PlayerListener {
      * @return false, wenn die Datei nicht gefunden wurde
      */
     public boolean playFile(TrackWrapper track) {
+        if (track.filePath == null || track.filePath.length() == 0) {
+            //Track aus der Datenbank holen, falls der Wrapper vom Server erstellt wurde
+            track = DbManager.getTrack(track.title, track.artist);
+        }
+
         FileInputStream fis = MediaManager.getFileStream(track);
 
         analyzer.reset();

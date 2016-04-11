@@ -97,7 +97,7 @@ public class DbManager {
      * @param artist Der Künstler
      * @return der gesuchte Track
      */
-    static TrackWrapper getTrack(String title, String artist) {
+    public static TrackWrapper getTrack(String title, String artist) {
         try {
             Statement statement = connection.createStatement();
             String sql;
@@ -163,6 +163,9 @@ public class DbManager {
      * @param tracks Die Liste an Tracks
      */
     static void addTracks(ArrayList<TrackWrapper> tracks) {
+        if (tracks.isEmpty())
+            return;
+
         Statement statement;
         try {
             statement = connection.createStatement();
