@@ -36,6 +36,9 @@ public class PlayerMaster implements PlayerListener {
      * @return false, wenn die Datei nicht gefunden wurde
      */
     public boolean playFile(TrackWrapper track) {
+        if (track == null)
+            return false;
+
         if (track.filePath == null || track.filePath.length() == 0) {
             //Track aus der Datenbank holen, falls der Wrapper vom Server erstellt wurde
             track = DbManager.getTrack(track.title, track.artist);

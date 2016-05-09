@@ -1,7 +1,7 @@
 package com.awaker;
 
-import com.awaker.analyzer.ColorTranslator;
 import com.awaker.analyzer.AnalyzeResultListener;
+import com.awaker.analyzer.ColorTranslator;
 import com.awaker.audio.PlaybackListener;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.audio.RepeatMode;
