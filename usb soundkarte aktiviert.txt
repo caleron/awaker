@@ -1,0 +1,26 @@
+/usr/share/alsa/alsa.conf
+-------------------------------------------
+diese zeilen von 0 auf 1 ändern (1 hier ist der index des gerätes aus "aplay -l"):
+
+defaults.ctl.card 1
+defaults.pcm.card 1
+
+kommentar entfernen bei (also # entfernen):
+load card-specific configuration files (on request)
+
+
+
+/home/pi/.asoundrc
+-------------------------------------------
+geändert zu (also 0 durch 1 jeweils ersetzt):
+pcm.!default {
+        type hw
+        card 1
+}
+
+ctl.!default {
+        type hw
+        card 1
+}
+
+quelle: http://superuser.com/questions/989385/alsa-base-conf-missing-in-new-raspberry-pi-raspbian-jesse

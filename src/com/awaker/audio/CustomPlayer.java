@@ -3,7 +3,6 @@ package com.awaker.audio;
 import com.awaker.util.Log;
 import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
-import javazoom.jl.player.FactoryRegistry;
 
 import java.io.InputStream;
 
@@ -21,7 +20,7 @@ class CustomPlayer {
     /**
      * The AudioDevice the audio samples are written to.
      */
-    private AudioDevice audio;
+    private CustomDevice audio;
 
     private int lastPosition = 0;
 
@@ -58,8 +57,9 @@ class CustomPlayer {
      */
     private synchronized void openAudio() throws JavaLayerException {
         if (audio == null) {
-            FactoryRegistry r = FactoryRegistry.systemRegistry();
-            audio = r.createAudioDevice();
+            //FactoryRegistry r = FactoryRegistry.systemRegistry();
+            //audio = r.createAudioDevice();
+            audio = new CustomDevice();
             audio.open(decoder);
         }
     }
