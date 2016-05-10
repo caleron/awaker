@@ -116,9 +116,9 @@ public class LightController {
     public void updateColor(Color color, boolean smooth) {
         currentColor = color;
         if (smooth) {
-            red = avg(red, ((color.getRed() / 255f) * colorBrightness));
-            green = avg(green, ((color.getGreen() / 255f) * colorBrightness));
-            blue = avg(blue, ((color.getBlue() / 255f) * colorBrightness));
+            red = getNewColor(red, ((color.getRed() / 255f) * colorBrightness));
+            green = getNewColor(green, ((color.getGreen() / 255f) * colorBrightness));
+            blue = getNewColor(blue, ((color.getBlue() / 255f) * colorBrightness));
         } else {
             red = (color.getRed() / 255f) * colorBrightness;
             green = (color.getGreen() / 255f) * colorBrightness;
@@ -203,14 +203,19 @@ public class LightController {
     }
 
     /**
-     * Berechnet den Durchschnitt aus a und b
+     * Berechnet einen neuen Farbwert aus oldColor und newColor
      *
-     * @param a erster Wert
-     * @param b zweiter Wert
-     * @return Durchschnitt aus a und b
+     * @param oldColor alter Wert
+     * @param newColor neuer Wert
+     * @return neu angepasster Farbwert
      */
-    private static float avg(float a, float b) {
-        return (a + b) / 2f;
+    private static float getNewColor(float oldColor, float newColor) {
+        if (oldColor > newColor) {
+            return (oldColor + newColor) / 2f;
+        } else {
+            //gewichteter Durchschnitt
+            return (oldColor * 2f + newColor) / 3f;
+        }
     }
 
     /**

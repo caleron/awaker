@@ -123,7 +123,7 @@ public class ColorTranslator {
             return Color.black;
 
         final int freqDivider1 = 200;
-        final int freqDivider2 = 800;
+        final int freqDivider2 = 900;
         final int freqDivider3 = 1500;
 
         List<Map.Entry<Double, Double>> partition1 = new ArrayList<>(
@@ -141,13 +141,13 @@ public class ColorTranslator {
         Map.Entry<Double, Double> max4 = findMaxima(partition4);
 
         float red = cap((float) Math.pow(max1.getValue() / 13000.0, 2));
-        float green = (float) (max2.getValue() / 15000.0);
-        float blue = (float) (max4.getValue() / 8000.0);
+        float green = (float) (max2.getValue() / 14000.0);
+        float blue = (float) (max4.getValue() / 9000.0);
 
         int range = freqDivider3 - freqDivider2;
 
-        green += (1 - ((max3.getKey() - freqDivider2) / range)) * (max3.getValue() / 15000.0);
-        blue += ((max3.getKey() - freqDivider2) / range) * (max3.getValue() / 7000.0);
+        green += (1 - ((max3.getKey() - freqDivider2) / range)) * (max3.getValue() / 14000.0);
+        blue += ((max3.getKey() - freqDivider2) / range) * (max3.getValue() / 8000.0);
 
         green = cap(Math.pow(green, 2));
         blue = cap(Math.pow(blue, 2));

@@ -91,7 +91,7 @@ class FFTAnalyzeThread extends Thread {
             if (Awaker.isMSWindows) {
                 delay = 440;
             } else {
-                delay = 370;
+                delay = 350;
             }
 
             analyzeThreshold = (int) (delay / msPerFrame);
