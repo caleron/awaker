@@ -67,7 +67,7 @@ public class Server {
                         Log.error(e1);
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.error(e);
             }
         }
