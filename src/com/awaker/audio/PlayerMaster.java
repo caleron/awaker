@@ -19,6 +19,8 @@ public class PlayerMaster implements PlayerListener {
 
     private final PlaybackListener playbackListener;
 
+    private int volume = 80;
+
     /**
      * Erstellt eine neue Instanz
      *
@@ -56,7 +58,7 @@ public class PlayerMaster implements PlayerListener {
             }
             analyzer.reset();
             try {
-                player = new CustomPlayer(this, fis);
+                player = new CustomPlayer(this, fis, volume);
                 player.play();
                 return true;
             } catch (JavaLayerException e) {
@@ -81,7 +83,7 @@ public class PlayerMaster implements PlayerListener {
             }
             analyzer.reset();
             try {
-                player = new CustomPlayer(this, fis);
+                player = new CustomPlayer(this, fis, volume);
                 player.playFromPosition(position);
                 return true;
             } catch (JavaLayerException e) {
@@ -210,6 +212,10 @@ public class PlayerMaster implements PlayerListener {
         }
         sb.append(";");
 
+        sb.append("volume:");
+        sb.append(volume);
+        sb.append(";");
+
         TrackWrapper currentTrack = currentPlayList.getCurrentTrack();
         if (currentTrack != null) {
             if (currentTrack.title.length() > 0) {
@@ -249,6 +255,13 @@ public class PlayerMaster implements PlayerListener {
         if (!customColorMode) {
             //Falls manuelle Lichtfarbe, keine Analyse auslösen
             analyzer.pushSamples(samples);
+        }
+    }
+
+    public void setVolume(int newVolume) {
+        this.volume = newVolume;
+        if (player != null) {
+            player.setVolume(volume);
         }
     }
 

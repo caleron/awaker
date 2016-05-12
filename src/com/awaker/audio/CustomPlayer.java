@@ -38,16 +38,19 @@ class CustomPlayer {
     private Header lastHeader;
     private boolean sampleRateReported = false;
 
+    private int volume;
+
     /**
      * Creates a new <code>Player</code> instance.
      *
      * @param a      PlayerListener, der über Playback-Events informiert wird
      * @param stream Inputstream, aus dem abgespielt werden soll.
      */
-    CustomPlayer(PlayerListener a, InputStream stream) {
+    CustomPlayer(PlayerListener a, InputStream stream, int volume) {
         samplesListener = a;
         decoder = new Decoder();
         bitstream = new Bitstream(stream);
+        this.volume = volume;
     }
 
     /**
@@ -61,6 +64,8 @@ class CustomPlayer {
             //audio = r.createAudioDevice();
             audio = new CustomDevice();
             audio.open(decoder);
+
+            setVolume(volume);
         }
     }
 
@@ -327,5 +332,12 @@ class CustomPlayer {
             return lastHeader.frequency();
         }
         return 0;
+    }
+
+    void setVolume(int volume) {
+        this.volume = volume;
+        if (audio != null) {
+            audio.setVolume(volume);
+        }
     }
 }

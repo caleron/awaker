@@ -31,6 +31,8 @@ public interface ServerListener {
      */
     void setRepeatMode(int repeatMode);
 
+    void setVolume(int volume);
+
     void setColorBrightness(int brightness);
 
     void setColor(Color color);
@@ -51,4 +53,6 @@ public interface ServerListener {
     void setColorMode(String mode);
 
     void stringReceived(String str);
+
+    void shutdown();
 }

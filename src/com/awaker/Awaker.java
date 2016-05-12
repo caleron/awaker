@@ -135,6 +135,11 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
+    public void setVolume(int volume) {
+        playerMaster.setVolume(volume);
+    }
+
+    @Override
     public void setRepeatMode(int repeatMode) {
         RepeatMode mode;
         switch (repeatMode) {
@@ -189,6 +194,13 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
             stringOutputFrame.setVisible(true);
             stringOutputBox.setText(stringOutputBox.getText() + "\n" + str);
         }
+    }
+
+    @Override
+    public void shutdown() {
+        playerMaster.stop();
+
+        System.exit(0);
     }
 
     @Override

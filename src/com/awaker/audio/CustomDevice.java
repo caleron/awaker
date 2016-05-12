@@ -12,6 +12,8 @@ class CustomDevice extends AudioDeviceBase {
 
     private AudioFormat fmt = null;
 
+    private boolean gainControlSupported = false;
+
     private byte[] byteBuf = new byte[4096];
 
     private AudioFormat getAudioFormat() {
@@ -50,14 +52,10 @@ class CustomDevice extends AudioDeviceBase {
                 source = (SourceDataLine) line;
                 //source.open(fmt, millisecondsToBytes(fmt, 2000));
                 source.open(fmt);
-                /*
-                if (source.isControlSupported(FloatControl.Type.MASTER_GAIN))
-                {
-					FloatControl c = (FloatControl)source.getControl(FloatControl.Type.MASTER_GAIN);
-                    c.setValue(c.getMaximum());
-                }*/
-                source.start();
 
+                gainControlSupported = source.isControlSupported(FloatControl.Type.MASTER_GAIN);
+
+                source.start();
             }
         } catch (RuntimeException | LinkageError | LineUnavailableException ex) {
             t = ex;
@@ -111,5 +109,23 @@ class CustomDevice extends AudioDeviceBase {
             pos = (int) (source.getMicrosecondPosition() / 1000);
         }
         return pos;
+    }
+
+    /**
+     * Setzt die Lautstärke. Hat erst nach öffnen der Line einen Effekt.
+     *
+     * @param value Wert zwischen 0 und 100
+     */
+    void setVolume(int value) {
+        if (gainControlSupported && source != null) {
+            FloatControl c = (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
+            float range = c.getMaximum() - c.getMinimum();
+
+            float factor = (float) Math.log10(value);
+
+            float newValue = c.getMinimum() + range * (factor / 2f);
+
+            c.setValue(Math.max(c.getMinimum(), Math.min(c.getMaximum(), newValue)));
+        }
     }
 }

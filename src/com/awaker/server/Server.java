@@ -161,6 +161,11 @@ public class Server {
                 listener.setRepeatMode(repeatMode);
                 break;
 
+            case "setVolume":
+                int volume = Integer.parseInt(args[1]);
+                listener.setVolume(volume);
+                break;
+
             case "setWhiteBrightness":
                 int brightness = Integer.parseInt(args[1]);
                 listener.setWhiteBrightness(brightness);
@@ -201,6 +206,12 @@ public class Server {
             case "sendString":
                 int length = Integer.parseInt(args[1]);
                 listener.stringReceived(readString(socketIn, length));
+                break;
+            case "shutdown":
+                clientSocket.close();
+                serverSocket.close();
+                listener.shutdown();
+
                 break;
             default:
                 clientSocket.close();
