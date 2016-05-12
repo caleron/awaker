@@ -17,6 +17,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +97,18 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
         if (play && track != null) {
             playFile(track);
+        }
+    }
+
+    @Override
+    public boolean containsFile(TrackWrapper track) {
+        track = DbManager.getTrack(track.title, track.artist);
+        if (track != null) {
+            File file = new File(track.filePath);
+
+            return file.exists();
+        } else {
+            return false;
         }
     }
 

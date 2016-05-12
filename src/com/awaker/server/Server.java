@@ -143,12 +143,23 @@ public class Server {
                 listener.downloadFile(socketIn, fileLength, fileName, true);
                 break;
 
+            case "checkFile":
+                title = args[1];
+                artist = args[2];
+
+                if (!listener.containsFile(new TrackWrapper(title, artist))) {
+                    socketOut.println("file not found");
+                    printStatus = false;
+                }
+                break;
+
             case "uploadFile":
                 fileName = args[1];
                 fileLength = Integer.parseInt(args[2]);
 
-                //abspielen
+                //herunterladen
                 listener.downloadFile(socketIn, fileLength, fileName, false);
+                break;
 
             case "playNext":
                 listener.playNext();

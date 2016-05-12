@@ -10,6 +10,8 @@ public interface ServerListener {
 
     boolean playFile(TrackWrapper track);
 
+    boolean containsFile(TrackWrapper track);
+
     void play();
 
     void playFromPosition(int position);
