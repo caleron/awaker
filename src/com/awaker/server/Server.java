@@ -143,6 +143,13 @@ public class Server {
                 listener.downloadFile(socketIn, fileLength, fileName, true);
                 break;
 
+            case "uploadFile":
+                fileName = args[1];
+                fileLength = Integer.parseInt(args[2]);
+
+                //abspielen
+                listener.downloadFile(socketIn, fileLength, fileName, false);
+
             case "playNext":
                 listener.playNext();
                 break;

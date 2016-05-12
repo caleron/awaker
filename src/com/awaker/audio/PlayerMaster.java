@@ -19,7 +19,7 @@ public class PlayerMaster implements PlayerListener {
 
     private final PlaybackListener playbackListener;
 
-    private int volume = 80;
+    private int volume = 70;
 
     /**
      * Erstellt eine neue Instanz
