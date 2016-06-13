@@ -11,10 +11,10 @@ public class LightController {
     private int colorBrightness = 100;
     private int whiteBrightness = 0;
 
-    private static final int PWM_PIN_RED = 1;
-    private static final int PWM_PIN_GREEN = 4;
-    private static final int PWM_PIN_BLUE = 5;
-    private static final int PWM_PIN_WHITE = 6;
+    private static final int PWM_PIN_RED = 9;
+    private static final int PWM_PIN_GREEN = 7;
+    private static final int PWM_PIN_BLUE = 0;
+    private static final int PWM_PIN_WHITE = 8;
 
     private float red, green, blue;
     //Steht für die letzte über die Funktion updateColor gesetzte Farbe
