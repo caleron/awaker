@@ -96,6 +96,48 @@ public class LightController {
     }
 
     /**
+     * Setzt die Helligkeit der roten LED
+     *
+     * @param brightness Helligkeit zwischen 0 und 100
+     */
+    public void setRedBrightness(int brightness) {
+        //wert zwischen 0 und 100 sicherstellen
+        brightness = Math.max(0, Math.min(100, brightness));
+        red = brightness;
+        currentColor = new Color(brightness * 2.55f, currentColor.getGreen(), currentColor.getBlue());
+
+        SoftPwm.softPwmWrite(PWM_PIN_RED, brightness);
+    }
+
+    /**
+     * Setzt die Helligkeit der grünen LED
+     *
+     * @param brightness Helligkeit zwischen 0 und 100
+     */
+    public void setGreenBrightness(int brightness) {
+        //wert zwischen 0 und 100 sicherstellen
+        brightness = Math.max(0, Math.min(100, brightness));
+        green = brightness;
+        currentColor = new Color(currentColor.getRed(), brightness * 2.55f, currentColor.getBlue());
+
+        SoftPwm.softPwmWrite(PWM_PIN_GREEN, brightness);
+    }
+
+    /**
+     * Setzt die Helligkeit der blauen LED
+     *
+     * @param brightness Helligkeit zwischen 0 und 100
+     */
+    public void setBlueBrightness(int brightness) {
+        //wert zwischen 0 und 100 sicherstellen
+        brightness = Math.max(0, Math.min(100, brightness));
+        blue = brightness;
+        currentColor = new Color(currentColor.getRed(), currentColor.getGreen(), brightness * 2.55f);
+
+        SoftPwm.softPwmWrite(PWM_PIN_BLUE, brightness);
+    }
+
+    /**
      * Setzt die Farbhelligkeit
      *
      * @param newValue Farbhelligkeit als Wert zwischen 0 und 100

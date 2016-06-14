@@ -1,5 +1,8 @@
-package com.awaker.gpio;
+package com.awaker.gpio.adc;
 
+/**
+ * Stellt einen Kanal des ADC's dar.
+ */
 public enum AdcChannel {
     CH0(0),
     CH1(1),
@@ -16,7 +19,7 @@ public enum AdcChannel {
         this.channel = channel;
     }
 
-    public int channel() {
+    public int getNumber() {
         return this.channel;
     }
 }
