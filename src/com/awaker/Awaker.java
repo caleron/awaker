@@ -8,7 +8,9 @@ import com.awaker.audio.RepeatMode;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.LightController;
+import com.awaker.gpio.adc.AnalogListener;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
 import com.awaker.util.Log;
@@ -22,7 +24,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackListener {
+public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackListener, AnalogListener {
     //Ausgabefenster und -feld beim Betrieb auf Windows
     private JFrame stringOutputFrame = null;
     private JTextArea stringOutputBox = null;
@@ -31,6 +33,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     private PlayerMaster playerMaster;
 
     private LightController lightController = null;
+
+    private AnalogControls analogControls = null;
 
     public static boolean isMSWindows = true;
 
@@ -54,6 +58,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
             panel = new AwakerPanel();
         } else {
             lightController = new LightController();
+            //TODO auskommentieren, wenn adc angeschlossen
+            //analogControls = new AnalogControls(this);
         }
     }
 
@@ -223,6 +229,26 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         }
     }
 
+    @Override
+    public void setRed(int brightness) {
+        if (!isMSWindows) {
+            lightController.setRedBrightness(brightness);
+        }
+    }
+
+    @Override
+    public void setGreen(int brightness) {
+        if (!isMSWindows) {
+            lightController.setGreenBrightness(brightness);
+        }
+    }
+
+    @Override
+    public void setBlue(int brightness) {
+        if (!isMSWindows) {
+            lightController.setBlueBrightness(brightness);
+        }
+    }
     @Override
     public void changeVisualisation(String newType) {
 

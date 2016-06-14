@@ -16,7 +16,7 @@ public interface AnalogListener {
      *
      * @param brightness Wert zwischen 0 und 100
      */
-    void setWhite(int brightness);
+    void setWhiteBrightness(int brightness);
 
     /**
      * Setzt die Helligkeit des roten Kanals

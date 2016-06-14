@@ -42,7 +42,7 @@ public class AnalogControls implements AdcListener {
                 listener.setVolume(newValue);
                 break;
             case CH1:
-                listener.setWhite(newValue);
+                listener.setWhiteBrightness(newValue);
                 break;
             case CH2:
                 listener.setRed(newValue);

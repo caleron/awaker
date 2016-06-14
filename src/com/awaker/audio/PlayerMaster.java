@@ -259,7 +259,7 @@ public class PlayerMaster implements PlayerListener {
     }
 
     public void setVolume(int newVolume) {
-        this.volume = newVolume;
+        this.volume = Math.min(100, Math.max(newVolume, 0));
         if (player != null) {
             player.setVolume(volume);
         }
