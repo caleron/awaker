@@ -1,4 +1,4 @@
-package com.awaker.light;
+package com.awaker.gpio;
 
 import com.awaker.util.Log;
 import com.pi4j.wiringpi.Gpio;

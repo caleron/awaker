@@ -8,7 +8,7 @@ import com.awaker.audio.RepeatMode;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
-import com.awaker.light.LightController;
+import com.awaker.gpio.LightController;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
 import com.awaker.util.Log;
