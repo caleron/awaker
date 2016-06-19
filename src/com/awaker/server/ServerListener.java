@@ -1,6 +1,7 @@
 package com.awaker.server;
 
 import com.awaker.data.TrackWrapper;
+import com.awaker.server.json.Answer;
 
 import java.awt.*;
 import java.io.InputStream;
@@ -43,7 +44,7 @@ public interface ServerListener {
 
     void changeVisualisation(String newType);
 
-    String getStatus();
+    Answer getStatus(Answer answer);
 
     void togglePlayPause();
 

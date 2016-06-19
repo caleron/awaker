@@ -11,7 +11,6 @@
       <element id="library" level="project" name="JLayer1.0" />
       <element id="library" level="project" name="sqlite-jdbc-3.9.0-20151016.083234-1" />
       <element id="library" level="project" name="com.mpatric:mp3agic:0.8.4" />
-      <element id="library" level="project" name="com.pi4j:pi4j-core:1.0" />
     </root>
   </artifact>
 </component>

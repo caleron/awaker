@@ -1,5 +1,6 @@
 package com.awaker.gpio;
 
+import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
 import com.pi4j.wiringpi.Gpio;
 import com.pi4j.wiringpi.SoftPwm;
@@ -261,27 +262,21 @@ public class LightController {
     }
 
     /**
-     * Gibt den Status zurück
+     * Schreibt den Status in das angegebene Answer-Objekt
      *
-     * @return Status-String
+     * @param answer Das Answer-Objekt
+     * @return das Answer-Objekt
      */
-    public String getStatus() {
-        StringBuilder sb = new StringBuilder(100);
-
-        sb.append("colorMode:");
-        sb.append(colorMode).append(";");
+    public Answer getStatus(Answer answer) {
+        answer.colorMode = colorMode;
 
         if (colorMode.equals("custom")) {
-            sb.append("currentColor:");
-            sb.append(currentColor.getRGB()).append(";");
+            answer.currentColor = currentColor.getRGB();
         }
+        answer.whiteBrightness = whiteBrightness;
 
-        sb.append("whiteBrightness:");
-        sb.append(whiteBrightness).append(";");
+        answer.animationBrightness = colorBrightness;
 
-        sb.append("colorBrightness:");
-        sb.append(colorBrightness).append(";");
-
-        return sb.toString();
+        return answer;
     }
 }

@@ -13,6 +13,7 @@ import com.awaker.gpio.LightController;
 import com.awaker.gpio.adc.AnalogListener;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
+import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
 
 import javax.swing.*;
@@ -255,12 +256,12 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public String getStatus() {
-        String status = playerMaster.getStatus();
+    public Answer getStatus(Answer answer) {
+        playerMaster.getStatus(answer);
         if (!isMSWindows) {
-            status += lightController.getStatus();
+            lightController.getStatus(answer);
         }
-        return status;
+        return answer;
     }
 
     @Override

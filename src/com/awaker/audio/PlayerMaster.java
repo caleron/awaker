@@ -5,6 +5,7 @@ import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
 import javazoom.jl.decoder.JavaLayerException;
 
@@ -189,56 +190,43 @@ public class PlayerMaster implements PlayerListener {
                 + " difference: " + (getPosition() - analyzePosition));
     }
 
-    public String getStatus() {
-        StringBuilder sb = new StringBuilder(100);
+    /**
+     * Schreibt den Status in das angegebene Answer-Objekt.
+     *
+     * @param answer Das zu modifizierende Answer-Objekt
+     * @return Das Answer-Objekt
+     */
+    public Answer getStatus(Answer answer) {
+        answer.playing = player != null && player.isPlaying();
+        answer.shuffle = currentPlayList.isShuffle();
 
-        sb.append("playing:");
-        if (player != null) {
-            sb.append(String.valueOf(player.isPlaying()));
-        } else {
-            sb.append("false");
-        }
-        sb.append(";").append("shuffle:");
-
-        sb.append(String.valueOf(currentPlayList.isShuffle())).append(";");
-
-        sb.append("repeat:");
         if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_ALL) {
-            sb.append("2");
+            answer.repeatMode = 2;
         } else if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_FILE) {
-            sb.append("1");
+            answer.repeatMode = 1;
         } else {
-            sb.append("0");
+            answer.repeatMode = 0;
         }
-        sb.append(";");
 
-        sb.append("volume:");
-        sb.append(volume);
-        sb.append(";");
+        answer.volume = volume;
 
         TrackWrapper currentTrack = currentPlayList.getCurrentTrack();
         if (currentTrack != null) {
             if (currentTrack.title.length() > 0) {
-                sb.append("currentTitle:");
-                sb.append(currentTrack.title).append(";");
+                answer.currentTitle = currentTrack.title;
             }
             if (currentTrack.artist != null && currentTrack.artist.length() > 0) {
-                sb.append("currentArtist:");
-                sb.append(currentTrack.artist).append(";");
+                answer.currentArtist = currentTrack.artist;
             }
             if (currentTrack.album != null && currentTrack.album.length() > 0) {
-                sb.append("currentAlbum:");
-                sb.append(currentTrack.album).append(";");
+                answer.currentAlbum = currentTrack.album;
             }
+            answer.trackLength = currentTrack.trackLength;
 
-            sb.append("trackLength:");
-            sb.append(currentTrack.trackLength).append(";");
-
-            sb.append("playPosition:");
-            sb.append((int) (player.getPosition() / 1000.0)).append(";");
+            answer.playPosition = (int) (player.getPosition() / 1000.0);
         }
 
-        return sb.toString();
+        return answer;
     }
 
     /**
