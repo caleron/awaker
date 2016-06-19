@@ -11,7 +11,6 @@
     <orderEntry type="library" name="JLayer1.0" level="project" />
     <orderEntry type="library" name="com.mpatric:mp3agic:0.8.4" level="project" />
     <orderEntry type="library" name="sqlite-jdbc-3.9.0-20151016.083234-1" level="project" />
-    <orderEntry type="library" name="com.pi4j:pi4j-core:1.0" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library name="JUnit4">
         <CLASSES>
@@ -22,5 +21,8 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="com.google.code.gson:gson:2.7" level="project" />
+    <orderEntry type="library" name="pi4j-core" level="project" />
+    <orderEntry type="library" name="pi4j-gpio-extension" level="project" />
   </component>
 </module>
