@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="pi4j-gpio-extension">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../pi4j-1.1-SNAPSHOT/lib/pi4j-gpio-extension.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../pi4j-1.1-SNAPSHOT/lib/pi4j-gpio-extension-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../pi4j-1.1-SNAPSHOT/lib/pi4j-gpio-extension-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
