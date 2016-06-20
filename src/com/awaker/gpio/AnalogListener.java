@@ -1,4 +1,4 @@
-package com.awaker.gpio.adc;
+package com.awaker.gpio;
 
 /**
  * Stellt einen Listener für Veränderungen an analogen Steuerungselementen dar.

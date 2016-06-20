@@ -10,7 +10,7 @@ import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.LightController;
-import com.awaker.gpio.adc.AnalogListener;
+import com.awaker.gpio.AnalogListener;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
 import com.awaker.server.json.Answer;
