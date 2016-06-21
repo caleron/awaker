@@ -12,9 +12,12 @@ import com.pi4j.io.gpio.event.GpioPinListenerAnalog;
 import com.pi4j.io.spi.SpiChannel;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 public class AnalogControls implements GpioPinListenerAnalog {
     private AnalogListener listener;
+
+    private static final int TOLERANCE = 7;
 
     private static final Pin VOLUME_CHANNEL = MCP3008Pin.CH0;
     private static final Pin WHITE_CHANNEL = MCP3008Pin.CH1;
@@ -28,6 +31,7 @@ public class AnalogControls implements GpioPinListenerAnalog {
     private GpioPinAnalogInput pin_green;
     private GpioPinAnalogInput pin_blue;
 
+    private HashMap<GpioPinAnalogInput, Double> lastValues = new HashMap<>();
 
     public AnalogControls(AnalogListener listener) {
         this.listener = listener;
@@ -58,25 +62,42 @@ public class AnalogControls implements GpioPinListenerAnalog {
         pin_red.addListener(this);
         pin_green.addListener(this);
         pin_blue.addListener(this);
+
+        lastValues.put(pin_volume, pin_volume.getValue());
+        lastValues.put(pin_white, pin_white.getValue());
+        lastValues.put(pin_red, pin_red.getValue());
+        lastValues.put(pin_green, pin_green.getValue());
+        lastValues.put(pin_blue, pin_blue.getValue());
     }
 
     @Override
     public void handleGpioPinAnalogValueChangeEvent(GpioPinAnalogValueChangeEvent event) {
+        double value = event.getValue();
+
+        GpioPinAnalogInput pin = (GpioPinAnalogInput) event.getPin();
+
+        Double lastValue = lastValues.get(pin);
+
+        if (Math.abs(lastValue - value) < TOLERANCE) {
+            return;
+        }
+        //Neuen Wert ablegen, falls Toleranz überschritten wurde
+        lastValues.put(pin, value);
         int newValue = (int) ((event.getValue() / 1023.0) * 100.0);
 
-        if (pin_volume.equals(event.getPin())) {
+        if (pin_volume.equals(pin)) {
             listener.setVolume(newValue);
 
-        } else if (pin_white.equals(event.getPin())) {
+        } else if (pin_white.equals(pin)) {
             listener.setWhiteBrightness(newValue);
 
-        } else if (pin_red.equals(event.getPin())) {
+        } else if (pin_red.equals(pin)) {
             listener.setRed(newValue);
 
-        } else if (pin_green.equals(event.getPin())) {
+        } else if (pin_green.equals(pin)) {
             listener.setGreen(newValue);
 
-        } else if (pin_blue.equals(event.getPin())) {
+        } else if (pin_blue.equals(pin)) {
             listener.setBlue(newValue);
 
         } else {
