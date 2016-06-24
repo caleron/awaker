@@ -48,6 +48,10 @@ public class TrackWrapper {
                 "\"%s\" TEXT," +
                 "\"%s\" TEXT," +
                 "\"%s\" TEXT,"
-                + "\"length\" INTEGER)", TABLE_NAME, ID, TITLE,ARTIST,ALBUM, FILE_PATH);
+                + "\"%s\" INTEGER)", TABLE_NAME, ID, TITLE,ARTIST,ALBUM, FILE_PATH, TRACK_LENGTH);
+    }
+
+    public int getId() {
+        return id;
     }
 }

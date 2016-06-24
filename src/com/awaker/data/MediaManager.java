@@ -1,5 +1,6 @@
 package com.awaker.data;
 
+import com.awaker.audio.PlayList;
 import com.awaker.util.Log;
 import com.mpatric.mp3agic.*;
 
@@ -14,9 +15,11 @@ import java.util.Random;
 public class MediaManager {
 
     private static ArrayList<TrackWrapper> allTracks;
+    private static ArrayList<PlayList> playLists;
 
     private static void loadTracks() {
         allTracks = DbManager.getAllTracks();
+        playLists = DbManager.getAllPlaylists(allTracks);
         if (allTracks != null) {
             Log.message("Mediathek enthält " + allTracks.size() + " Tracks");
         } else {
@@ -242,5 +245,9 @@ public class MediaManager {
 
     public static ArrayList<TrackWrapper> getAllTracks() {
         return allTracks;
+    }
+
+    public static ArrayList<PlayList> getPlayLists() {
+        return playLists;
     }
 }

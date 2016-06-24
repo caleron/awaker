@@ -1,10 +1,14 @@
 package com.awaker.server.json;
 
+import com.awaker.data.DbManager;
+import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.server.ServerListener;
 
 import java.awt.*;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Repräsentiert einen Befehl, der von einem Client geschickt wurde. Beinhaltet alle möglichen Felder, die durch
@@ -132,6 +136,9 @@ public class Command {
                 //Status wird sowieso ausgegeben
                 break;
 
+            case "getLibrary":
+                return getLibrary(Answer.library());
+
             case "sendString":
                 listener.stringReceived(text);
                 break;
@@ -143,5 +150,24 @@ public class Command {
         }
 
         return listener.getStatus(Answer.status());
+    }
+
+    /**
+     * Gibt die Mediathek zurück.
+     *
+     * @param library Die Mediathek als Answer
+     * @return Das modifizierte Answer-Objekt
+     */
+    private static Answer getLibrary(Answer library) {
+        library.tracks = new ArrayList<>();
+        ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
+
+        library.tracks.addAll(allTracks.stream()
+                .map(track -> new Track(track.getId(), track.title, track.artist, track.album, track.trackLength))
+                .collect(Collectors.toList()));
+
+        library.playlists = DbManager.getAllPlaylistsForJSON();
+
+        return library;
     }
 }

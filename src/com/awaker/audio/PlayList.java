@@ -9,8 +9,17 @@ import java.util.Random;
 import java.util.Stack;
 
 public class PlayList {
-    public static final PlayList ALL_TRACKS = new PlayList("Alle", null);
 
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String TABLE_NAME = "playlists";
+    public static final String PLAYLIST_TRACKS_TABLE_NAME = "playlist_tracks";
+    public static final String PLAYLIST_TRACKS_PLAYLIST_ID = "playlist_id";
+    public static final String PLAYLIST_TRACKS_TRACK_ID = "track_id";
+
+    public static final PlayList ALL_TRACKS = new PlayList(-1, "Alle", null);
+
+    private final int id;
     private final Random rand = new Random();
     private final String name;
 
@@ -28,12 +37,26 @@ public class PlayList {
     /**
      * Erstellt eine neue Playlist
      *
+     * @param id     ID der Playlist
      * @param name   Name der Playlist
      * @param tracks Liste der Tracks
      */
-    public PlayList(String name, ArrayList<TrackWrapper> tracks) {
+    public PlayList(int id, String name, ArrayList<TrackWrapper> tracks) {
+        this.id = id;
         this.name = name;
         this.tracks = tracks;
+    }
+
+    /**
+     * Erstellt eine neue Playlist mit einer leeren Trackliste.
+     *
+     * @param id   ID der Playlist
+     * @param name Name der Playlist
+     */
+    public PlayList(int id, String name) {
+        this.id = id;
+        this.name = name;
+        this.tracks = new ArrayList<>();
     }
 
     /**
@@ -93,6 +116,22 @@ public class PlayList {
         }
     }
 
+    public void addTrack(TrackWrapper track) {
+        tracks.add(track);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public List<TrackWrapper> getTracks() {
+        return tracks;
+    }
+
     public TrackWrapper getCurrentTrack() {
         return currentTrack;
     }
@@ -115,5 +154,19 @@ public class PlayList {
 
     public void setRepeatMode(RepeatMode repeatMode) {
         this.repeatMode = repeatMode;
+    }
+
+
+    public static String getCreateTableSql() {
+        return String.format("CREATE TABLE IF NOT EXISTS \"%s\" " +
+                "(\"%s\" INTEGER PRIMARY KEY, " +
+                "\"%s\" TEXT)", TABLE_NAME, ID, NAME);
+    }
+
+    public static String getCreatePlaylistTracksTableSql() {
+        return String.format("CREATE TABLE IF NOT EXISTS \"%s\" " +
+                "(\"%s\" INTEGER PRIMARY KEY, " +
+                "\"%s\" INTEGER," +
+                "\"%s\" INTEGER)", PLAYLIST_TRACKS_TABLE_NAME, ID, PLAYLIST_TRACKS_PLAYLIST_ID, PLAYLIST_TRACKS_TRACK_ID);
     }
 }

@@ -1,11 +1,13 @@
 package com.awaker.server.json;
 
-public class Answer {
-    public static final String TYPE_FILE_STATUS = "file_status";
-    public static final String TYPE_STATUS = "status";
-    public static final String TYPE_LIBRARY = "library";
+import java.util.List;
 
-    public String type;
+public class Answer {
+    private static final String TYPE_FILE_STATUS = "file_status";
+    private static final String TYPE_STATUS = "status";
+    private static final String TYPE_LIBRARY = "library";
+
+    private String type;
 
     public String colorMode;
     public int currentColor;
@@ -22,6 +24,9 @@ public class Answer {
     public boolean playing;
     public boolean shuffle;
 
+    public List<Track> tracks;
+    public List<Playlist> playlists;
+
     private boolean fileNotFound;
 
     public Answer() {
@@ -33,6 +38,10 @@ public class Answer {
 
     static Answer status() {
         return new Answer(TYPE_STATUS);
+    }
+
+    static Answer library() {
+        return new Answer(TYPE_LIBRARY);
     }
 
     static Answer fileNotFound() {

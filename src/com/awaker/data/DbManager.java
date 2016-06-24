@@ -1,9 +1,14 @@
 package com.awaker.data;
 
+import com.awaker.audio.PlayList;
+import com.awaker.server.json.Playlist;
 import com.awaker.util.Log;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DbManager {
     private static Connection connection;
@@ -54,12 +59,14 @@ public class DbManager {
     }
 
     /**
-     * Erstellt die Datenbanktabellen (1)
+     * Erstellt die Datenbanktabellen (2)
      */
     private static void setupDb() {
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate(TrackWrapper.getCreateTableSql());
+            statement.executeUpdate(PlayList.getCreateTableSql());
+            statement.executeUpdate(PlayList.getCreatePlaylistTracksTableSql());
             statement.close();
         } catch (SQLException e) {
             Log.error(e);
@@ -198,5 +205,105 @@ public class DbManager {
         } catch (SQLException e) {
             Log.error(e);
         }
+    }
+
+    /**
+     * Gibt eine Liste aller Playlists zurück, die wiederum nur die IDs der Tracks enthalten. Für das Serialisieren mit
+     * JSON zusätzlich zur Liste aller vollständigen Tracks gedacht.
+     *
+     * @return Liste aller Playlists
+     */
+    public static List<Playlist> getAllPlaylistsForJSON() {
+        try {
+            ArrayList<Playlist> res = new ArrayList<>();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM playlists");
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt(PlayList.ID);
+                String name = resultSet.getString(PlayList.NAME);
+
+                res.add(new Playlist(id, name, getTrackIDsOfPlaylist(id)));
+            }
+
+            resultSet.close();
+            statement.close();
+            return res;
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
+    /**
+     * Gibt eine Liste aller Track-IDs der Playlist zur ID zurück.
+     *
+     * @param id Die ID der Playlist
+     * @return Liste der Track-IDs
+     */
+    private static List<Integer> getTrackIDsOfPlaylist(int id) {
+        try {
+            ArrayList<Integer> res = new ArrayList<>();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT track_id FROM playlist_tracks WHERE id = " + id);
+
+            while (resultSet.next()) {
+                res.add(resultSet.getInt(PlayList.PLAYLIST_TRACKS_TRACK_ID));
+            }
+
+            resultSet.close();
+            statement.close();
+            return res;
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
+    public static ArrayList<PlayList> getAllPlaylists(ArrayList<TrackWrapper> allTracks) {
+        Map<Integer, PlayList> playListMap = new HashMap<>();
+
+        try {
+            //alle Playlists laden
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM playlists");
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt(PlayList.ID);
+                String name = resultSet.getString(PlayList.NAME);
+
+                playListMap.put(id, new PlayList(id, name));
+            }
+
+            resultSet.close();
+            statement.close();
+            //TODO checken
+            //Titel den Playlists zuweisen
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(String.format("SELECT %s,%s,%s,%s,%s,%s,%s FROM playlist_tracks " +
+                            "INNER JOIN music ON music.id = playlist_tracks.track_id",
+                    TrackWrapper.ID,
+                    TrackWrapper.ALBUM,
+                    TrackWrapper.TITLE,
+                    TrackWrapper.ARTIST,
+                    TrackWrapper.FILE_PATH,
+                    TrackWrapper.TRACK_LENGTH,
+                    PlayList.PLAYLIST_TRACKS_PLAYLIST_ID));
+
+            while (resultSet.next()) {
+                TrackWrapper trackWrapper = readTrack(resultSet);
+                Integer playlist_id = resultSet.getInt(PlayList.PLAYLIST_TRACKS_PLAYLIST_ID);
+
+                playListMap.get(playlist_id).addTrack(trackWrapper);
+            }
+
+            resultSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+
+
+        return new ArrayList<>(playListMap.values());
     }
 }
