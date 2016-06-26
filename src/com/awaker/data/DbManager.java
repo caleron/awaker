@@ -260,7 +260,13 @@ public class DbManager {
         return null;
     }
 
-    public static ArrayList<PlayList> getAllPlaylists(ArrayList<TrackWrapper> allTracks) {
+    /**
+     * Gibt alle Playlists mit korrekten Referenzen aus.
+     *
+     * @param allTracks Alle Tracks.
+     * @return Eine Liste aller Playlists.
+     */
+    static ArrayList<PlayList> getAllPlaylists(ArrayList<TrackWrapper> allTracks) {
         Map<Integer, PlayList> playListMap = new HashMap<>();
 
         try {
@@ -277,24 +283,21 @@ public class DbManager {
 
             resultSet.close();
             statement.close();
-            //TODO checken
+
             //Titel den Playlists zuweisen
             statement = connection.createStatement();
-            resultSet = statement.executeQuery(String.format("SELECT %s,%s,%s,%s,%s,%s,%s FROM playlist_tracks " +
-                            "INNER JOIN music ON music.id = playlist_tracks.track_id",
-                    TrackWrapper.ID,
-                    TrackWrapper.ALBUM,
-                    TrackWrapper.TITLE,
-                    TrackWrapper.ARTIST,
-                    TrackWrapper.FILE_PATH,
-                    TrackWrapper.TRACK_LENGTH,
-                    PlayList.PLAYLIST_TRACKS_PLAYLIST_ID));
+            resultSet = statement.executeQuery("SELECT * FROM playlist_tracks");
 
             while (resultSet.next()) {
-                TrackWrapper trackWrapper = readTrack(resultSet);
-                Integer playlist_id = resultSet.getInt(PlayList.PLAYLIST_TRACKS_PLAYLIST_ID);
+                Integer trackId = resultSet.getInt(PlayList.PLAYLIST_TRACKS_TRACK_ID);
+                Integer playlistId = resultSet.getInt(PlayList.PLAYLIST_TRACKS_PLAYLIST_ID);
 
-                playListMap.get(playlist_id).addTrack(trackWrapper);
+                for (TrackWrapper track : allTracks) {
+                    if (track.getId() == trackId) {
+                        playListMap.get(playlistId).addTrack(track);
+                        break;
+                    }
+                }
             }
 
             resultSet.close();
@@ -303,7 +306,78 @@ public class DbManager {
             Log.error(e);
         }
 
-
         return new ArrayList<>(playListMap.values());
+    }
+
+    /**
+     * Erstellt eine neue Playlists.
+     *
+     * @param name Der name der Playlist.
+     */
+    static void createPlaylist(String name) {
+        try {
+            Statement statement = connection.createStatement();
+
+            statement.executeUpdate(new PlayList(name).getInsertSQL());
+
+            statement.close();
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+    }
+
+    /**
+     * Löscht eine Playlist.
+     *
+     * @param playList Die zu entfernende Playlist.
+     */
+    static void removePlaylist(PlayList playList) {
+        try {
+            Statement statement = connection.createStatement();
+
+            statement.executeUpdate(String.format("DELETE FROM playlists WHERE id = %d", playList.getId()));
+            statement.executeUpdate(String.format("DELETE FROM playlist_tracks WHERE playlist_id = %d", playList.getId()));
+            statement.close();
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+    }
+
+    /**
+     * Fügt einen Track zu einer Playlist hinzu.
+     *
+     * @param playList Die Playlist.
+     * @param track    Der Track.
+     */
+    static void addTrackToPlaylist(PlayList playList, TrackWrapper track) {
+        try {
+            Statement statement = connection.createStatement();
+
+            statement.executeUpdate(String.format("INSERT INTO playlist_tracks (playlist_id, track_id) VALUES (%d, %d)"
+                    , playList.getId(), track.getId()));
+
+            statement.close();
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+    }
+
+    /**
+     * Entfernt einen Track von einer Playlist.
+     *
+     * @param playList Die Playlist.
+     * @param track    Der zu entfernende Track.
+     */
+    static void removeTrackFromPlaylist(PlayList playList, TrackWrapper track) {
+        try {
+            Statement statement = connection.createStatement();
+
+            statement.executeUpdate(String.format("DELETE FROM playlist_tracks WHERE playlist_id = %d AND track_id = %d"
+                    , playList.getId(), track.getId()));
+
+            statement.close();
+        } catch (SQLException e) {
+            Log.error(e);
+        }
     }
 }

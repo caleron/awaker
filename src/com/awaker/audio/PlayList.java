@@ -60,6 +60,16 @@ public class PlayList {
     }
 
     /**
+     * Erstellt eine neue Playlist mit einer leeren Trackliste und ohne id.
+     *
+     * @param name Name der Playlist
+     */
+    public PlayList(String name) {
+        id = -1;
+        this.name = name;
+    }
+
+    /**
      * Wählt den nächsten Track aus
      *
      * @return der nächste Track
@@ -116,8 +126,22 @@ public class PlayList {
         }
     }
 
+    /**
+     * Fügt einen Track zur Playlist hinzu.
+     *
+     * @param track Der neue Track.
+     */
     public void addTrack(TrackWrapper track) {
         tracks.add(track);
+    }
+
+    /**
+     * Entfernt einen Track von der Playlist.
+     *
+     * @param track Der zu entfernende Track.
+     */
+    public void removeTrack(TrackWrapper track) {
+        tracks.remove(track);
     }
 
     public String getName() {
@@ -156,6 +180,9 @@ public class PlayList {
         this.repeatMode = repeatMode;
     }
 
+    public String getInsertSQL() {
+        return String.format("INSERT INTO playlists (name) VALUES (\"%s\")", name);
+    }
 
     public static String getCreateTableSql() {
         return String.format("CREATE TABLE IF NOT EXISTS \"%s\" " +

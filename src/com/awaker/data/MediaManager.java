@@ -19,13 +19,22 @@ public class MediaManager {
 
     private static void loadTracks() {
         allTracks = DbManager.getAllTracks();
-        playLists = DbManager.getAllPlaylists(allTracks);
         if (allTracks != null) {
             Log.message("Mediathek enthält " + allTracks.size() + " Tracks");
         } else {
             Log.message("allTracks ist null");
         }
     }
+
+    private static void loadData() {
+        loadTracks();
+        loadPlaylists();
+    }
+
+    private static void loadPlaylists() {
+        playLists = DbManager.getAllPlaylists(allTracks);
+    }
+
 
     /**
      * Gibt den InputStream zu einem Track zurück
@@ -194,7 +203,7 @@ public class MediaManager {
         }
         Log.message("Scan abgeschlossen");
 
-        loadTracks();
+        loadData();
     }
 
     /**
@@ -241,6 +250,49 @@ public class MediaManager {
             Log.error(e);
         }
         return null;
+    }
+
+    /**
+     * Erstellt eine neue Playlist und lädt danach alle Playlists neu.
+     *
+     * @param name Der Name der Playlist.
+     */
+    public static void createPlaylist(String name) {
+        DbManager.createPlaylist(name);
+        loadPlaylists();
+    }
+
+
+    /**
+     * Löscht eine Playlist und lädt danach alle Playlists neu.
+     *
+     * @param playList Die zu entfernende Playlist.
+     */
+    public static void removePlaylist(PlayList playList) {
+        DbManager.removePlaylist(playList);
+        loadPlaylists();
+    }
+
+    /**
+     * Fügt einen Track zu einer Playlist hinzu.
+     *
+     * @param playList Die Playlist.
+     * @param track    Der Track.
+     */
+    public static void addTrackToPlaylist(PlayList playList, TrackWrapper track) {
+        DbManager.addTrackToPlaylist(playList, track);
+        playList.addTrack(track);
+    }
+
+    /**
+     * Entfernt einen Track von einer Playlist.
+     *
+     * @param playList Die Playlist.
+     * @param track    Der zu entfernende Track.
+     */
+    public static void removeTrackFromPlaylist(PlayList playList, TrackWrapper track) {
+        DbManager.removeTrackFromPlaylist(playList, track);
+        playList.removeTrack(track);
     }
 
     public static ArrayList<TrackWrapper> getAllTracks() {
