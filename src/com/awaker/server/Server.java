@@ -105,6 +105,13 @@ public class Server {
 
         int commandLength = socketIn.readInt();
 
+        if (commandLength > 3000000) {
+            System.out.println("Request too long or first 4 bytes invalid, socket closed");
+            socketOut.println("Request too long");
+            clientSocket.close();
+            return;
+        }
+
         byte[] commandBytes = new byte[commandLength];
         int readBytes = socketIn.read(commandBytes);
 
