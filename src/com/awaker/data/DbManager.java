@@ -329,14 +329,14 @@ public class DbManager {
     /**
      * Löscht eine Playlist.
      *
-     * @param playList Die zu entfernende Playlist.
+     * @param playListId Die Id der zu löschenden Playlist.
      */
-    static void removePlaylist(PlayList playList) {
+    static void removePlaylist(int playListId) {
         try {
             Statement statement = connection.createStatement();
 
-            statement.executeUpdate(String.format("DELETE FROM playlists WHERE id = %d", playList.getId()));
-            statement.executeUpdate(String.format("DELETE FROM playlist_tracks WHERE playlist_id = %d", playList.getId()));
+            statement.executeUpdate(String.format("DELETE FROM playlists WHERE id = %d", playListId));
+            statement.executeUpdate(String.format("DELETE FROM playlist_tracks WHERE playlist_id = %d", playListId));
             statement.close();
         } catch (SQLException e) {
             Log.error(e);

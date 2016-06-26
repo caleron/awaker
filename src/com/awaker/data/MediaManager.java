@@ -266,33 +266,84 @@ public class MediaManager {
     /**
      * Löscht eine Playlist und lädt danach alle Playlists neu.
      *
-     * @param playList Die zu entfernende Playlist.
+     * @param playListId Die ID der zu löschenden Playlist.
      */
-    public static void removePlaylist(PlayList playList) {
-        DbManager.removePlaylist(playList);
+    public static void removePlaylist(int playListId) {
+
+        DbManager.removePlaylist(playListId);
         loadPlaylists();
     }
 
     /**
      * Fügt einen Track zu einer Playlist hinzu.
      *
-     * @param playList Die Playlist.
-     * @param track    Der Track.
+     * @param playListId Die ID der Playlist
+     * @param trackId    Die ID des Tracks
      */
-    public static void addTrackToPlaylist(PlayList playList, TrackWrapper track) {
+    public static void addTrackToPlaylist(int playListId, int trackId) {
+        PlayList playList = getPlayList(playListId);
+        TrackWrapper track = getTrack(trackId);
+
+        if (track == null || playList == null)
+            return;
+
         DbManager.addTrackToPlaylist(playList, track);
         playList.addTrack(track);
     }
 
+
     /**
      * Entfernt einen Track von einer Playlist.
      *
-     * @param playList Die Playlist.
-     * @param track    Der zu entfernende Track.
+     * @param playListId Die ID der Playlist
+     * @param trackId    Die ID des Tracks
      */
-    public static void removeTrackFromPlaylist(PlayList playList, TrackWrapper track) {
+    public static void removeTrackFromPlaylist(int playListId, int trackId) {
+        PlayList playList = getPlayList(playListId);
+        TrackWrapper track = getTrack(trackId);
+
+        if (track == null || playList == null)
+            return;
+
         DbManager.removeTrackFromPlaylist(playList, track);
         playList.removeTrack(track);
+    }
+
+    /**
+     * Sucht eine Playlist mit der angegebenen ID raus.
+     *
+     * @param playListId Die ID der Playlist.
+     * @return Die Playlist mit der ID
+     */
+    public static PlayList getPlayList(int playListId) {
+        PlayList playList = null;
+        //Playlist raussuchen
+        for (PlayList list : playLists) {
+            if (list.getId() == playListId) {
+                playList = list;
+                break;
+            }
+        }
+        return playList;
+    }
+
+    /**
+     * Sucht einen Track mit der angegebenen ID raus.
+     *
+     * @param trackId Die ID des Tracks
+     * @return Der Track mit der ID
+     */
+    public static TrackWrapper getTrack(int trackId) {
+        TrackWrapper track = null;
+
+        //Track raussuchen
+        for (TrackWrapper track1 : allTracks) {
+            if (track1.getId() == trackId) {
+                track = track1;
+                break;
+            }
+        }
+        return track;
     }
 
     public static ArrayList<TrackWrapper> getAllTracks() {

@@ -9,8 +9,8 @@ import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.gpio.AnalogControls;
-import com.awaker.gpio.LightController;
 import com.awaker.gpio.AnalogListener;
+import com.awaker.gpio.LightController;
 import com.awaker.server.Server;
 import com.awaker.server.ServerListener;
 import com.awaker.server.json.Answer;
@@ -250,10 +250,42 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
             lightController.setBlueBrightness(brightness);
         }
     }
+
     @Override
     public void changeVisualisation(String newType) {
 
     }
+
+    @Override
+    public void playPlaylist(int id) {
+        playerMaster.playPlaylist(MediaManager.getPlayList(id));
+    }
+
+    @Override
+    public void playTrackOfPlaylist(int playlistId, int trackId) {
+        playerMaster.playTrackOfPlaylist(MediaManager.getPlayList(playlistId), MediaManager.getTrack(trackId));
+    }
+
+    @Override
+    public void createPlaylist(String name) {
+        MediaManager.createPlaylist(name);
+    }
+
+    @Override
+    public void removePlaylist(int id) {
+        MediaManager.removePlaylist(id);
+    }
+
+    @Override
+    public void addTrackToPlaylist(int playlistId, int trackId) {
+        MediaManager.addTrackToPlaylist(playlistId, trackId);
+    }
+
+    @Override
+    public void removeTrackFromPlaylist(int playlistId, int trackId) {
+        MediaManager.removeTrackFromPlaylist(playlistId, trackId);
+    }
+
 
     @Override
     public Answer getStatus(Answer answer) {

@@ -55,6 +55,18 @@ public interface ServerListener {
      */
     void setColorMode(String mode);
 
+    void playPlaylist(int id);
+
+    void playTrackOfPlaylist(int playlistId, int trackId);
+
+    void createPlaylist(String name);
+
+    void removePlaylist(int id);
+
+    void addTrackToPlaylist(int playlistId, int trackId);
+
+    void removeTrackFromPlaylist(int playlistId, int trackId);
+
     void stringReceived(String str);
 
     void shutdown();

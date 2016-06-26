@@ -52,6 +52,7 @@ public class PlayerMaster implements PlayerListener {
         analyzer.reset();
 
         if (fis != null) {
+            currentPlayList = PlayList.ALL_TRACKS;
             currentPlayList.setCurrentTrack(track);
 
             if (player != null) {
@@ -67,6 +68,38 @@ public class PlayerMaster implements PlayerListener {
             }
         }
         return false;
+    }
+
+    /**
+     * Spielt einen Track aus einer Playlist ab und setzt die Playlist als aktive Playlist fest.
+     *
+     * @param playList Die Playlist mit dem Track.
+     * @param track    Der abzuspielende Track.
+     * @return False, falls playList oder track null sind.
+     */
+    public boolean playTrackOfPlaylist(PlayList playList, TrackWrapper track) {
+        if (playList == null || track == null)
+            return false;
+
+        currentPlayList = playList;
+        currentPlayList.setCurrentTrack(track);
+        playFile(track);
+        return true;
+    }
+
+    /**
+     * Spielt eine Playlist ab und setzt sie als aktiv.
+     *
+     * @param playList Die Playlist.
+     * @return False, falls die playList null ist.
+     */
+    public boolean playPlaylist(PlayList playList) {
+        if (playList == null)
+            return false;
+
+        currentPlayList = playList;
+        play();
+        return true;
     }
 
     /**

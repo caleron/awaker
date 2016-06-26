@@ -19,6 +19,10 @@ public class Command {
 
     private String action;
 
+    private String name;
+    private int playlistId;
+    private int trackId;
+
     private String title;
     private String artist;
     private String fileName;
@@ -130,6 +134,30 @@ public class Command {
 
             case "changeVisualization":
                 listener.changeVisualisation(visualisation);
+                break;
+
+            case "createPlaylist":
+                listener.createPlaylist(name);
+                break;
+
+            case "removePlaylist":
+                listener.removePlaylist(playlistId);
+                break;
+
+            case "addTrackToPlaylist":
+                listener.addTrackToPlaylist(playlistId, trackId);
+                break;
+
+            case "removeTrackFromPlaylist":
+                listener.removeTrackFromPlaylist(playlistId, trackId);
+                break;
+
+            case "playPlaylist":
+                listener.playPlaylist(playlistId);
+                break;
+
+            case "playTrackOfPlaylist":
+                listener.playTrackOfPlaylist(playlistId, trackId);
                 break;
 
             case "getStatus":
