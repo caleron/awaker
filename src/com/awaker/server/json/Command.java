@@ -17,6 +17,37 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class Command {
 
+    private static final String PLAY = "play";
+    private static final String PLAY_FROM_POSITION = "playFromPosition";
+    private static final String PAUSE = "pause";
+    private static final String STOP = "stop";
+    private static final String TOGGLE_PLAY_PAUSE = "togglePlayPause";
+    private static final String PLAY_FILE = "playFile";
+    private static final String UPLOAD_AND_PLAY_FILE = "uploadAndPlayFile";
+    private static final String CHECK_FILE = "checkFile";
+    private static final String UPLOAD_FILE = "uploadFile";
+    private static final String PLAY_NEXT = "playNext";
+    private static final String PLAY_PREVIOUS = "playPrevious";
+    private static final String SET_SHUFFLE = "setShuffle";
+    private static final String SET_REPEAT_MODE = "setRepeatMode";
+    private static final String SET_VOLUME = "setVolume";
+    private static final String SET_WHITE_BRIGHTNESS = "setWhiteBrightness";
+    private static final String SET_COLOR_BRIGHTNESS = "setColorBrightness";
+    private static final String SET_COLOR_MODE = "setColorMode";
+    private static final String SET_COLOR = "setColor";
+    private static final String SET_RGBCOLOR = "setRGBColor";
+    private static final String CHANGE_VISUALIZATION = "changeVisualization";
+    private static final String CREATE_PLAYLIST = "createPlaylist";
+    private static final String REMOVE_PLAYLIST = "removePlaylist";
+    private static final String ADD_TRACK_TO_PLAYLIST = "addTrackToPlaylist";
+    private static final String REMOVE_TRACK_FROM_PLAYLIST = "removeTrackFromPlaylist";
+    private static final String PLAY_PLAYLIST = "playPlaylist";
+    private static final String PLAY_TRACK_OF_PLAYLIST = "playTrackOfPlaylist";
+    private static final String GET_STATUS = "getStatus";
+    private static final String GET_LIBRARY = "getLibrary";
+    private static final String SEND_STRING = "sendString";
+    private static final String SHUTDOWN = "shutdown";
+
     private String action;
 
     private String name;
@@ -50,127 +81,127 @@ public class Command {
     public Answer execute(ServerListener listener, InputStream socketIn) throws Exceptions.CloseSocket, Exceptions.Shutdown {
 
         switch (action) {
-            case "play":
+            case PLAY:
                 listener.play();
                 break;
 
-            case "playFromPosition":
+            case PLAY_FROM_POSITION:
                 listener.playFromPosition(position);
                 break;
 
-            case "pause":
+            case PAUSE:
                 listener.pause();
                 break;
 
-            case "stop":
+            case STOP:
                 listener.stop();
                 break;
 
-            case "togglePlayPause":
+            case TOGGLE_PLAY_PAUSE:
                 listener.togglePlayPause();
                 break;
 
-            case "playFile":
+            case PLAY_FILE:
                 if (!listener.playFile(new TrackWrapper(title, artist))) {
                     return Answer.fileNotFound();
                 }
                 break;
 
-            case "uploadAndPlayFile":
+            case UPLOAD_AND_PLAY_FILE:
                 //abspielen
                 listener.downloadFile(socketIn, length, fileName, true);
                 break;
 
-            case "checkFile":
+            case CHECK_FILE:
                 if (!listener.containsFile(new TrackWrapper(title, artist))) {
                     return Answer.fileNotFound();
                 }
                 break;
 
-            case "uploadFile":
+            case UPLOAD_FILE:
                 //herunterladen
                 listener.downloadFile(socketIn, length, fileName, false);
                 break;
 
-            case "playNext":
+            case PLAY_NEXT:
                 listener.playNext();
                 break;
 
-            case "playPrevious":
+            case PLAY_PREVIOUS:
                 listener.playPrevious();
                 break;
 
-            case "setShuffle":
+            case SET_SHUFFLE:
                 listener.setShuffle(shuffle);
                 break;
 
-            case "setRepeatMode":
+            case SET_REPEAT_MODE:
                 listener.setRepeatMode(repeatMode);
                 break;
 
-            case "setVolume":
+            case SET_VOLUME:
                 listener.setVolume(volume);
                 break;
 
-            case "setWhiteBrightness":
+            case SET_WHITE_BRIGHTNESS:
                 listener.setWhiteBrightness(brightness);
                 break;
 
-            case "setColorBrightness":
+            case SET_COLOR_BRIGHTNESS:
                 listener.setColorBrightness(brightness);
                 break;
 
-            case "setColorMode":
+            case SET_COLOR_MODE:
                 listener.setColorMode(colorMode);
                 break;
 
-            case "setColor":
+            case SET_COLOR:
                 listener.setColor(new Color(color, false));
                 break;
 
-            case "setRGBColor":
+            case SET_RGBCOLOR:
                 listener.setColor(new Color(red, green, blue));
                 break;
 
-            case "changeVisualization":
+            case CHANGE_VISUALIZATION:
                 listener.changeVisualisation(visualisation);
                 break;
 
-            case "createPlaylist":
+            case CREATE_PLAYLIST:
                 listener.createPlaylist(name);
                 break;
 
-            case "removePlaylist":
+            case REMOVE_PLAYLIST:
                 listener.removePlaylist(playlistId);
                 break;
 
-            case "addTrackToPlaylist":
+            case ADD_TRACK_TO_PLAYLIST:
                 listener.addTrackToPlaylist(playlistId, trackId);
                 break;
 
-            case "removeTrackFromPlaylist":
+            case REMOVE_TRACK_FROM_PLAYLIST:
                 listener.removeTrackFromPlaylist(playlistId, trackId);
                 break;
 
-            case "playPlaylist":
+            case PLAY_PLAYLIST:
                 listener.playPlaylist(playlistId);
                 break;
 
-            case "playTrackOfPlaylist":
+            case PLAY_TRACK_OF_PLAYLIST:
                 listener.playTrackOfPlaylist(playlistId, trackId);
                 break;
 
-            case "getStatus":
+            case GET_STATUS:
                 //Status wird sowieso ausgegeben
                 break;
 
-            case "getLibrary":
+            case GET_LIBRARY:
                 return getLibrary(Answer.library());
 
-            case "sendString":
+            case SEND_STRING:
                 listener.stringReceived(text);
                 break;
-            case "shutdown":
+            case SHUTDOWN:
                 throw new Exceptions.Shutdown();
 
             default:
