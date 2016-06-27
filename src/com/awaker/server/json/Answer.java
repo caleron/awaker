@@ -36,15 +36,15 @@ public class Answer {
         this.type = type;
     }
 
-    static Answer status() {
+    public static Answer status() {
         return new Answer(TYPE_STATUS);
     }
 
-    static Answer library() {
+    public static Answer library() {
         return new Answer(TYPE_LIBRARY);
     }
 
-    static Answer fileNotFound() {
+    public static Answer fileNotFound() {
         Answer answer = new Answer(TYPE_FILE_STATUS);
         answer.fileNotFound = true;
         return answer;

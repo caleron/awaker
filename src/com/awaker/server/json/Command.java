@@ -78,7 +78,7 @@ public class Command {
     public Command() {
     }
 
-    public Answer execute(ServerListener listener, InputStream socketIn) throws Exceptions.CloseSocket, Exceptions.Shutdown {
+    public Answer execute(ServerListener listener) throws Exceptions.CloseSocket, Exceptions.Shutdown {
 
         switch (action) {
             case PLAY:
@@ -107,10 +107,9 @@ public class Command {
                 }
                 break;
 
-            case UPLOAD_AND_PLAY_FILE:
+            //case UPLOAD_AND_PLAY_FILE:
                 //abspielen
-                listener.downloadFile(socketIn, length, fileName, true);
-                break;
+                //break;
 
             case CHECK_FILE:
                 if (!listener.containsFile(new TrackWrapper(title, artist))) {
@@ -118,10 +117,9 @@ public class Command {
                 }
                 break;
 
-            case UPLOAD_FILE:
+            //case UPLOAD_FILE:
                 //herunterladen
-                listener.downloadFile(socketIn, length, fileName, false);
-                break;
+              //  break;
 
             case PLAY_NEXT:
                 listener.playNext();

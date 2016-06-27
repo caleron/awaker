@@ -11,7 +11,8 @@ import com.awaker.data.TrackWrapper;
 import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.AnalogListener;
 import com.awaker.gpio.LightController;
-import com.awaker.server.Server;
+import com.awaker.server.MyServer;
+import com.awaker.server.UploadServer;
 import com.awaker.server.ServerListener;
 import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
@@ -33,6 +34,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
     private PlayerMaster playerMaster;
 
+    private MyServer server;
+
     private LightController lightController = null;
 
     private AnalogControls analogControls = null;
@@ -42,16 +45,18 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     private Awaker(boolean isWindows) {
         isMSWindows = isWindows;
 
-        new Server(this);
+        new UploadServer(this);
 
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> Log.error(e));
 
         /*if (isMSWindows)
             new Timer(1000, e -> playerMaster.printPosition()).start();*/
 
-
         DbManager.init();
         MediaManager.startScanFiles();
+
+        server = new MyServer(this);
+        server.start();
 
         playerMaster = new PlayerMaster(this, this);
 

@@ -11,6 +11,9 @@
       <element id="library" level="project" name="JLayer1.0" />
       <element id="library" level="project" name="sqlite-jdbc-3.9.0-20151016.083234-1" />
       <element id="library" level="project" name="com.mpatric:mp3agic:0.8.4" />
+      <element id="library" level="project" name="pi4j-core" />
+      <element id="library" level="project" name="com.google.code.gson:gson:2.7" />
+      <element id="library" level="project" name="pi4j-gpio-extension" />
     </root>
   </artifact>
 </component>
