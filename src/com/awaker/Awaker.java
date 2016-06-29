@@ -183,9 +183,9 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void setColorBrightness(int brightness) {
+    public void setAnimationBrightness(int brightness) {
         if (!isMSWindows) {
-            lightController.setColorBrightness(brightness);
+            lightController.setAnimationBrightness(brightness);
         }
     }
 

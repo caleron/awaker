@@ -36,7 +36,7 @@ public interface ServerListener {
 
     void setVolume(int volume);
 
-    void setColorBrightness(int brightness);
+    void setAnimationBrightness(int brightness);
 
     void setColor(Color color);
 

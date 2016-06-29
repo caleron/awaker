@@ -6,7 +6,6 @@ import com.awaker.data.TrackWrapper;
 import com.awaker.server.ServerListener;
 
 import java.awt.*;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -32,7 +31,7 @@ public class Command {
     private static final String SET_REPEAT_MODE = "setRepeatMode";
     private static final String SET_VOLUME = "setVolume";
     private static final String SET_WHITE_BRIGHTNESS = "setWhiteBrightness";
-    private static final String SET_COLOR_BRIGHTNESS = "setColorBrightness";
+    private static final String SET_ANIMATION_BRIGHTNESS = "setAnimationBrightness";
     private static final String SET_COLOR_MODE = "setColorMode";
     private static final String SET_COLOR = "setColor";
     private static final String SET_RGBCOLOR = "setRGBColor";
@@ -145,8 +144,8 @@ public class Command {
                 listener.setWhiteBrightness(brightness);
                 break;
 
-            case SET_COLOR_BRIGHTNESS:
-                listener.setColorBrightness(brightness);
+            case SET_ANIMATION_BRIGHTNESS:
+                listener.setAnimationBrightness(brightness);
                 break;
 
             case SET_COLOR_MODE:

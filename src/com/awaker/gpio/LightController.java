@@ -9,7 +9,7 @@ import java.awt.*;
 
 public class LightController {
 
-    private int colorBrightness = 100;
+    private int animationBrightness = 100;
     private int whiteBrightness = 0;
 
     private static final int PWM_PIN_RED = 9;
@@ -143,29 +143,29 @@ public class LightController {
      *
      * @param newValue Farbhelligkeit als Wert zwischen 0 und 100
      */
-    public void setColorBrightness(int newValue) {
+    public void setAnimationBrightness(int newValue) {
         //wert zwischen 0 und 100 sicherstellen
-        colorBrightness = Math.max(0, Math.min(100, newValue));
+        animationBrightness = Math.max(0, Math.min(100, newValue));
 
-        colorBrightness = newValue;
+        animationBrightness = newValue;
     }
 
     /**
      * Setzt eine neue Farbe.
      *
-     * @param color  Die Farbe
-     * @param smooth True, wenn der Farbübergang geglättet werden soll.
+     * @param color   Die Farbe
+     * @param isMusic True, wenn der Farbübergang geglättet werden soll.
      */
-    public void updateColor(Color color, boolean smooth) {
+    public void updateColor(Color color, boolean isMusic) {
         currentColor = color;
-        if (smooth) {
-            red = getNewColor(red, ((color.getRed() / 255f) * colorBrightness));
-            green = getNewColor(green, ((color.getGreen() / 255f) * colorBrightness));
-            blue = getNewColor(blue, ((color.getBlue() / 255f) * colorBrightness));
+        if (isMusic) {
+            red = getNewColor(red, ((color.getRed() / 255f) * animationBrightness));
+            green = getNewColor(green, ((color.getGreen() / 255f) * animationBrightness));
+            blue = getNewColor(blue, ((color.getBlue() / 255f) * animationBrightness));
         } else {
-            red = (color.getRed() / 255f) * colorBrightness;
-            green = (color.getGreen() / 255f) * colorBrightness;
-            blue = (color.getBlue() / 255f) * colorBrightness;
+            red = (color.getRed() / 255f) * 100;
+            green = (color.getGreen() / 255f) * 100;
+            blue = (color.getBlue() / 255f) * 100;
         }
         refreshColorPins();
     }
@@ -205,7 +205,7 @@ public class LightController {
         float hue = 0f;
 
         while (!animationThread.isInterrupted()) {
-            Color c = Color.getHSBColor(hue, 1, colorBrightness / 100f);
+            Color c = Color.getHSBColor(hue, 1, animationBrightness / 100f);
 
             red = c.getRed();
             green = c.getGreen();
@@ -275,7 +275,7 @@ public class LightController {
         }
         answer.whiteBrightness = whiteBrightness;
 
-        answer.animationBrightness = colorBrightness;
+        answer.animationBrightness = animationBrightness;
 
         return answer;
     }
