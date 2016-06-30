@@ -57,10 +57,11 @@ public class MyServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        System.out.println(message);
         Command command = gson.fromJson(message, Command.class);
 
         try {
-            command.execute(listener);
+            conn.send(gson.toJson(command.execute(listener)));
         } catch (Exceptions.CloseSocket closeSocket) {
             conn.close();
         } catch (Exceptions.Shutdown shutdown) {

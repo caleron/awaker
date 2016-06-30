@@ -25,7 +25,7 @@ public class Answer {
     public boolean shuffle;
 
     public List<Track> tracks;
-    public List<Playlist> playlists;
+    public List<Playlist> playLists;
 
     private boolean fileNotFound;
 

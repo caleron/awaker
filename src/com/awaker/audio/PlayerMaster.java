@@ -88,6 +88,15 @@ public class PlayerMaster implements PlayerListener {
     }
 
     /**
+     * Spielt einen Track aus der All-PlayList ab.
+     *
+     * @param track Der Track
+     */
+    public boolean play(TrackWrapper track) {
+        return playTrackOfPlaylist(PlayList.ALL_TRACKS, track);
+    }
+
+    /**
      * Spielt eine Playlist ab und setzt sie als aktiv.
      *
      * @param playList Die Playlist.
@@ -310,5 +319,4 @@ public class PlayerMaster implements PlayerListener {
     public void playbackPaused() {
 
     }
-
 }

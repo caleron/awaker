@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class Command {
 
     private static final String PLAY = "play";
+    private static final String PLAY_ID = "play_id";
     private static final String PLAY_FROM_POSITION = "playFromPosition";
     private static final String PAUSE = "pause";
     private static final String STOP = "stop";
@@ -84,6 +85,10 @@ public class Command {
                 listener.play();
                 break;
 
+            case PLAY_ID:
+                listener.play(trackId);
+
+                break;
             case PLAY_FROM_POSITION:
                 listener.playFromPosition(position);
                 break;
@@ -107,8 +112,8 @@ public class Command {
                 break;
 
             //case UPLOAD_AND_PLAY_FILE:
-                //abspielen
-                //break;
+            //abspielen
+            //break;
 
             case CHECK_FILE:
                 if (!listener.containsFile(new TrackWrapper(title, artist))) {
@@ -117,8 +122,8 @@ public class Command {
                 break;
 
             //case UPLOAD_FILE:
-                //herunterladen
-              //  break;
+            //herunterladen
+            //  break;
 
             case PLAY_NEXT:
                 listener.playNext();
@@ -193,7 +198,7 @@ public class Command {
                 break;
 
             case GET_LIBRARY:
-                return getLibrary(Answer.library());
+                return getLibrary(listener.getStatus(Answer.library()));
 
             case SEND_STRING:
                 listener.stringReceived(text);
@@ -222,7 +227,7 @@ public class Command {
                 .map(track -> new Track(track.getId(), track.title, track.artist, track.album, track.trackLength))
                 .collect(Collectors.toList()));
 
-        library.playlists = DbManager.getAllPlaylistsForJSON();
+        library.playLists = DbManager.getAllPlaylistsForJSON();
 
         return library;
     }

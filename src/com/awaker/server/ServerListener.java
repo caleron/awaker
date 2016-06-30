@@ -70,4 +70,6 @@ public interface ServerListener {
     void stringReceived(String str);
 
     void shutdown();
+
+    void play(int trackId);
 }

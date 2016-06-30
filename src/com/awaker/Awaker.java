@@ -12,8 +12,8 @@ import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.AnalogListener;
 import com.awaker.gpio.LightController;
 import com.awaker.server.MyServer;
-import com.awaker.server.UploadServer;
 import com.awaker.server.ServerListener;
+import com.awaker.server.UploadServer;
 import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
 
@@ -127,6 +127,11 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     @Override
     public void play() {
         playerMaster.play();
+    }
+
+    @Override
+    public void play(int trackId) {
+        playerMaster.play(MediaManager.getTrack(trackId));
     }
 
     @Override
