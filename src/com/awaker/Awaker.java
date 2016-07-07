@@ -14,6 +14,7 @@ import com.awaker.gpio.LightController;
 import com.awaker.server.MyServer;
 import com.awaker.server.ServerListener;
 import com.awaker.server.UploadServer;
+import com.awaker.server.WebContentServer;
 import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
 
@@ -57,6 +58,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
         server = new MyServer(this);
         server.start();
+
+        WebContentServer.start();
 
         playerMaster = new PlayerMaster(this, this);
 

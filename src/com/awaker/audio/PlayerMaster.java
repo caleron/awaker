@@ -264,6 +264,7 @@ public class PlayerMaster implements PlayerListener {
                 answer.currentAlbum = currentTrack.album;
             }
             answer.trackLength = currentTrack.trackLength;
+            answer.currentTrackId = currentTrack.getId();
 
             answer.playPosition = (int) (player.getPosition() / 1000.0);
         }
