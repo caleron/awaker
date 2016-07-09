@@ -27,7 +27,7 @@ public class MyServer extends WebSocketServer {
      * @param listener Der {@link ServerListener}.
      */
     public MyServer(ServerListener listener) {
-        super(new InetSocketAddress("192.168.1.102", PORT));
+        super(new InetSocketAddress(PORT));
         this.listener = listener;
         gson = new Gson();
     }
