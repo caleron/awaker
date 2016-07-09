@@ -16,9 +16,8 @@ import java.util.concurrent.Executors;
 public class WebContentServer implements HttpHandler {
 
     public static void start() {
-        HttpServer server = null;
         try {
-            server = HttpServer.create(new InetSocketAddress(80), 0);
+            HttpServer server = HttpServer.create(new InetSocketAddress(80), 0);
             server.createContext("/", new WebContentServer());
             server.setExecutor(Executors.newSingleThreadExecutor()); // creates a default executor
             server.start();
@@ -71,7 +70,7 @@ public class WebContentServer implements HttpHandler {
 
         OutputStream os = httpExchange.getResponseBody();
         FileInputStream fs = new FileInputStream(file);
-        
+
         final byte[] buffer = new byte[65536];
         int count;
 
