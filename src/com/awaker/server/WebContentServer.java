@@ -30,7 +30,7 @@ public class WebContentServer implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         String root = "./web";
         URI uri = httpExchange.getRequestURI();
-        System.out.println("looking for: " + root + uri.getPath());
+
         String path = uri.getPath();
         File file = new File(root + path).getCanonicalFile();
 
@@ -39,10 +39,12 @@ public class WebContentServer implements HttpHandler {
             if (indexFile.exists()) {
                 sendFile(httpExchange, path + "/index.html", indexFile);
             } else {
+                System.out.println("did not found " + path);
                 send404(httpExchange);
             }
         } else if (!file.isFile()) {
             // Object does not exist or is not a file: reject with 404 error.
+            System.out.println("did not found " + path);
             send404(httpExchange);
         } else {
             // Object exists and is a file: accept with response code 200.
