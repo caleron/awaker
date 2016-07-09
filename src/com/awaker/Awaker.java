@@ -66,8 +66,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         if (isWindows) {
             panel = new AwakerPanel();
         } else {
-            lightController = new LightController();
             analogControls = new AnalogControls(this);
+            lightController = new LightController();
         }
     }
 

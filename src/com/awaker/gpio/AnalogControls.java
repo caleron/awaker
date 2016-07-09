@@ -51,6 +51,8 @@ public class AnalogControls implements GpioPinListenerAnalog {
             return;
         }
 
+        provider.setMonitorInterval(50);
+
         GpioController gpioController = GpioFactory.getInstance();
 
         pin_volume = gpioController.provisionAnalogInputPin(provider, VOLUME_CHANNEL, "pin_volume");
@@ -73,6 +75,8 @@ public class AnalogControls implements GpioPinListenerAnalog {
         lastValues.put(pin_red, pin_red.getValue());
         lastValues.put(pin_green, pin_green.getValue());
         lastValues.put(pin_blue, pin_blue.getValue());
+
+        System.out.println("AnalogControls initialisiert");
     }
 
     @Override

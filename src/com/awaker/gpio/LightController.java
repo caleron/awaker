@@ -26,7 +26,7 @@ public class LightController {
 
     public LightController() {
         //wiringpi library initialisieren
-        Gpio.wiringPiSetup();
+        //Gpio.wiringPiSetup();
 
         /**
          * Soft-PWM-Pins erstellen mit möglichen Werten zwischen 0 und 100. Der interne Taktzyklus ist 100µS lang.
@@ -105,7 +105,7 @@ public class LightController {
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
         red = brightness;
-        currentColor = new Color(brightness * 2.55f, currentColor.getGreen(), currentColor.getBlue());
+        currentColor = new Color((int) Math.min(brightness * 2.55f, 255), currentColor.getGreen(), currentColor.getBlue());
 
         SoftPwm.softPwmWrite(PWM_PIN_RED, brightness);
     }
@@ -119,7 +119,7 @@ public class LightController {
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
         green = brightness;
-        currentColor = new Color(currentColor.getRed(), brightness * 2.55f, currentColor.getBlue());
+        currentColor = new Color(currentColor.getRed(), ((int) Math.min(brightness * 2.55f, 255)), currentColor.getBlue());
 
         SoftPwm.softPwmWrite(PWM_PIN_GREEN, brightness);
     }
@@ -133,7 +133,7 @@ public class LightController {
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
         blue = brightness;
-        currentColor = new Color(currentColor.getRed(), currentColor.getGreen(), brightness * 2.55f);
+        currentColor = new Color(currentColor.getRed(), currentColor.getGreen(), ((int) Math.min(brightness * 2.55f, 255)));
 
         SoftPwm.softPwmWrite(PWM_PIN_BLUE, brightness);
     }
