@@ -67,8 +67,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
             panel = new AwakerPanel();
         } else {
             lightController = new LightController();
-            //TODO auskommentieren, wenn adc angeschlossen
-            //analogControls = new AnalogControls(this);
+            analogControls = new AnalogControls(this);
         }
     }
 

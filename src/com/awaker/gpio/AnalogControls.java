@@ -17,16 +17,18 @@ import java.util.HashMap;
 public class AnalogControls implements GpioPinListenerAnalog {
     private AnalogListener listener;
 
-    private static final int TOLERANCE = 7;
+    private static final int TOLERANCE = 10;
 
     private static final Pin VOLUME_CHANNEL = MCP3008Pin.CH0;
     private static final Pin WHITE_CHANNEL = MCP3008Pin.CH1;
-    private static final Pin RED_CHANNEL = MCP3008Pin.CH2;
-    private static final Pin GREEN_CHANNEL = MCP3008Pin.CH3;
-    private static final Pin BLUE_CHANNEL = MCP3008Pin.CH4;
+    private static final Pin ANIMATION_CHANNEL = MCP3008Pin.CH2;
+    private static final Pin RED_CHANNEL = MCP3008Pin.CH3;
+    private static final Pin GREEN_CHANNEL = MCP3008Pin.CH4;
+    private static final Pin BLUE_CHANNEL = MCP3008Pin.CH5;
 
     private GpioPinAnalogInput pin_volume;
     private GpioPinAnalogInput pin_white;
+    private GpioPinAnalogInput pin_animation;
     private GpioPinAnalogInput pin_red;
     private GpioPinAnalogInput pin_green;
     private GpioPinAnalogInput pin_blue;
@@ -53,18 +55,21 @@ public class AnalogControls implements GpioPinListenerAnalog {
 
         pin_volume = gpioController.provisionAnalogInputPin(provider, VOLUME_CHANNEL, "pin_volume");
         pin_white = gpioController.provisionAnalogInputPin(provider, WHITE_CHANNEL, "pin_white");
+        pin_animation = gpioController.provisionAnalogInputPin(provider, ANIMATION_CHANNEL, "pin_animation");
         pin_red = gpioController.provisionAnalogInputPin(provider, RED_CHANNEL, "pin_red");
         pin_green = gpioController.provisionAnalogInputPin(provider, GREEN_CHANNEL, "pin_green");
         pin_blue = gpioController.provisionAnalogInputPin(provider, BLUE_CHANNEL, "pin_blue");
 
         pin_volume.addListener(this);
         pin_white.addListener(this);
+        pin_animation.addListener(this);
         pin_red.addListener(this);
         pin_green.addListener(this);
         pin_blue.addListener(this);
 
         lastValues.put(pin_volume, pin_volume.getValue());
         lastValues.put(pin_white, pin_white.getValue());
+        lastValues.put(pin_animation, pin_animation.getValue());
         lastValues.put(pin_red, pin_red.getValue());
         lastValues.put(pin_green, pin_green.getValue());
         lastValues.put(pin_blue, pin_blue.getValue());
@@ -90,6 +95,9 @@ public class AnalogControls implements GpioPinListenerAnalog {
 
         } else if (pin_white.equals(pin)) {
             listener.setWhiteBrightness(newValue);
+
+        } else if (pin_animation.equals(pin)) {
+            listener.setAnimationBrightness(newValue);
 
         } else if (pin_red.equals(pin)) {
             listener.setRed(newValue);
