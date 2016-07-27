@@ -1,5 +1,6 @@
 package com.awaker.server;
 
+import com.awaker.util.Config;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -17,7 +18,7 @@ public class WebContentServer implements HttpHandler {
 
     public static void start() {
         try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(80), 0);
+            HttpServer server = HttpServer.create(new InetSocketAddress(Config.WEBCONTENT_PORT), 0);
             server.createContext("/", new WebContentServer());
             server.setExecutor(Executors.newSingleThreadExecutor()); // creates a default executor
             server.start();

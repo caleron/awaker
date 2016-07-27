@@ -11,12 +11,10 @@ import com.awaker.data.TrackWrapper;
 import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.AnalogListener;
 import com.awaker.gpio.LightController;
-import com.awaker.server.MyServer;
-import com.awaker.server.ServerListener;
-import com.awaker.server.UploadServer;
-import com.awaker.server.WebContentServer;
+import com.awaker.server.*;
 import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
+import com.google.gson.Gson;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,10 +33,10 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
     private PlayerMaster playerMaster;
 
+    public static final Gson GSON = new Gson();
     private MyServer server;
 
     private LightController lightController = null;
-
     private AnalogControls analogControls = null;
 
     public static boolean isMSWindows = true;
@@ -46,7 +44,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     private Awaker(boolean isWindows) {
         isMSWindows = isWindows;
 
-        new UploadServer(this);
+        new LegacyUploadServer(this);
 
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> Log.error(e));
 
@@ -60,6 +58,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         server.start();
 
         WebContentServer.start();
+        HttpUploadServer.start();
 
         playerMaster = new PlayerMaster(this, this);
 

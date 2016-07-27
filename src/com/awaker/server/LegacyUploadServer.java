@@ -1,5 +1,7 @@
 package com.awaker.server;
 
+import com.awaker.Awaker;
+import com.awaker.util.Config;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
 
@@ -13,24 +15,20 @@ import java.net.SocketTimeoutException;
 /**
  * Server zum Upload von Dateien
  */
-public class UploadServer {
-    private static final int PORT_NUMBER = 4732;
+public class LegacyUploadServer {
     private ServerSocket serverSocket;
 
     private boolean interrupt = false;
 
     private final ServerListener listener;
-    private final Gson gson;
 
-    public UploadServer(ServerListener listener) {
+    public LegacyUploadServer(ServerListener listener) {
         this.listener = listener;
         try {
-            serverSocket = new ServerSocket(PORT_NUMBER);
+            serverSocket = new ServerSocket(Config.LEGACY_UPLOAD_PORT);
         } catch (IOException e) {
             Log.error(e);
         }
-
-        gson = new Gson();
 
         new Thread(this::runServer).start();
     }
@@ -98,7 +96,7 @@ public class UploadServer {
         BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
         String json = reader.readLine();
-        UploadCommand command = gson.fromJson(json, UploadCommand.class);
+        UploadCommand command = Awaker.GSON.fromJson(json, UploadCommand.class);
 
         listener.downloadFile(clientSocket.getInputStream(), command.fileLength, command.name, command.play);
     }
