@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Apache Commons IOUtils">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/commons-io-2.5/commons-io-2.5.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://$PROJECT_DIR$/lib/commons-io-2.5/docs" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-io-2.5/commons-io-2.5-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/lib/commons-io-2.5-src/src/main/java" />
+      <root url="file://$PROJECT_DIR$/lib/commons-io-2.5-src/src/test/java" />
+    </SOURCES>
+  </library>
+</component>
