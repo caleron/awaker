@@ -58,7 +58,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         server.start();
 
         WebContentServer.start();
-        HttpUploadServer.start();
+        HttpUploadServer.start(this);
 
         playerMaster = new PlayerMaster(this, this);
 
@@ -106,11 +106,12 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void downloadFile(InputStream is, int length, String fileName, boolean play) {
+    public TrackWrapper downloadFile(InputStream is, int length, String fileName, boolean play) {
         TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
         if (play && track != null) {
             playFile(track);
         }
+        return track;
     }
 
     @Override

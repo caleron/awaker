@@ -7,7 +7,7 @@ import java.awt.*;
 import java.io.InputStream;
 
 public interface ServerListener {
-    void downloadFile(InputStream is, int length, String fileName, boolean play);
+    TrackWrapper downloadFile(InputStream is, int length, String fileName, boolean play);
 
     boolean playFile(TrackWrapper track);
 
