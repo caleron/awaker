@@ -309,6 +309,7 @@ public class PlayerMaster implements PlayerListener {
     @Override
     public void playbackFinished() {
         playNext();
+        playbackListener.playbackNewSong();
     }
 
     @Override

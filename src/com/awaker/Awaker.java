@@ -321,6 +321,11 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         }
     }
 
+    @Override
+    public void playbackNewSong() {
+        server.sendStatus();
+    }
+
     /**
      * Panel zur grafischen Darstellung der Frequenzanalyse unter Windows
      */
