@@ -14,6 +14,7 @@ import java.util.Random;
  */
 public class MediaManager {
 
+    private static Random rand = new Random();
     private static ArrayList<TrackWrapper> allTracks;
     private static ArrayList<PlayList> playLists;
 
@@ -75,14 +76,21 @@ public class MediaManager {
         final int BUFFER_SIZE = 8192;
         byte[] buffer = new byte[BUFFER_SIZE];
 
+        File newFile = new File(fileName);
+
+        //sicherstellen, dass Datei noch nicht existiert
+        while (newFile.exists()) {
+            fileName = fileName.replace(".mp3", "") + rand.nextInt() + ".mp3";
+            newFile = new File(fileName);
+        }
+
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(fileName);
+            fos = new FileOutputStream(newFile);
         } catch (FileNotFoundException ignored) {
         }
         try {
             if (fos == null) {
-                Random rand = new Random();
                 fileName = "media/" + rand.nextInt() + ".mp3";
                 fos = new FileOutputStream(fileName);
             }
@@ -108,8 +116,6 @@ public class MediaManager {
             //fertig
             fos.close();
 
-            File newFile = new File(fileName);
-
             if (totalBytesRead < length) {
                 Log.message("Lengths do not match, cancelling integration in Database");
                 if (newFile.delete()) {
@@ -131,9 +137,19 @@ public class MediaManager {
                 return null;
             }
 
-            DbManager.addTrack(track);
+            //Prüfen, ob Track bereits in Datenbank
+            TrackWrapper existingTrack = DbManager.getTrack(track.title, track.artist);
 
-            loadTracks();
+            if (existingTrack != null) {
+                Log.message("Track already existing, integration cancelled, returning existing Track");
+                if (newFile.delete()) {
+                    Log.message("File deleted");
+                }
+            } else {
+                DbManager.addTrack(track);
+                loadTracks();
+            }
+
             //Neu aus Datenbank laden, damit ID und Referenzen richtig sind
             track = DbManager.getTrack(track.title, track.artist);
 
