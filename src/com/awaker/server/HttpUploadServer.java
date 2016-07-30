@@ -42,6 +42,7 @@ public class HttpUploadServer implements HttpHandler {
             httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
             httpExchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
             httpExchange.getResponseHeaders().add("Access-Control-Allow-Headers", "content-type, filename");
+            httpExchange.getResponseHeaders().add("Access-Control-Max-Age", "86400");
             //Statuscode senden
             httpExchange.sendResponseHeaders(200, 0);
 
