@@ -103,13 +103,16 @@ public class MediaManager {
                 }
                 totalBytesRead += readCount;
             }
+            //readCount ist beim letzten Durchlauf -1, zum Ausgleich wieder um 1 erhöhen
+            totalBytesRead++;
             //fertig
             fos.close();
 
+            File newFile = new File(fileName);
+
             if (totalBytesRead < length) {
                 Log.message("Lengths do not match, cancelling integration in Database");
-                File deleteFile = new File(fileName);
-                if (deleteFile.delete()) {
+                if (newFile.delete()) {
                     Log.message("File deleted");
                 }
                 return null;
@@ -118,10 +121,13 @@ public class MediaManager {
             Log.message("download finished");
 
             //Tags lesen und in Datenbank packen
-            TrackWrapper track = readFile(new File(fileName));
+            TrackWrapper track = readFile(newFile);
 
             if (track == null) {
                 Log.message("Error reading Tags, integration cancelled.");
+                if (newFile.delete()) {
+                    Log.message("File deleted");
+                }
                 return null;
             }
 
