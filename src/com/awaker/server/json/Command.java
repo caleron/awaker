@@ -46,7 +46,11 @@ public class Command {
     private static final String GET_STATUS = "getStatus";
     private static final String GET_LIBRARY = "getLibrary";
     private static final String SEND_STRING = "sendString";
-    private static final String SHUTDOWN = "shutdown";
+    private static final String SHUTDOWN_SERVER = "shutdownServer";
+    private static final String SHUTDOWN_RASPI = "shutdownRaspi";
+    private static final String REBOOT_RASPI = "rebootRaspi";
+    private static final String REBOOT_SERVER = "rebootServer";
+
 
     private String action;
 
@@ -78,7 +82,7 @@ public class Command {
     public Command() {
     }
 
-    public Answer execute(ServerListener listener) throws Exceptions.CloseSocket, Exceptions.Shutdown {
+    public Answer execute(ServerListener listener) throws Exceptions.CloseSocket, Exceptions.ShutdownServer, Exceptions.ShutdownRaspi, Exceptions.RebootServer, Exceptions.RebootRaspi {
 
         switch (action) {
             case PLAY:
@@ -203,9 +207,14 @@ public class Command {
             case SEND_STRING:
                 listener.stringReceived(text);
                 break;
-            case SHUTDOWN:
-                throw new Exceptions.Shutdown();
-
+            case SHUTDOWN_SERVER:
+                throw new Exceptions.ShutdownServer();
+            case SHUTDOWN_RASPI:
+                throw new Exceptions.ShutdownRaspi();
+            case REBOOT_RASPI:
+                throw new Exceptions.RebootRaspi();
+            case REBOOT_SERVER:
+                throw new Exceptions.RebootServer();
             default:
                 throw new Exceptions.CloseSocket();
         }

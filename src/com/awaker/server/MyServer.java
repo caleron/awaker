@@ -5,6 +5,7 @@ import com.awaker.server.json.Answer;
 import com.awaker.server.json.Command;
 import com.awaker.server.json.Exceptions;
 import com.awaker.util.Config;
+import com.awaker.util.RaspiControl;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -27,8 +28,6 @@ public class MyServer extends WebSocketServer {
 
     //nach 2 Sekunden sicher den Status senden, unabhängig von aufeinanderfolgenden Anfragen
     private Timer longerTimer = new Timer(2000, e -> sendStatus());
-
-//TODO status bei neuem song pushen, statt clients abfragen zu lassen
 
     /**
      * Erstellt eine neue Instanz.
@@ -77,9 +76,15 @@ public class MyServer extends WebSocketServer {
             conn.send(gson.toJson(command.execute(listener)));
         } catch (Exceptions.CloseSocket closeSocket) {
             conn.close();
-        } catch (Exceptions.Shutdown shutdown) {
+        } catch (Exceptions.ShutdownServer e) {
             conn.close();
             listener.shutdown();
+        } catch (Exceptions.RebootServer e1) {
+            RaspiControl.restartApplication();
+        } catch (Exceptions.ShutdownRaspi e2) {
+            RaspiControl.shutdown();
+        } catch (Exceptions.RebootRaspi e3) {
+            RaspiControl.reboot();
         }
 
         if (connections().size() > 1) {
