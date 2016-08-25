@@ -26,6 +26,12 @@ public class WebContentServer implements HttpHandler {
         }
     }
 
+    /**
+     * Startet einen https-Server. http://stackoverflow.com/questions/2308479/simple-java-https-server
+     * <p>
+     * Zertifikat momentan mit keytool erstellt und wird nicht von Browsern akzeptiert. Künftig von
+     * https://www.startssl.com/ Zertifikat holen.
+     */
     public static void startSecure() {
         try {
             HttpsServer server = HttpsServer.create(new InetSocketAddress(Config.WEBCONTENT_SECURE_PORT), 0);

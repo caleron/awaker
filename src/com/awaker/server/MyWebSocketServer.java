@@ -31,6 +31,8 @@ public class MyWebSocketServer extends WebSocketServer {
 
     /**
      * Erstellt eine neue Instanz.
+     * Verschlüsselung einführen, wenn ssl-server verwendet wird
+     * http://stackoverflow.com/questions/9745249/html5-websocket-with-ssl
      *
      * @param listener Der {@link ServerListener}.
      */
