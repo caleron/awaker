@@ -34,7 +34,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     private PlayerMaster playerMaster;
 
     public static final Gson GSON = new Gson();
-    private MyServer server;
+    private MyWebSocketServer server;
 
     private LightController lightController = null;
     private AnalogControls analogControls = null;
@@ -54,7 +54,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         DbManager.init();
         MediaManager.startScanFiles();
 
-        server = new MyServer(this);
+        server = new MyWebSocketServer(this);
         server.start();
 
         WebContentServer.start();

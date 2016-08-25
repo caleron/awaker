@@ -19,7 +19,7 @@ import java.util.Collection;
 /**
  * Server für WebSockets. Übernimmt die Abarbeitung aller Anfragen außer Uploads.
  */
-public class MyServer extends WebSocketServer {
+public class MyWebSocketServer extends WebSocketServer {
     private final Gson gson;
     private final ServerListener listener;
 
@@ -34,7 +34,7 @@ public class MyServer extends WebSocketServer {
      *
      * @param listener Der {@link ServerListener}.
      */
-    public MyServer(ServerListener listener) {
+    public MyWebSocketServer(ServerListener listener) {
         super(new InetSocketAddress(Config.WEBSOCKET_PORT));
         this.listener = listener;
         gson = new Gson();

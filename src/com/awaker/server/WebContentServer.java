@@ -1,17 +1,16 @@
 package com.awaker.server;
 
 import com.awaker.util.Config;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.*;
 
+import javax.net.ssl.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.security.KeyStore;
 import java.util.concurrent.Executors;
 
 public class WebContentServer implements HttpHandler {
@@ -23,6 +22,58 @@ public class WebContentServer implements HttpHandler {
             server.setExecutor(Executors.newSingleThreadExecutor()); // creates a default executor
             server.start();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void startSecure() {
+        try {
+            HttpsServer server = HttpsServer.create(new InetSocketAddress(Config.WEBCONTENT_SECURE_PORT), 0);
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+
+            String keystorePassword = "ku76??doRa99kratos";
+            String keyPassword = "brat+//StorchsenF";
+            String keyName = "awaker_keys";
+            String fileName = "keys/awaker_store.jks";
+
+            KeyStore ks = KeyStore.getInstance("JKS");
+
+            FileInputStream fis = new FileInputStream(fileName);
+            ks.load(fis, keystorePassword.toCharArray());
+
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+            kmf.init(ks, keyPassword.toCharArray());
+
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            tmf.init(ks);
+
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+            server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+                @Override
+                public void configure(HttpsParameters params) {
+                    try {
+                        // initialise the SSL context
+                        SSLContext c = SSLContext.getDefault();
+                        SSLEngine engine = c.createSSLEngine();
+                        params.setNeedClientAuth(false);
+                        params.setCipherSuites(engine.getEnabledCipherSuites());
+                        params.setProtocols(engine.getEnabledProtocols());
+
+                        // get the default parameters
+                        SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
+                        params.setSSLParameters(defaultSSLParameters);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            server.createContext("/", new WebContentServer());
+            server.setExecutor(Executors.newSingleThreadExecutor()); // creates a default executor
+            server.start();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
