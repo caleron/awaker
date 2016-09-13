@@ -12,12 +12,14 @@ import com.pi4j.io.gpio.event.GpioPinListenerAnalog;
 import com.pi4j.io.spi.SpiChannel;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 
 public class AnalogControls implements GpioPinListenerAnalog {
     private AnalogListener listener;
 
     private static final int TOLERANCE = 10;
+    private static final int INITIAL_THRESHOLD = 50;
 
     private static final Pin VOLUME_CHANNEL = MCP3008Pin.CH0;
     private static final Pin WHITE_CHANNEL = MCP3008Pin.CH1;
@@ -34,6 +36,7 @@ public class AnalogControls implements GpioPinListenerAnalog {
     private GpioPinAnalogInput pin_blue;
 
     private HashMap<GpioPinAnalogInput, Double> lastValues = new HashMap<>();
+    private HashMap<GpioPinAnalogInput, Long> lastChange = new HashMap<>();
 
     public AnalogControls(AnalogListener listener) {
         this.listener = listener;
@@ -76,6 +79,13 @@ public class AnalogControls implements GpioPinListenerAnalog {
         lastValues.put(pin_green, pin_green.getValue());
         lastValues.put(pin_blue, pin_blue.getValue());
 
+        lastChange.put(pin_volume, 0L);
+        lastChange.put(pin_white, 0L);
+        lastChange.put(pin_animation, 0L);
+        lastChange.put(pin_red, 0L);
+        lastChange.put(pin_green, 0L);
+        lastChange.put(pin_blue, 0L);
+
         System.out.println("AnalogControls initialisiert");
     }
 
@@ -87,9 +97,15 @@ public class AnalogControls implements GpioPinListenerAnalog {
 
         Double lastValue = lastValues.get(pin);
 
-        if (Math.abs(lastValue - value) < TOLERANCE) {
+        double diff = Math.abs(lastValue - value);
+        if (diff < TOLERANCE) {
+            return;
+        } else if (diff < INITIAL_THRESHOLD && lastChange.get(pin) + 500 < new Date().getTime()) {
             return;
         }
+
+        //Änderung dokumentieren
+        lastChange.put(pin, new Date().getTime());
         //Neuen Wert ablegen, falls Toleranz überschritten wurde
         lastValues.put(pin, value);
         int newValue = (int) ((event.getValue() / 1023.0) * 100.0);
@@ -98,19 +114,19 @@ public class AnalogControls implements GpioPinListenerAnalog {
             listener.setVolume(newValue);
 
         } else if (pin_white.equals(pin)) {
-            listener.setWhiteBrightness(newValue);
+            listener.setWhiteBrightness(newValue, false);
 
         } else if (pin_animation.equals(pin)) {
-            listener.setAnimationBrightness(newValue);
+            listener.setAnimationBrightness(newValue, false);
 
         } else if (pin_red.equals(pin)) {
-            listener.setRed(newValue);
+            listener.setRed(newValue, false);
 
         } else if (pin_green.equals(pin)) {
-            listener.setGreen(newValue);
+            listener.setGreen(newValue, false);
 
         } else if (pin_blue.equals(pin)) {
-            listener.setBlue(newValue);
+            listener.setBlue(newValue, false);
 
         } else {
             Log.message("received event from unknown pin: " + event.getPin().getName());
