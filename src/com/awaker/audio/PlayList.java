@@ -117,7 +117,7 @@ public class PlayList {
      * @return Der vorherige Track
      */
     public TrackWrapper previousTrack() {
-        if (currentTrack == null || trackHistory.isEmpty()) {
+        if (currentTrack == null || trackHistory.size() < 2) {
             return nextTrack();
         } else {
             trackHistory.pop();
