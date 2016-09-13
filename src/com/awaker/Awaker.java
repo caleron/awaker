@@ -190,16 +190,20 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void setAnimationBrightness(int brightness) {
+    public void setAnimationBrightness(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setAnimationBrightness(brightness);
+            lightController.setAnimationBrightness(brightness, smooth);
         }
     }
 
     @Override
-    public void setColor(Color color) {
+    public void setColor(Color color, boolean smooth) {
         if (!isMSWindows) {
-            lightController.updateColor(color, false);
+            if (smooth) {
+                lightController.updateColorSmooth(color);
+            } else {
+                lightController.updateColor(color, false);
+            }
         }
     }
 
@@ -236,30 +240,30 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void setWhiteBrightness(int brightness) {
+    public void setWhiteBrightness(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setWhiteBrightness(brightness);
+            lightController.setWhiteBrightness(brightness, smooth);
         }
     }
 
     @Override
-    public void setRed(int brightness) {
+    public void setRed(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setRedBrightness(brightness);
+            lightController.setRedBrightness(brightness, smooth);
         }
     }
 
     @Override
-    public void setGreen(int brightness) {
+    public void setGreen(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setGreenBrightness(brightness);
+            lightController.setGreenBrightness(brightness, smooth);
         }
     }
 
     @Override
-    public void setBlue(int brightness) {
+    public void setBlue(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setBlueBrightness(brightness);
+            lightController.setBlueBrightness(brightness, smooth);
         }
     }
 

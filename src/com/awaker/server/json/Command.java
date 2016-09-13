@@ -51,7 +51,6 @@ public class Command {
     private static final String REBOOT_RASPI = "rebootRaspi";
     private static final String REBOOT_SERVER = "rebootServer";
 
-
     private String action;
 
     private String name;
@@ -69,6 +68,7 @@ public class Command {
     private int red;
     private int green;
     private int blue;
+    private boolean smooth;
 
     private boolean shuffle;
     private int volume;
@@ -150,11 +150,11 @@ public class Command {
                 break;
 
             case SET_WHITE_BRIGHTNESS:
-                listener.setWhiteBrightness(brightness);
+                listener.setWhiteBrightness(brightness, smooth);
                 break;
 
             case SET_ANIMATION_BRIGHTNESS:
-                listener.setAnimationBrightness(brightness);
+                listener.setAnimationBrightness(brightness,smooth);
                 break;
 
             case SET_COLOR_MODE:
@@ -162,11 +162,11 @@ public class Command {
                 break;
 
             case SET_COLOR:
-                listener.setColor(new Color(color, false));
+                listener.setColor(new Color(color, false), smooth);
                 break;
 
             case SET_RGBCOLOR:
-                listener.setColor(new Color(red, green, blue));
+                listener.setColor(new Color(red, green, blue), smooth);
                 break;
 
             case CHANGE_VISUALIZATION:

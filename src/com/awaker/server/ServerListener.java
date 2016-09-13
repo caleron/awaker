@@ -36,11 +36,11 @@ public interface ServerListener {
 
     void setVolume(int volume);
 
-    void setAnimationBrightness(int brightness);
+    void setAnimationBrightness(int brightness, boolean smooth);
 
-    void setColor(Color color);
+    void setColor(Color color, boolean smooth);
 
-    void setWhiteBrightness(int brightness);
+    void setWhiteBrightness(int brightness, boolean smooth);
 
     void changeVisualisation(String newType);
 

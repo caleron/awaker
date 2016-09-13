@@ -16,33 +16,33 @@ public interface AnalogListener {
      *
      * @param brightness Wert zwischen 0 und 100
      */
-    void setWhiteBrightness(int brightness);
+    void setWhiteBrightness(int brightness, boolean smooth);
 
     /**
      * Setzt die Helligkeit der Farbanimationen
      *
      * @param brightness Wert zwischen 0 und 100
      */
-    void setAnimationBrightness(int brightness);
+    void setAnimationBrightness(int brightness, boolean smooth);
 
     /**
      * Setzt die Helligkeit des roten Kanals
      *
      * @param brightness Wert zwischen 0 und 100
      */
-    void setRed(int brightness);
+    void setRed(int brightness, boolean smooth);
 
     /**
      * Setzt die Helligkeit des grünen Kanals
      *
      * @param brightness Wert zwischen 0 und 100
      */
-    void setGreen(int brightness);
+    void setGreen(int brightness, boolean smooth);
 
     /**
      * Setzt die Helligkeit des blauen Kanals
      *
      * @param brightness Wert zwischen 0 und 100
      */
-    void setBlue(int brightness);
+    void setBlue(int brightness, boolean smooth);
 }

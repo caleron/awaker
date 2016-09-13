@@ -2,7 +2,6 @@ package com.awaker.gpio;
 
 import com.awaker.server.json.Answer;
 import com.awaker.util.Log;
-import com.pi4j.wiringpi.Gpio;
 import com.pi4j.wiringpi.SoftPwm;
 
 import java.awt.*;
@@ -28,10 +27,10 @@ public class LightController {
         //wiringpi library initialisieren
         //Gpio.wiringPiSetup();
 
-        /**
-         * Soft-PWM-Pins erstellen mit möglichen Werten zwischen 0 und 100. Der interne Taktzyklus ist 100µS lang.
-         * Durch eine Auflösung bis 100 ergibt dies 100 Taktzyklen pro PWM-Takt, also insgesamt 100 * 100µS = 10ms pro
-         * PWM-Takt, was eine PWM-Frequenz von 100Hz bedeutet.
+        /*
+          Soft-PWM-Pins erstellen mit möglichen Werten zwischen 0 und 100. Der interne Taktzyklus ist 100µS lang.
+          Durch eine Auflösung bis 100 ergibt dies 100 Taktzyklen pro PWM-Takt, also insgesamt 100 * 100µS = 10ms pro
+          PWM-Takt, was eine PWM-Frequenz von 100Hz bedeutet.
          */
         SoftPwm.softPwmCreate(PWM_PIN_RED, 0, 100);
         SoftPwm.softPwmCreate(PWM_PIN_GREEN, 0, 100);
@@ -85,15 +84,42 @@ public class LightController {
     }
 
     /**
+     * Verändert die Helligkeit des angegebenen Pins langsam. Zwischen einzelnen Schritten wird 10ms pausiert.
+     *
+     * @param pin          Der Pin
+     * @param currentValue Der aktuelle Wert
+     * @param steps        Die Anzahl an Schritten
+     * @param stepSize     Die Schrittgröße
+     */
+    private static void smoothPin(int pin, int currentValue, int steps, int stepSize) {
+        new Thread(() -> {
+            int value = currentValue;
+            for (int i = 0; i < steps; i++) {
+                value += stepSize;
+                SoftPwm.softPwmWrite(pin, value);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }).start();
+    }
+
+    /**
      * Setzt die Helligkeit der weißen LED
      *
      * @param brightness Helligkeit zwischen 0 und 100
      */
-    public void setWhiteBrightness(int brightness) {
+    public void setWhiteBrightness(int brightness, boolean smooth) {
+        if (smooth) {
+            smoothPin(PWM_PIN_WHITE, whiteBrightness, Math.abs(whiteBrightness - brightness), whiteBrightness > brightness ? -1 : 1);
+        }
         //wert zwischen 0 und 100 sicherstellen
         whiteBrightness = Math.max(0, Math.min(100, brightness));
 
-        SoftPwm.softPwmWrite(PWM_PIN_WHITE, whiteBrightness);
+        if (!smooth) {
+            SoftPwm.softPwmWrite(PWM_PIN_WHITE, whiteBrightness);
+        }
     }
 
     /**
@@ -101,13 +127,18 @@ public class LightController {
      *
      * @param brightness Helligkeit zwischen 0 und 100
      */
-    public void setRedBrightness(int brightness) {
+    public void setRedBrightness(int brightness, boolean smooth) {
+        if (smooth) {
+            smoothPin(PWM_PIN_RED, (int) red, Math.abs((int) red - brightness), red > brightness ? -1 : 1);
+        }
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
         red = brightness;
         currentColor = new Color((int) Math.min(brightness * 2.55f, 255), currentColor.getGreen(), currentColor.getBlue());
 
-        SoftPwm.softPwmWrite(PWM_PIN_RED, brightness);
+        if (!smooth) {
+            SoftPwm.softPwmWrite(PWM_PIN_RED, brightness);
+        }
     }
 
     /**
@@ -115,13 +146,18 @@ public class LightController {
      *
      * @param brightness Helligkeit zwischen 0 und 100
      */
-    public void setGreenBrightness(int brightness) {
+    public void setGreenBrightness(int brightness, boolean smooth) {
+        if (smooth) {
+            smoothPin(PWM_PIN_GREEN, (int) green, Math.abs((int) green - brightness), green > brightness ? -1 : 1);
+        }
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
         green = brightness;
         currentColor = new Color(currentColor.getRed(), ((int) Math.min(brightness * 2.55f, 255)), currentColor.getBlue());
 
-        SoftPwm.softPwmWrite(PWM_PIN_GREEN, brightness);
+        if (!smooth) {
+            SoftPwm.softPwmWrite(PWM_PIN_GREEN, brightness);
+        }
     }
 
     /**
@@ -129,13 +165,18 @@ public class LightController {
      *
      * @param brightness Helligkeit zwischen 0 und 100
      */
-    public void setBlueBrightness(int brightness) {
+    public void setBlueBrightness(int brightness, boolean smooth) {
+        if (smooth) {
+            smoothPin(PWM_PIN_BLUE, (int) blue, Math.abs((int) blue - brightness), blue > brightness ? -1 : 1);
+        }
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
         blue = brightness;
         currentColor = new Color(currentColor.getRed(), currentColor.getGreen(), ((int) Math.min(brightness * 2.55f, 255)));
 
-        SoftPwm.softPwmWrite(PWM_PIN_BLUE, brightness);
+        if (!smooth) {
+            SoftPwm.softPwmWrite(PWM_PIN_BLUE, brightness);
+        }
     }
 
     /**
@@ -143,11 +184,27 @@ public class LightController {
      *
      * @param newValue Farbhelligkeit als Wert zwischen 0 und 100
      */
-    public void setAnimationBrightness(int newValue) {
+    public void setAnimationBrightness(int newValue, boolean smooth) {
         //wert zwischen 0 und 100 sicherstellen
-        animationBrightness = Math.max(0, Math.min(100, newValue));
-
-        animationBrightness = newValue;
+        if (smooth) {
+            new Thread(() -> {
+                int steps = Math.abs(newValue - animationBrightness);
+                int stepSize = newValue > animationBrightness ? 1 : -1;
+                for (int i = 0; i < steps; i++) {
+                    animationBrightness += stepSize;
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ignored) {
+                    }
+                    if (animationBrightness >= 100 || animationBrightness <= 0) {
+                        animationBrightness = Math.max(0, Math.min(100, newValue));
+                        break;
+                    }
+                }
+            }).start();
+        } else {
+            animationBrightness = Math.max(0, Math.min(100, newValue));
+        }
     }
 
     /**
@@ -168,6 +225,17 @@ public class LightController {
             blue = (color.getBlue() / 255f) * 100;
         }
         refreshColorPins();
+    }
+
+    /**
+     * Setzt eine neue Farbe mit sanftem Übergang
+     *
+     * @param color Die Farbe
+     */
+    public void updateColorSmooth(Color color) {
+        setRedBrightness((int) ((color.getRed() / 255f) * 100), true);
+        setGreenBrightness((int) ((color.getGreen() / 255f) * 100), true);
+        setBlueBrightness((int) ((color.getBlue() / 255f) * 100), true);
     }
 
     /**
