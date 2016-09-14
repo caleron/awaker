@@ -16,7 +16,7 @@ public class LightController {
     private static final int PWM_PIN_BLUE = 0;
     private static final int PWM_PIN_WHITE = 8;
 
-    private float red, green, blue;
+    private int red, green, blue;
     //Steht für die letzte über die Funktion updateColor gesetzte Farbe
     private Color currentColor = Color.BLACK;
 
@@ -129,7 +129,7 @@ public class LightController {
      */
     public void setRedBrightness(int brightness, boolean smooth) {
         if (smooth) {
-            smoothPin(PWM_PIN_RED, (int) red, Math.abs((int) red - brightness), red > brightness ? -1 : 1);
+            smoothPin(PWM_PIN_RED, red, Math.abs(red - brightness), red > brightness ? -1 : 1);
         }
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
@@ -148,7 +148,7 @@ public class LightController {
      */
     public void setGreenBrightness(int brightness, boolean smooth) {
         if (smooth) {
-            smoothPin(PWM_PIN_GREEN, (int) green, Math.abs((int) green - brightness), green > brightness ? -1 : 1);
+            smoothPin(PWM_PIN_GREEN, green, Math.abs(green - brightness), green > brightness ? -1 : 1);
         }
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
@@ -167,7 +167,7 @@ public class LightController {
      */
     public void setBlueBrightness(int brightness, boolean smooth) {
         if (smooth) {
-            smoothPin(PWM_PIN_BLUE, (int) blue, Math.abs((int) blue - brightness), blue > brightness ? -1 : 1);
+            smoothPin(PWM_PIN_BLUE, blue, Math.abs(blue - brightness), blue > brightness ? -1 : 1);
         }
         //wert zwischen 0 und 100 sicherstellen
         brightness = Math.max(0, Math.min(100, brightness));
@@ -216,13 +216,13 @@ public class LightController {
     public void updateColor(Color color, boolean isMusic) {
         currentColor = color;
         if (isMusic) {
-            red = getNewColor(red, ((color.getRed() / 255f) * animationBrightness));
-            green = getNewColor(green, ((color.getGreen() / 255f) * animationBrightness));
-            blue = getNewColor(blue, ((color.getBlue() / 255f) * animationBrightness));
+            red = getNewColor(red, (int) ((color.getRed() / 255f) * animationBrightness));
+            green = getNewColor(green, (int) ((color.getGreen() / 255f) * animationBrightness));
+            blue = getNewColor(blue, (int) ((color.getBlue() / 255f) * animationBrightness));
         } else {
-            red = (color.getRed() / 255f) * 100;
-            green = (color.getGreen() / 255f) * 100;
-            blue = (color.getBlue() / 255f) * 100;
+            red = (int) ((color.getRed() / 255f) * 100);
+            green = (int) ((color.getGreen() / 255f) * 100);
+            blue = (int) ((color.getBlue() / 255f) * 100);
         }
         refreshColorPins();
     }
@@ -242,9 +242,9 @@ public class LightController {
      * Schreibt die Farbwerte zu den PINs
      */
     private void refreshColorPins() {
-        SoftPwm.softPwmWrite(PWM_PIN_RED, (int) red);
-        SoftPwm.softPwmWrite(PWM_PIN_GREEN, (int) green);
-        SoftPwm.softPwmWrite(PWM_PIN_BLUE, (int) blue);
+        SoftPwm.softPwmWrite(PWM_PIN_RED, red);
+        SoftPwm.softPwmWrite(PWM_PIN_GREEN, green);
+        SoftPwm.softPwmWrite(PWM_PIN_BLUE, blue);
     }
 
     /**
@@ -320,12 +320,12 @@ public class LightController {
      * @param newColor neuer Wert
      * @return neu angepasster Farbwert
      */
-    private static float getNewColor(float oldColor, float newColor) {
+    private static int getNewColor(int oldColor, int newColor) {
         if (oldColor > newColor) {
-            return (oldColor + newColor) / 2f;
+            return (int) ((oldColor + newColor) / 2f);
         } else {
             //gewichteter Durchschnitt
-            return (oldColor * 2f + newColor) / 3f;
+            return (int) ((oldColor * 2f + newColor) / 3f);
         }
     }
 
