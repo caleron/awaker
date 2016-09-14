@@ -28,5 +28,6 @@
     <orderEntry type="library" name="javax.servlet-api" level="project" />
     <orderEntry type="library" name="Apache Commons IOUtils" level="project" />
     <orderEntry type="library" name="Java-WebSocket-1.3.0-javadoc" level="project" />
+    <orderEntry type="library" name="com.luckycatlabs:SunriseSunsetCalculator:1.2" level="project" />
   </component>
 </module>
