@@ -14,9 +14,6 @@
       <element id="library" level="project" name="pi4j-core" />
       <element id="library" level="project" name="com.google.code.gson:gson:2.7" />
       <element id="library" level="project" name="pi4j-gpio-extension" />
-      <element id="library" level="project" name="Apache Commons FileUpload" />
-      <element id="library" level="project" name="Apache Commons IOUtils" />
-      <element id="library" level="project" name="javax.servlet-api" />
     </root>
   </artifact>
 </component>
