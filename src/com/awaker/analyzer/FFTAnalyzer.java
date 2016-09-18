@@ -8,13 +8,23 @@ public class FFTAnalyzer {
     //1024 Samples entsprechen bei 44100Hz Abtastrate etwa 23ms
     //Samples für einen Channel, also insgesamt 2048 werden gebraucht
     private static final int MIN_ANALYZE_SIZE = 1024;
-    private static final int BUFFER_SIZE = MIN_ANALYZE_SIZE * 2;
 
+    private final int channels;
     private final FFTAnalyzeThread analyzeThread;
 
     public FFTAnalyzer(AnalyzeResultListener listener) {
-        buffer = new short[BUFFER_SIZE];
-        analyzeThread = new FFTAnalyzeThread(listener);
+        this(listener, 2);
+    }
+
+    public FFTAnalyzer(AnalyzeResultListener listener, int channels) {
+        if (channels != 1 && channels != 2) {
+            throw new IllegalArgumentException("Invalid Channel count, only mono and stereo is supported");
+        }
+        this.channels = channels;
+        int bufferSize = MIN_ANALYZE_SIZE * channels;
+
+        buffer = new short[bufferSize];
+        analyzeThread = new FFTAnalyzeThread(listener, channels);
         analyzeThread.start();
     }
 
@@ -24,7 +34,6 @@ public class FFTAnalyzer {
      * @param samples der Sample-Array, wobei die Samples abwechselnd für einen Kanal stehen
      */
     public synchronized void pushSamples(short[] samples) {
-        final int channels = 2;
 
         if (bufferedSampleCount + samples.length >= MIN_ANALYZE_SIZE * channels) {
             int newSamplesCount;

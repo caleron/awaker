@@ -9,6 +9,7 @@ class FFTAnalyzeThread extends Thread {
     private final Queue<short[]> queue;
     private final Map<Integer, FFT> fftMap = new HashMap<>(3);
     private final AnalyzeResultListener listener;
+    private final int channels;
 
     private int currentSampleRate;
     private long analyzedSamplesCount = 0;
@@ -24,9 +25,10 @@ class FFTAnalyzeThread extends Thread {
      */
     private int analyzeThreshold = 12;
 
-    FFTAnalyzeThread(AnalyzeResultListener listener) {
+    FFTAnalyzeThread(AnalyzeResultListener listener, int channels) {
         this.listener = listener;
         queue = new LinkedList<>();
+        this.channels = channels;
     }
 
     @Override
@@ -110,29 +112,43 @@ class FFTAnalyzeThread extends Thread {
      * @param samples Array aus Samples
      */
     private void analyzeSamples(short[] samples) {
-        int sampleFrame = samples.length / 2;
-        //System.out.println(sampleFrame);
-        short[] leftSamples = new short[sampleFrame];
-        short[] rightSamples = new short[sampleFrame];
+        if (channels == 2) {
+            int sampleFrame = samples.length / 2;
+            //System.out.println(sampleFrame);
+            short[] leftSamples = new short[sampleFrame];
+            short[] rightSamples = new short[sampleFrame];
 
-        for (int i = 0; i < leftSamples.length; i++) {
-            leftSamples[i] = samples[i * 2];
-            rightSamples[i] = samples[i * 2 + 1];
+            for (int i = 0; i < leftSamples.length; i++) {
+                leftSamples[i] = samples[i * 2];
+                rightSamples[i] = samples[i * 2 + 1];
+            }
+
+            double[] left = analyzeChannel(leftSamples);
+            double[] right = analyzeChannel(rightSamples);
+
+            List<Map.Entry<Double, Double>> result = new ArrayList<>();
+            for (int i = 0; i < left.length; i++) {
+                //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
+                double freq = ((1.0 * currentSampleRate) / (1.0 * sampleFrame)) * i;
+
+                result.add(new AbstractMap.SimpleEntry<>(freq, left[i] + right[i]));
+            }
+
+            //List<Map.Entry<Double, Double>> maximaList = findLocalMaxima(result);
+            listener.newResults(result);
+        } else if (channels == 1) {
+            double[] mono = analyzeChannel(samples);
+
+            List<Map.Entry<Double, Double>> result = new ArrayList<>();
+            for (int i = 0; i < mono.length; i++) {
+                //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
+                double freq = ((1.0 * currentSampleRate) / (1.0 * samples.length)) * i;
+
+                result.add(new AbstractMap.SimpleEntry<>(freq, mono[i]));
+            }
+
+            listener.newResults(result);
         }
-
-        double[] left = analyzeChannel(leftSamples);
-        double[] right = analyzeChannel(rightSamples);
-
-        List<Map.Entry<Double, Double>> result = new ArrayList<>();
-        for (int i = 0; i < left.length; i++) {
-            //Frequenz entspricht SAMPLE_RATE / sampleFrame * Index
-            double freq = ((1.0 * currentSampleRate) / (1.0 * sampleFrame)) * i;
-
-            result.add(new AbstractMap.SimpleEntry<>(freq, left[i] + right[i]));
-        }
-
-        //List<Map.Entry<Double, Double>> maximaList = findLocalMaxima(result);
-        listener.newResults(result);
     }
 
 
