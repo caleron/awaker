@@ -11,7 +11,7 @@ class FFTAnalyzeThread extends Thread {
     private final AnalyzeResultListener listener;
     private final int channels;
 
-    private int currentSampleRate;
+    private int currentSampleRate = 0;
     private long analyzedSamplesCount = 0;
 
     /**
@@ -44,6 +44,12 @@ class FFTAnalyzeThread extends Thread {
                     //Samples aus der Queue nehmen
                     short[] samples = queue.poll();
 
+                    if (samples == null) {
+                        Log.error("got zeros");
+                        queue.clear();
+                        continue;
+                    }
+
                     //Spielzeit der Samples berechnen und 1 ms abziehen
                     long samplePlayTime = (long) (((samples.length * 0.5 * 1000) / (currentSampleRate * 1.0)) - 1);
 
@@ -69,7 +75,7 @@ class FFTAnalyzeThread extends Thread {
                     //Schlafen, wenn nicht genug Samples da sind
                     sleep(1);
                 }
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 Log.error(e);
             }
         }
@@ -108,6 +114,7 @@ class FFTAnalyzeThread extends Thread {
 
     /**
      * Startet die Analyse von Stereo-Samples. Die Amplituden der beiden Kanäle werden einfach addiert.
+     * zum Berechnen von dB: 10 * log10(re * re + im * im)
      *
      * @param samples Array aus Samples
      */
