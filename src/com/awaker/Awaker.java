@@ -15,6 +15,7 @@ import com.awaker.gpio.LightChannel;
 import com.awaker.gpio.LightController;
 import com.awaker.server.*;
 import com.awaker.server.json.Answer;
+import com.awaker.util.Config;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
 
@@ -54,6 +55,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
             new Timer(1000, e -> playerMaster.printPosition()).start();*/
 
         DbManager.init();
+        Config.init();
         MediaManager.startScanFiles();
 
         server = new MyWebSocketServer(this);

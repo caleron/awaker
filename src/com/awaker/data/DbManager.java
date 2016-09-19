@@ -2,6 +2,7 @@ package com.awaker.data;
 
 import com.awaker.audio.PlayList;
 import com.awaker.server.json.Playlist;
+import com.awaker.util.Config;
 import com.awaker.util.Log;
 
 import java.sql.*;
@@ -67,6 +68,7 @@ public class DbManager {
             statement.executeUpdate(TrackWrapper.getCreateTableSql());
             statement.executeUpdate(PlayList.getCreateTableSql());
             statement.executeUpdate(PlayList.getCreatePlaylistTracksTableSql());
+            statement.executeUpdate(Config.getCreateTableSQL());
             statement.close();
         } catch (SQLException e) {
             Log.error(e);
@@ -374,6 +376,37 @@ public class DbManager {
 
             statement.executeUpdate(String.format("DELETE FROM playlist_tracks WHERE playlist_id = %d AND track_id = %d"
                     , playList.getId(), track.getId()));
+
+            statement.close();
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+    }
+
+    public static HashMap<String, String> getConfig() {
+        try {
+            HashMap<String, String> res = new HashMap<>();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM config");
+
+            while (resultSet.next()) {
+                res.put(resultSet.getString("name"), resultSet.getString("value"));
+            }
+
+            resultSet.close();
+            statement.close();
+            return res;
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
+    public static void setConfig(String key, String value) {
+        try {
+            Statement statement = connection.createStatement();
+
+            statement.executeUpdate(String.format("REPLACE INTO config (name, value) VALUES (\"%s\", \"%s\")", key, value));
 
             statement.close();
         } catch (SQLException e) {
