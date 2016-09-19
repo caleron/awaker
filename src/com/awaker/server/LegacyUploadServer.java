@@ -3,7 +3,6 @@ package com.awaker.server;
 import com.awaker.Awaker;
 import com.awaker.util.Config;
 import com.awaker.util.Log;
-import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,6 +44,9 @@ public class LegacyUploadServer {
      */
     private void runServer() {
         while (!interrupt) {
+            if (serverSocket == null)
+                return;
+
             try {
                 Socket clientSocket = serverSocket.accept();
 
