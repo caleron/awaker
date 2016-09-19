@@ -5,11 +5,13 @@ import com.awaker.analyzer.ColorTranslator;
 import com.awaker.audio.PlaybackListener;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.audio.RepeatMode;
+import com.awaker.automation.Automator;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.AnalogListener;
+import com.awaker.gpio.LightChannel;
 import com.awaker.gpio.LightController;
 import com.awaker.server.*;
 import com.awaker.server.json.Answer;
@@ -68,6 +70,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
             analogControls = new AnalogControls(this);
             lightController = new LightController();
         }
+        new Automator(lightController);
     }
 
 
@@ -242,28 +245,28 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     @Override
     public void setWhiteBrightness(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setWhiteBrightness(brightness, smooth);
+            lightController.setBrightness(LightChannel.WHITE, brightness, smooth);
         }
     }
 
     @Override
     public void setRed(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setRedBrightness(brightness, smooth);
+            lightController.setBrightness(LightChannel.RED, brightness, smooth);
         }
     }
 
     @Override
     public void setGreen(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setGreenBrightness(brightness, smooth);
+            lightController.setBrightness(LightChannel.GREEN, brightness, smooth);
         }
     }
 
     @Override
     public void setBlue(int brightness, boolean smooth) {
         if (!isMSWindows) {
-            lightController.setBlueBrightness(brightness, smooth);
+            lightController.setBrightness(LightChannel.BLUE, brightness, smooth);
         }
     }
 

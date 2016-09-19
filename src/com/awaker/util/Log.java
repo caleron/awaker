@@ -20,8 +20,8 @@ public class Log {
     private static final String ERROR_FILE = "logs/errors.log";
 
 
-    /**
-     * Initialisieren des Loggers
+    /*
+      Initialisieren des Loggers
      */
     static {
         Date now = new Date();
