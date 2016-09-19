@@ -1,7 +1,7 @@
 package com.awaker.server;
 
 import com.awaker.Awaker;
-import com.awaker.util.Config;
+import com.awaker.util.PortConfig;
 import com.awaker.util.Log;
 
 import java.io.BufferedReader;
@@ -24,7 +24,7 @@ public class LegacyUploadServer {
     public LegacyUploadServer(ServerListener listener) {
         this.listener = listener;
         try {
-            serverSocket = new ServerSocket(Config.LEGACY_UPLOAD_PORT);
+            serverSocket = new ServerSocket(PortConfig.LEGACY_UPLOAD_PORT);
         } catch (IOException e) {
             Log.error(e);
         }

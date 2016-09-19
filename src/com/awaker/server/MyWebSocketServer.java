@@ -4,7 +4,7 @@ package com.awaker.server;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.Command;
 import com.awaker.server.json.Exceptions;
-import com.awaker.util.Config;
+import com.awaker.util.PortConfig;
 import com.awaker.util.RaspiControl;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
@@ -37,7 +37,7 @@ public class MyWebSocketServer extends WebSocketServer {
      * @param listener Der {@link ServerListener}.
      */
     public MyWebSocketServer(ServerListener listener) {
-        super(new InetSocketAddress(Config.WEBSOCKET_PORT));
+        super(new InetSocketAddress(PortConfig.WEBSOCKET_PORT));
         this.listener = listener;
         gson = new Gson();
 

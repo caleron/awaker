@@ -1,6 +1,6 @@
 package com.awaker.server;
 
-import com.awaker.util.Config;
+import com.awaker.util.PortConfig;
 import com.sun.net.httpserver.*;
 
 import javax.net.ssl.*;
@@ -17,7 +17,7 @@ public class WebContentServer implements HttpHandler {
 
     public static void start() {
         try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(Config.WEBCONTENT_PORT), 0);
+            HttpServer server = HttpServer.create(new InetSocketAddress(PortConfig.WEBCONTENT_PORT), 0);
             server.createContext("/", new WebContentServer());
             server.setExecutor(Executors.newSingleThreadExecutor()); // creates a default executor
             server.start();
@@ -34,7 +34,7 @@ public class WebContentServer implements HttpHandler {
      */
     public static void startSecure() {
         try {
-            HttpsServer server = HttpsServer.create(new InetSocketAddress(Config.WEBCONTENT_SECURE_PORT), 0);
+            HttpsServer server = HttpsServer.create(new InetSocketAddress(PortConfig.WEBCONTENT_SECURE_PORT), 0);
 
             SSLContext sslContext = SSLContext.getInstance("TLS");
 

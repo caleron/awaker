@@ -3,7 +3,7 @@ package com.awaker.server;
 import com.awaker.Awaker;
 import com.awaker.data.TrackWrapper;
 import com.awaker.server.json.UploadAnswer;
-import com.awaker.util.Config;
+import com.awaker.util.PortConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -20,7 +20,7 @@ public class HttpUploadServer implements HttpHandler {
 
     public static void start(ServerListener listener) {
         try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(Config.HTTP_UPLOAD_PORT), 0);
+            HttpServer server = HttpServer.create(new InetSocketAddress(PortConfig.HTTP_UPLOAD_PORT), 0);
             server.createContext("/", new HttpUploadServer(listener));
             server.setExecutor(Executors.newCachedThreadPool());
             server.start();
