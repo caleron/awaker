@@ -25,6 +25,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +80,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
     public static void main(String[] args) {
         String OS = System.getProperty("os.name").toLowerCase();
+        printVersion();
 
         if (OS.contains("win")) {
             Awaker awaker = new Awaker(true);
@@ -94,6 +97,14 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         }
     }
 
+    private static void printVersion() {
+        try {
+            File f = new File(Awaker.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            Log.message("Starte Version vom " + new Date(f.lastModified()).toString());
+        } catch (URISyntaxException e) {
+            Log.error(e);
+        }
+    }
 
     @Override
     public void newResults(List<Map.Entry<Double, Double>> list) {
