@@ -107,8 +107,8 @@ public class LightController {
                 green.setValue(value, smooth);
                 break;
             case COLORS:
-                white.setValue(value, smooth);
                 red.setValue(value, smooth);
+                green.setValue(value, smooth);
                 blue.setValue(value, smooth);
                 break;
             case ANIMATION:
