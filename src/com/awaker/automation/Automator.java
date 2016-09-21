@@ -4,6 +4,7 @@ import com.awaker.audio_in.AudioCapture;
 import com.awaker.gpio.LightChannel;
 import com.awaker.gpio.LightController;
 import com.awaker.util.Config;
+import com.awaker.util.ConfigKey;
 
 public class Automator implements EnvironmentEventListener {
 
@@ -11,10 +12,10 @@ public class Automator implements EnvironmentEventListener {
 
     public Automator(LightController lightController) {
         this.lightController = lightController;
-        if (Config.getBool(Config.LIGHT_ON_SUNRISE, true) || Config.getBool(Config.LIGHT_ON_SUNSET, true)) {
+        if (Config.getBool(ConfigKey.LIGHT_ON_SUNRISE, true) || Config.getBool(ConfigKey.LIGHT_ON_SUNSET, true)) {
             AutoLighter.start(this);
         }
-        if (Config.getBool(Config.DETECT_CLAPS, false)) {
+        if (Config.getBool(ConfigKey.DETECT_CLAPS, false)) {
             new AudioCapture(this).start();
         }
     }
