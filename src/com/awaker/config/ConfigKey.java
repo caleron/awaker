@@ -1,4 +1,4 @@
-package com.awaker.util;
+package com.awaker.config;
 
 /**
  *

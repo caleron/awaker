@@ -1,6 +1,6 @@
 package com.awaker.server;
 
-import com.awaker.util.PortConfig;
+import com.awaker.config.PortConfig;
 import com.sun.net.httpserver.*;
 
 import javax.net.ssl.*;

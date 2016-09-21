@@ -15,7 +15,7 @@ import com.awaker.gpio.LightChannel;
 import com.awaker.gpio.LightController;
 import com.awaker.server.*;
 import com.awaker.server.json.Answer;
-import com.awaker.util.Config;
+import com.awaker.config.Config;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
 

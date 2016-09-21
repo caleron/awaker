@@ -1,4 +1,4 @@
-package com.awaker.util;
+package com.awaker.config;
 
 public interface PortConfig {
     int WEBSOCKET_PORT = 4733;

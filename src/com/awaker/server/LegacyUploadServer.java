@@ -1,7 +1,7 @@
 package com.awaker.server;
 
 import com.awaker.Awaker;
-import com.awaker.util.PortConfig;
+import com.awaker.config.PortConfig;
 import com.awaker.util.Log;
 
 import java.io.BufferedReader;

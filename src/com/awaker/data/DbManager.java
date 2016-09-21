@@ -2,7 +2,7 @@ package com.awaker.data;
 
 import com.awaker.audio.PlayList;
 import com.awaker.server.json.Playlist;
-import com.awaker.util.Config;
+import com.awaker.config.Config;
 import com.awaker.util.Log;
 
 import java.sql.*;

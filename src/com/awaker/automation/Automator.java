@@ -3,8 +3,8 @@ package com.awaker.automation;
 import com.awaker.audio_in.AudioCapture;
 import com.awaker.gpio.LightChannel;
 import com.awaker.gpio.LightController;
-import com.awaker.util.Config;
-import com.awaker.util.ConfigKey;
+import com.awaker.config.Config;
+import com.awaker.config.ConfigKey;
 
 public class Automator implements EnvironmentEventListener {
 
