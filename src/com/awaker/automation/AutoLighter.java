@@ -1,9 +1,13 @@
 package com.awaker.automation;
 
+import com.awaker.util.Log;
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.Location;
 
-import java.util.Calendar;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -13,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class AutoLighter {
     private final EnvironmentEventListener listener;
     private SunriseSunsetCalculator calculator;
-    private Calendar sunrise;
-    private Calendar sunset;
+    private ZonedDateTime sunrise;
+    private ZonedDateTime sunset;
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> sunriseSchedule, sunsetSchedule, midnightSchedule;
@@ -36,37 +40,41 @@ public class AutoLighter {
 
     @SuppressWarnings("Duplicates")
     private void scheduleEvents() {
-        Calendar now = Calendar.getInstance();
-        if (now.before(sunrise)) {
-            long msToSunrise = sunrise.getTimeInMillis() - now.getTimeInMillis();
+        ZonedDateTime now = ZonedDateTime.now();
+
+        if (now.isBefore(sunrise)) {
             if (sunriseSchedule != null) {
                 sunriseSchedule.cancel(false);
             }
-            sunriseSchedule = executor.schedule(listener::sunrise, msToSunrise, TimeUnit.MILLISECONDS);
+
+            long secondsToSunrise = now.until(sunrise, ChronoUnit.SECONDS); //Duration.between(sunrise, now).getSeconds();
+            Log.message("Timing sunrise to " + sunrise.toString() + " (" + secondsToSunrise + "s remaining)");
+            sunriseSchedule = executor.schedule(listener::sunrise, secondsToSunrise, TimeUnit.SECONDS);
         }
 
-        if (now.before(sunset)) {
-            long msToSunset = sunset.getTimeInMillis() - now.getTimeInMillis();
+        if (now.isBefore(sunset)) {
             if (sunsetSchedule != null) {
                 sunsetSchedule.cancel(false);
             }
-            sunsetSchedule = executor.schedule(listener::sunset, msToSunset, TimeUnit.MILLISECONDS);
+
+            long secondsToSunset = now.until(sunset, ChronoUnit.SECONDS);
+            Log.message("Timing sunset to " + sunset.toString() + " (" + secondsToSunset + "s remaining)");
+            sunsetSchedule = executor.schedule(listener::sunset, secondsToSunset, TimeUnit.SECONDS);
         }
 
-        Calendar tomorrow = Calendar.getInstance();
-        tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-        tomorrow.set(Calendar.HOUR_OF_DAY, 0);
-        tomorrow.set(Calendar.MINUTE, 1);
-        long msToMidnight = tomorrow.getTimeInMillis() - now.getTimeInMillis();
         if (midnightSchedule != null) {
             midnightSchedule.cancel(false);
         }
-        midnightSchedule = executor.schedule(this::scheduleEvents, msToMidnight, TimeUnit.MILLISECONDS);
+        ZonedDateTime tomorrow = ZonedDateTime.now();
+        tomorrow = tomorrow.plusDays(1).withHour(0).withMinute(1);
+        long secondsToMidnight = now.until(tomorrow, ChronoUnit.SECONDS);
+        Log.message("Timing rescheduling of sunset/sunrise timers to " + tomorrow.toString() + "(" + secondsToMidnight + "s remaining)");
+        midnightSchedule = executor.schedule(this::scheduleEvents, secondsToMidnight, TimeUnit.SECONDS);
     }
 
     private void refreshTimes() {
-        Calendar now = Calendar.getInstance();
-        sunrise = calculator.getOfficialSunriseCalendarForDate(now);
-        sunset = calculator.getOfficialSunsetCalendarForDate(now);
+        GregorianCalendar now = GregorianCalendar.from(ZonedDateTime.now());
+        sunrise = ZonedDateTime.ofInstant(calculator.getOfficialSunriseCalendarForDate(now).toInstant(), ZoneId.systemDefault());
+        sunset = ZonedDateTime.ofInstant(calculator.getOfficialSunsetCalendarForDate(now).toInstant(), ZoneId.systemDefault());
     }
 }
