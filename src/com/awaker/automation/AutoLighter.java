@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class AutoLighter {
+class AutoLighter {
     private final EnvironmentEventListener listener;
     private SunriseSunsetCalculator calculator;
     private ZonedDateTime sunrise;
@@ -23,7 +23,7 @@ public class AutoLighter {
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> sunriseSchedule, sunsetSchedule, midnightSchedule;
 
-    public AutoLighter(EnvironmentEventListener listener) {
+    private AutoLighter(EnvironmentEventListener listener) {
         this.listener = listener;
     }
 
