@@ -1,10 +1,11 @@
 package com.awaker.sntp_client;
 
-import java.io.IOException;
+import com.awaker.util.Log;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.text.DecimalFormat;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -35,52 +36,40 @@ import java.text.DecimalFormat;
  *
  * @author Adam Buckley
  */
+
 public class SntpClient {
-    public static void main(String[] args) throws IOException {
-        String serverName = "time-c.nist.gov";
+    public static ZonedDateTime getTime() {
+        try {
+            String serverName = "time.nist.gov";
 
-        // Send request
-        DatagramSocket socket = new DatagramSocket();
-        InetAddress address = InetAddress.getByName(serverName);
-        byte[] buf = new NtpMessage().toByteArray();
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 123);
+            // Send request
+            DatagramSocket socket = new DatagramSocket();
+            socket.setSoTimeout(20000);
+            InetAddress address = InetAddress.getByName(serverName);
+            byte[] buf = new NtpMessage().toByteArray();
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 123);
 
-        // Set the transmit timestamp *just* before sending the packet
-        NtpMessage.encodeTimestamp(packet.getData(), 40, (System.currentTimeMillis() / 1000.0) + 2208988800.0);
+            // Set the transmit timestamp *just* before sending the packet
+            NtpMessage.encodeTimestamp(packet.getData(), 40, (System.currentTimeMillis() / 1000.0) + 2208988800.0);
 
-        socket.send(packet);
+            socket.send(packet);
 
-        // Get response
-        System.out.println("NTP request sent, waiting for response...\n");
-        packet = new DatagramPacket(buf, buf.length);
-        socket.receive(packet);
+            // Get response
+            packet = new DatagramPacket(buf, buf.length);
+            socket.receive(packet);
 
-        // Immediately record the incoming timestamp
-        double destinationTimestamp = (System.currentTimeMillis() / 1000.0) + 2208988800.0;
+            // Process response
+            NtpMessage msg = new NtpMessage(packet.getData());
 
-        // Process response
-        NtpMessage msg = new NtpMessage(packet.getData());
+            ZonedDateTime currentZonedDateTime = msg.getCurrentZonedDateTime();
+            System.out.println("Received current Time: " + currentZonedDateTime.toString());
 
-        // Corrected, according to RFC2030 errata
-        double roundTripDelay = (destinationTimestamp - msg.originateTimestamp) - (msg.transmitTimestamp - msg.receiveTimestamp);
+            socket.close();
 
-        double localClockOffset = ((msg.receiveTimestamp - msg.originateTimestamp) +
-                (msg.transmitTimestamp - destinationTimestamp)) / 2;
-
-
-        // Display response
-        System.out.println("NTP server: " + serverName);
-        System.out.println(msg.toString());
-
-        System.out.println("Dest. timestamp:     " +
-                NtpMessage.timestampToString(destinationTimestamp));
-
-        System.out.println("Round-trip delay: " +
-                new DecimalFormat("0.00").format(roundTripDelay * 1000) + " ms");
-
-        System.out.println("Local clock offset: " +
-                new DecimalFormat("0.00").format(localClockOffset * 1000) + " ms");
-
-        socket.close();
+            return currentZonedDateTime;
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 }

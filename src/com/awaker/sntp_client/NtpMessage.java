@@ -2,12 +2,15 @@ package com.awaker.sntp_client;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 
 /**
  * http://support.ntp.org/bin/view/Support/JavaSntpClient
- *
+ * <p>
  * This class represents a NTP message, as specified in RFC 2030.  The message
  * format is compatible with all versions of NTP and SNTP.
  * <p>
@@ -404,6 +407,16 @@ public class NtpMessage {
         String fractionSting = new DecimalFormat(".000000").format(fraction);
 
         return date + fractionSting;
+    }
+
+    public ZonedDateTime getCurrentZonedDateTime() {
+        // timestamp from server is relative to 1900, utc is used by Java and is relative to 1970
+        double utc = transmitTimestamp - (2208988800.0);
+
+        // milliseconds
+        long ms = (long) (utc * 1000.0);
+
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(ms), ZoneId.systemDefault());
     }
 
 

@@ -1,5 +1,9 @@
 package com.awaker.automation;
 
+import com.awaker.config.Config;
+import com.awaker.config.ConfigChangeListener;
+import com.awaker.config.ConfigKey;
+import com.awaker.sntp_client.SntpClient;
 import com.awaker.util.Log;
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.Location;
@@ -14,7 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-class AutoLighter {
+class AutoLighter implements ConfigChangeListener {
     private final EnvironmentEventListener listener;
     private SunriseSunsetCalculator calculator;
     private ZonedDateTime sunrise;
@@ -25,22 +29,34 @@ class AutoLighter {
 
     private AutoLighter(EnvironmentEventListener listener) {
         this.listener = listener;
-    }
-
-    public static void start(EnvironmentEventListener listener) {
-        new Thread(new AutoLighter(listener)::init).start();
-    }
-
-    private void init() {
         Location location = new Location("53.4842682", "10.1460763");
         calculator = new SunriseSunsetCalculator(location, TimeZone.getDefault());
         refreshTimes();
         scheduleEvents();
+
+        ConfigKey[] listenEvents = new ConfigKey[]{
+                ConfigKey.SUNRISE_TIME_OFFSET
+        };
+        Config.addListener(this, listenEvents);
     }
 
-    @SuppressWarnings("Duplicates")
+    public static void start(EnvironmentEventListener listener) {
+        new Thread(() -> new AutoLighter(listener)).start();
+    }
+
     private void scheduleEvents() {
-        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime now = null;
+        while (now == null) {
+            now = SntpClient.getTime();
+            if (now == null) {
+                Log.message("Getting Time failed, retrying in 20 seconds");
+                try {
+                    Thread.sleep(20000);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+            }
+        }
 
         if (now.isBefore(sunrise)) {
             if (sunriseSchedule != null) {
@@ -65,8 +81,8 @@ class AutoLighter {
         if (midnightSchedule != null) {
             midnightSchedule.cancel(false);
         }
-        ZonedDateTime tomorrow = ZonedDateTime.now();
-        tomorrow = tomorrow.plusDays(1).withHour(0).withMinute(1);
+
+        ZonedDateTime tomorrow = now.plusDays(1).withHour(0).withMinute(1);
         long secondsToMidnight = now.until(tomorrow, ChronoUnit.SECONDS);
         Log.message("Timing rescheduling of sunset/sunrise timers to " + tomorrow.toString() + "(" + secondsToMidnight + "s remaining)");
         midnightSchedule = executor.schedule(this::scheduleEvents, secondsToMidnight, TimeUnit.SECONDS);
@@ -76,5 +92,10 @@ class AutoLighter {
         GregorianCalendar now = GregorianCalendar.from(ZonedDateTime.now());
         sunrise = ZonedDateTime.ofInstant(calculator.getOfficialSunriseCalendarForDate(now).toInstant(), ZoneId.systemDefault());
         sunset = ZonedDateTime.ofInstant(calculator.getOfficialSunsetCalendarForDate(now).toInstant(), ZoneId.systemDefault());
+    }
+
+    @Override
+    public void configChanged(ConfigKey key) {
+
     }
 }
