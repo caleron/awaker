@@ -1,11 +1,13 @@
 package com.awaker.server.json;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class Answer {
     private static final String TYPE_FILE_STATUS = "file_status";
     private static final String TYPE_STATUS = "status";
     private static final String TYPE_LIBRARY = "library";
+    private static final String TYPE_CONFIG = "config";
 
     private String type;
 
@@ -28,6 +30,11 @@ public class Answer {
     public List<Track> tracks;
     public List<Playlist> playLists;
 
+    public String name;
+    public String value;
+    public HashMap<String, String> config;
+    public String[] configOptions;
+
     private boolean fileNotFound;
 
     public Answer() {
@@ -43,6 +50,10 @@ public class Answer {
 
     public static Answer library() {
         return new Answer(TYPE_LIBRARY);
+    }
+
+    public static Answer config() {
+        return new Answer(TYPE_CONFIG);
     }
 
     public static Answer fileNotFound() {

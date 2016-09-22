@@ -3,6 +3,7 @@ package com.awaker.config;
 
 import com.awaker.data.DbManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -28,6 +29,9 @@ public class Config {
     }
 
     public static void setString(ConfigKey key, String value) {
+        if (key == null)
+            return;
+
         DbManager.setConfig(key.getKey(), value);
         config.put(key.getKey(), value);
 
@@ -49,7 +53,7 @@ public class Config {
     }
 
     public static String getString(ConfigKey key, String def) {
-        if (config.containsKey(key.getKey())) {
+        if (key != null && config.containsKey(key.getKey())) {
             return config.get(key.getKey());
         }
         return def;
@@ -63,8 +67,17 @@ public class Config {
         return Integer.valueOf(getString(key, def.toString()));
     }
 
-    public static ConfigKey[] getConfigOptions() {
-        return ConfigKey.values();
+    public static String[] getConfigOptions() {
+        ConfigKey[] values = ConfigKey.values();
+        ArrayList<String> list = new ArrayList<>();
+        for (ConfigKey value : values) {
+            list.add(value.getKey());
+        }
+        return list.toArray(new String[list.size()]);
+    }
+
+    public static HashMap<String, String> getConfig() {
+        return config;
     }
 
     public static String getCreateTableSQL() {

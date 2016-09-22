@@ -1,5 +1,7 @@
 package com.awaker.server.json;
 
+import com.awaker.config.Config;
+import com.awaker.config.ConfigKey;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
@@ -50,10 +52,15 @@ public class Command {
     private static final String SHUTDOWN_RASPI = "shutdownRaspi";
     private static final String REBOOT_RASPI = "rebootRaspi";
     private static final String REBOOT_SERVER = "rebootServer";
+    private static final String GET_CONFIG = "getConfig";
+    private static final String SET_CONFIG = "setConfig";
+    private static final String GET_CONFIG_LIST = "getConfigList";
+    private static final String GET_CONFIG_OPTIONS = "getConfigOptions";
 
     private String action;
 
     private String name;
+    private String value;
     private int playlistId;
     private int trackId;
 
@@ -154,7 +161,7 @@ public class Command {
                 break;
 
             case SET_ANIMATION_BRIGHTNESS:
-                listener.setAnimationBrightness(brightness,smooth);
+                listener.setAnimationBrightness(brightness, smooth);
                 break;
 
             case SET_COLOR_MODE:
@@ -207,6 +214,31 @@ public class Command {
             case SEND_STRING:
                 listener.stringReceived(text);
                 break;
+
+            case GET_CONFIG:
+                Answer answer = Answer.config();
+                answer.name = name;
+                answer.value = Config.getString(ConfigKey.getForKey(name), "");
+                return answer;
+
+            case SET_CONFIG:
+                answer = Answer.config();
+                answer.name = name;
+                ConfigKey key = ConfigKey.getForKey(name);
+                Config.setString(key, value);
+                answer.value = Config.getString(key, "");
+                return answer;
+
+            case GET_CONFIG_LIST:
+                answer = Answer.config();
+                answer.config = Config.getConfig();
+                return answer;
+
+            case GET_CONFIG_OPTIONS:
+                answer = Answer.config();
+                answer.configOptions = Config.getConfigOptions();
+                return answer;
+
             case SHUTDOWN_SERVER:
                 throw new Exceptions.ShutdownServer();
             case SHUTDOWN_RASPI:

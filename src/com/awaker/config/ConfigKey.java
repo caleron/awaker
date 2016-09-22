@@ -20,4 +20,14 @@ public enum ConfigKey {
     public String getKey() {
         return key;
     }
+
+    public static ConfigKey getForKey(String key) {
+        ConfigKey[] values = ConfigKey.values();
+        for (ConfigKey value : values) {
+            if (value.getKey().equals(key)) {
+                return value;
+            }
+        }
+        return null;
+    }
 }
