@@ -1,6 +1,7 @@
 package com.awaker.server;
 
 import com.awaker.config.PortConfig;
+import com.awaker.util.Log;
 import com.sun.net.httpserver.*;
 
 import javax.net.ssl.*;
@@ -97,12 +98,12 @@ public class WebContentServer implements HttpHandler {
             if (indexFile.exists()) {
                 sendFile(httpExchange, path + "/index.html", indexFile);
             } else {
-                System.out.println("did not found " + path);
+                Log.message("did not found " + path);
                 send404(httpExchange);
             }
         } else if (!file.isFile()) {
             // Object does not exist or is not a file: reject with 404 error.
-            System.out.println("did not found " + path);
+            Log.message("did not found " + path);
             send404(httpExchange);
         } else {
             // Object exists and is a file: accept with response code 200.

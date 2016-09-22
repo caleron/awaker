@@ -87,7 +87,7 @@ public class AnalogControls implements GpioPinListenerAnalog {
         lastChange.put(pin_green, 0L);
         lastChange.put(pin_blue, 0L);
 
-        System.out.println("AnalogControls initialisiert");
+        Log.message("AnalogControls initialisiert");
     }
 
     @Override

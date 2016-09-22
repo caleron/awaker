@@ -5,6 +5,7 @@ import com.awaker.server.json.Answer;
 import com.awaker.server.json.Command;
 import com.awaker.server.json.Exceptions;
 import com.awaker.config.PortConfig;
+import com.awaker.util.Log;
 import com.awaker.util.RaspiControl;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
@@ -97,12 +98,12 @@ public class MyWebSocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, ByteBuffer message) {
-        System.out.println("binary message");
+        Log.message("binary message");
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
         ex.printStackTrace();
-        System.out.println("error");
+        Log.error(ex);
     }
 }

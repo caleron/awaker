@@ -62,7 +62,7 @@ public class SntpClient {
             NtpMessage msg = new NtpMessage(packet.getData());
 
             ZonedDateTime currentZonedDateTime = msg.getCurrentZonedDateTime();
-            System.out.println("Received current Time: " + currentZonedDateTime.toString());
+            Log.message("Received current Time: " + currentZonedDateTime.toString());
 
             socket.close();
 
