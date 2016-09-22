@@ -31,11 +31,11 @@ class AutoLighter implements ConfigChangeListener {
         this.listener = listener;
         Location location = new Location("53.4842682", "10.1460763");
         calculator = new SunriseSunsetCalculator(location, TimeZone.getDefault());
-        refreshTimes();
         scheduleEvents();
 
         ConfigKey[] listenEvents = new ConfigKey[]{
-                ConfigKey.SUNRISE_TIME_OFFSET
+                ConfigKey.SUNRISE_TIME_OFFSET, ConfigKey.SUNSET_TIME_OFFSET,
+                ConfigKey.LIGHT_ON_SUNRISE, ConfigKey.LIGHT_ON_SUNSET
         };
         Config.addListener(this, listenEvents);
     }
@@ -45,25 +45,31 @@ class AutoLighter implements ConfigChangeListener {
     }
 
     private void scheduleEvents() {
+        refreshTimes();
         ZonedDateTime now = null;
         while (now == null) {
             now = SntpClient.getTime();
             if (now == null) {
                 Log.message("Getting Time failed, retrying in 20 seconds");
                 try {
-                    Thread.sleep(20000);
+                    Thread.sleep(30000);
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }
             }
         }
 
+        int sunriseOffset = Config.getInt(ConfigKey.SUNRISE_TIME_OFFSET, 0);
+        int sunsetOffset = Config.getInt(ConfigKey.SUNSET_TIME_OFFSET, 0);
+
         if (now.isBefore(sunrise)) {
             if (sunriseSchedule != null) {
                 sunriseSchedule.cancel(false);
             }
 
-            long secondsToSunrise = now.until(sunrise, ChronoUnit.SECONDS); //Duration.between(sunrise, now).getSeconds();
+            long secondsToSunrise = now.until(sunrise, ChronoUnit.SECONDS);
+            secondsToSunrise += sunriseOffset;
+
             Log.message("Timing sunrise to " + sunrise.toString() + " (" + secondsToSunrise + "s remaining)");
             sunriseSchedule = executor.schedule(listener::sunrise, secondsToSunrise, TimeUnit.SECONDS);
         }
@@ -74,6 +80,8 @@ class AutoLighter implements ConfigChangeListener {
             }
 
             long secondsToSunset = now.until(sunset, ChronoUnit.SECONDS);
+            secondsToSunset += sunsetOffset;
+
             Log.message("Timing sunset to " + sunset.toString() + " (" + secondsToSunset + "s remaining)");
             sunsetSchedule = executor.schedule(listener::sunset, secondsToSunset, TimeUnit.SECONDS);
         }
@@ -96,6 +104,6 @@ class AutoLighter implements ConfigChangeListener {
 
     @Override
     public void configChanged(ConfigKey key) {
-
+        scheduleEvents();
     }
 }
