@@ -19,7 +19,8 @@ public class AnalogControls implements GpioPinListenerAnalog {
     private AnalogListener listener;
 
     private static final int TOLERANCE = 10;
-    private static final int INITIAL_THRESHOLD = 50;
+    private static final int INITIAL_THRESHOLD = 30;
+    private static final int THRESHOLD_TIME = 5000;
 
     private static final Pin VOLUME_CHANNEL = MCP3008Pin.CH0;
     private static final Pin WHITE_CHANNEL = MCP3008Pin.CH1;
@@ -100,7 +101,7 @@ public class AnalogControls implements GpioPinListenerAnalog {
         double diff = Math.abs(lastValue - value);
         if (diff < TOLERANCE) {
             return;
-        } else if (diff < INITIAL_THRESHOLD && lastChange.get(pin) + 500 < new Date().getTime()) {
+        } else if (diff < INITIAL_THRESHOLD && lastChange.get(pin) + THRESHOLD_TIME < new Date().getTime()) {
             return;
         }
 
