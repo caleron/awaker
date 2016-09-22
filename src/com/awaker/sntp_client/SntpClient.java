@@ -40,7 +40,7 @@ import java.time.ZonedDateTime;
 public class SntpClient {
     public static ZonedDateTime getTime() {
         try {
-            String serverName = "time.nist.gov";
+            String serverName = "time-c.nist.gov";
 
             // Send request
             DatagramSocket socket = new DatagramSocket();
