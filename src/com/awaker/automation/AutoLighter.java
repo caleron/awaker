@@ -50,7 +50,7 @@ class AutoLighter implements ConfigChangeListener {
         while (now == null) {
             now = SntpClient.getTime();
             if (now == null) {
-                Log.message("Getting Time failed, retrying in 20 seconds");
+                Log.message("Getting Time failed, retrying in 30 seconds");
                 try {
                     Thread.sleep(30000);
                 } catch (InterruptedException e) {

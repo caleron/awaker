@@ -39,7 +39,7 @@ public class Config {
         listeners.forEach((listener, configKeys) -> {
             Arrays.stream(configKeys);
             if (Arrays.asList(configKeys).contains(key)) {
-                listener.configChanged(key);
+                new Thread(() -> listener.configChanged(key)).start();
             }
         });
     }
