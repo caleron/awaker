@@ -2,26 +2,42 @@ package com.awaker.audio_in;
 
 import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.automation.EnvironmentEventListener;
+import com.awaker.config.Config;
+import com.awaker.config.ConfigChangeListener;
+import com.awaker.config.ConfigKey;
+import com.awaker.util.Log;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.TargetDataLine;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-public class AudioCapture {
-
-    private boolean interrupt = false;
-
+public class AudioCapture implements ConfigChangeListener{
+    private static AudioCapture instance;
     private final FFTAnalyzer analyzer;
+    private Thread thread;
 
     public AudioCapture(EnvironmentEventListener listener) {
         analyzer = new FFTAnalyzer(new ClapDetector(listener), 1);
         analyzer.updateAudioParams(44100, 10000000);
+
+        Config.addListener(this, ConfigKey.DETECT_CLAPS);
+
+        if (Config.getBool(ConfigKey.DETECT_CLAPS)) {
+            startCapture();
+        }
     }
 
-    public void start() {
-        interrupt = false;
-        new Thread(this::capture).start();
+    public static void start(EnvironmentEventListener listener) {
+        instance = new AudioCapture(listener);
+    }
+
+    private void startCapture() {
+        thread = new Thread(this::capture);
+        thread.start();
     }
 
     private void capture() {
@@ -39,7 +55,7 @@ public class AudioCapture {
             int bufferSize = 2048;
             byte byteBuffer[] = new byte[bufferSize];
 
-            while (!interrupt) {
+            while (!thread.isInterrupted()) {
                 int count = line.read(byteBuffer, 0, byteBuffer.length);
 
                 if (count > 0) {
@@ -52,13 +68,23 @@ public class AudioCapture {
                     analyzer.pushSamples(shortBuffer);
                 }
             }
-        } catch (LineUnavailableException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 
-    public void stop() {
-        interrupt = true;
+    private void stopCapture() {
+        thread.interrupt();
     }
 
+    @Override
+    public void configChanged(ConfigKey key) {
+        if (Config.getBool(ConfigKey.DETECT_CLAPS)) {
+            if (!thread.isAlive()) {
+                startCapture();
+            }
+        } else {
+            stopCapture();
+        }
+    }
 }

@@ -31,7 +31,10 @@ class AutoLighter implements ConfigChangeListener {
         this.listener = listener;
         Location location = new Location("53.4842682", "10.1460763");
         calculator = new SunriseSunsetCalculator(location, TimeZone.getDefault());
-        scheduleEvents();
+
+        if (Config.getBool(ConfigKey.LIGHT_ON_SUNRISE) || Config.getBool(ConfigKey.LIGHT_ON_SUNSET)) {
+            scheduleEvents();
+        }
 
         ConfigKey[] listenEvents = new ConfigKey[]{
                 ConfigKey.SUNRISE_TIME_OFFSET, ConfigKey.SUNSET_TIME_OFFSET,
@@ -59,14 +62,22 @@ class AutoLighter implements ConfigChangeListener {
             }
         }
 
-        int sunriseOffset = Config.getInt(ConfigKey.SUNRISE_TIME_OFFSET, 0);
-        int sunsetOffset = Config.getInt(ConfigKey.SUNSET_TIME_OFFSET, 0);
+        int sunriseOffset = Config.getInt(ConfigKey.SUNRISE_TIME_OFFSET);
+        int sunsetOffset = Config.getInt(ConfigKey.SUNSET_TIME_OFFSET);
 
-        if (now.isBefore(sunrise)) {
-            if (sunriseSchedule != null) {
-                sunriseSchedule.cancel(false);
-            }
+        //Events abbrechen, falls gesetzt
+        if (sunriseSchedule != null) {
+            sunriseSchedule.cancel(false);
+        }
+        if (sunsetSchedule != null) {
+            sunsetSchedule.cancel(false);
+        }
+        if (midnightSchedule != null) {
+            midnightSchedule.cancel(false);
+        }
 
+        //Sonnenaufgang setzen
+        if (now.isBefore(sunrise) && Config.getBool(ConfigKey.LIGHT_ON_SUNRISE)) {
             long secondsToSunrise = now.until(sunrise, ChronoUnit.SECONDS);
             secondsToSunrise += sunriseOffset;
 
@@ -74,11 +85,8 @@ class AutoLighter implements ConfigChangeListener {
             sunriseSchedule = executor.schedule(listener::sunrise, secondsToSunrise, TimeUnit.SECONDS);
         }
 
-        if (now.isBefore(sunset)) {
-            if (sunsetSchedule != null) {
-                sunsetSchedule.cancel(false);
-            }
-
+        //Sonnenuntergang setzen
+        if (now.isBefore(sunset) && Config.getBool(ConfigKey.LIGHT_ON_SUNSET)) {
             long secondsToSunset = now.until(sunset, ChronoUnit.SECONDS);
             secondsToSunset += sunsetOffset;
 
@@ -86,10 +94,7 @@ class AutoLighter implements ConfigChangeListener {
             sunsetSchedule = executor.schedule(listener::sunset, secondsToSunset, TimeUnit.SECONDS);
         }
 
-        if (midnightSchedule != null) {
-            midnightSchedule.cancel(false);
-        }
-
+        //Um 00:01 alle Timer neu setzen
         ZonedDateTime tomorrow = now.plusDays(1).withHour(0).withMinute(1);
         long secondsToMidnight = now.until(tomorrow, ChronoUnit.SECONDS);
         Log.message("Timing rescheduling of sunset/sunrise timers to " + tomorrow.toString() + "(" + secondsToMidnight + "s remaining)");

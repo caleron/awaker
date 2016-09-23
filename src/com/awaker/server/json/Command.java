@@ -218,7 +218,7 @@ public class Command {
             case GET_CONFIG:
                 Answer answer = Answer.config();
                 answer.name = name;
-                answer.value = Config.getString(ConfigKey.getForKey(name), "");
+                answer.value = Config.getString(ConfigKey.getForKey(name));
                 return answer;
 
             case SET_CONFIG:
@@ -226,7 +226,7 @@ public class Command {
                 answer.name = name;
                 ConfigKey key = ConfigKey.getForKey(name);
                 Config.setString(key, value);
-                answer.value = Config.getString(key, "");
+                answer.value = Config.getString(key);
                 return answer;
 
             case GET_CONFIG_LIST:

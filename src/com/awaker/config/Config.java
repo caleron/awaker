@@ -52,19 +52,22 @@ public class Config {
         setString(key, value.toString());
     }
 
-    public static String getString(ConfigKey key, String def) {
-        if (key != null && config.containsKey(key.getKey())) {
+    public static String getString(ConfigKey key) {
+        if (key == null)
+            return "";
+
+        if (config.containsKey(key.getKey())) {
             return config.get(key.getKey());
         }
-        return def;
+        return key.getDefault();
     }
 
-    public static Boolean getBool(ConfigKey key, Boolean def) {
-        return Boolean.parseBoolean(getString(key, def.toString()));
+    public static Boolean getBool(ConfigKey key) {
+        return Boolean.parseBoolean(getString(key));
     }
 
-    public static Integer getInt(ConfigKey key, Integer def) {
-        return Integer.valueOf(getString(key, def.toString()));
+    public static Integer getInt(ConfigKey key) {
+        return Integer.valueOf(getString(key));
     }
 
     public static String[] getConfigOptions() {
