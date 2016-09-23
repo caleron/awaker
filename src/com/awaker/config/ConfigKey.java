@@ -8,7 +8,7 @@ public enum ConfigKey {
     TIME_SERVER("time_server", "time-c.nist.gov"),
     DETECT_CLAPS("detect_claps", false),
     LIGHT_ON_SUNRISE("light_on_sunrise", false),
-    SUNRISE_TIME_OFFSET("sunset_time_offset", 0),
+    SUNRISE_TIME_OFFSET("sunrise_time_offset", 0),
     LIGHT_ON_SUNSET("light_on_sunset", false),
     SUNSET_TIME_OFFSET("sunset_time_offset", 0);
 

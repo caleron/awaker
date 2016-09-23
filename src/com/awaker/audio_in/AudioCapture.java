@@ -82,7 +82,7 @@ public class AudioCapture implements ConfigChangeListener {
     @Override
     public void configChanged(ConfigKey key) {
         if (Config.getBool(ConfigKey.DETECT_CLAPS)) {
-            if (!thread.isAlive()) {
+            if (thread == null || !thread.isAlive()) {
                 startCapture();
             }
         } else {
