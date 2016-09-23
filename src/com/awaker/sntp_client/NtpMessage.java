@@ -63,31 +63,14 @@ import java.util.Date;
  *
  * @author Adam Buckley
  */
-public class NtpMessage {
-    /**
-     * This is a two-bit code warning of an impending leap second to be
-     * inserted/deleted in the last minute of the current day.  It's values
-     * may be as follows:
-     * <p>
-     * Value     Meaning
-     * -----     -------
-     * 0         no warning
-     * 1         last minute has 61 seconds
-     * 2         last minute has 59 seconds)
-     * 3         alarm condition (clock not synchronized)
-     */
-    public byte leapIndicator = 0;
-
-
+class NtpMessage {
     /**
      * This value indicates the NTP/SNTP version number.  The version number
      * is 3 for Version 3 (IPv4 only) and 4 for Version 4 (IPv4, IPv6 and OSI).
      * If necessary to distinguish between IPv4, IPv6 and OSI, the
      * encapsulating context must be inspected.
      */
-    public byte version = 3;
-
-
+    private byte version = 3;
     /**
      * This value indicates the mode, with values defined as follows:
      * <p>
@@ -106,9 +89,20 @@ public class NtpMessage {
      * in the request and the server sets it to 4 (server) in the reply. In
      * multicast mode, the server sets this field to 5 (broadcast).
      */
-    public byte mode = 0;
-
-
+    private byte mode = 0;
+    /**
+     * This is a two-bit code warning of an impending leap second to be
+     * inserted/deleted in the last minute of the current day.  It's values
+     * may be as follows:
+     * <p>
+     * Value     Meaning
+     * -----     -------
+     * 0         no warning
+     * 1         last minute has 61 seconds
+     * 2         last minute has 59 seconds)
+     * 3         alarm condition (clock not synchronized)
+     */
+    private byte leapIndicator = 0;
     /**
      * This value indicates the stratum level of the local clock, with values
      * defined as follows:
@@ -120,7 +114,7 @@ public class NtpMessage {
      * 2-15     secondary reference (via NTP or SNTP)
      * 16-255   reserved
      */
-    public short stratum = 0;
+    private short stratum = 0;
 
 
     /**
@@ -129,7 +123,7 @@ public class NtpMessage {
      * this field presently range from 4 (16 s) to 14 (16284 s); however, most
      * applications use only the sub-range 6 (64 s) to 10 (1024 s).
      */
-    public byte pollInterval = 0;
+    private byte pollInterval = 0;
 
 
     /**
@@ -138,7 +132,7 @@ public class NtpMessage {
      * range from -6 for mains-frequency clocks to -20 for microsecond clocks
      * found in some workstations.
      */
-    public byte precision = 0;
+    private byte precision = 0;
 
 
     /**
@@ -149,7 +143,7 @@ public class NtpMessage {
      * negative values of a few milliseconds to positive values of several
      * hundred milliseconds.
      */
-    public double rootDelay = 0;
+    private double rootDelay = 0;
 
 
     /**
@@ -157,7 +151,7 @@ public class NtpMessage {
      * source, in seconds.  The values  that normally appear in this field
      * range from 0 to several hundred milliseconds.
      */
-    public double rootDispersion = 0;
+    private double rootDispersion = 0;
 
 
     /**
@@ -194,41 +188,41 @@ public class NtpMessage {
      * GPS      Global Positioning Service
      * GOES     Geostationary Orbit Environment Satellite
      */
-    public byte[] referenceIdentifier = {0, 0, 0, 0};
+    private byte[] referenceIdentifier = {0, 0, 0, 0};
 
 
     /**
      * This is the time at which the local clock was last set or corrected, in
      * seconds since 00:00 1-Jan-1900.
      */
-    public double referenceTimestamp = 0;
+    private double referenceTimestamp = 0;
 
 
     /**
      * This is the time at which the request departed the client for the
      * server, in seconds since 00:00 1-Jan-1900.
      */
-    public double originateTimestamp = 0;
+    private double originateTimestamp = 0;
 
 
     /**
      * This is the time at which the request arrived at the server, in seconds
      * since 00:00 1-Jan-1900.
      */
-    public double receiveTimestamp = 0;
+    private double receiveTimestamp = 0;
 
 
     /**
      * This is the time at which the reply departed the server for the client,
      * in seconds since 00:00 1-Jan-1900.
      */
-    public double transmitTimestamp = 0;
+    private double transmitTimestamp = 0;
 
 
     /**
      * Constructs a new NtpMessage from an array of bytes.
      */
-    public NtpMessage(byte[] array) {
+    NtpMessage(byte[] array) {
         // See the packet format diagram in RFC 2030 for details
         leapIndicator = (byte) ((array[0] >> 6) & 0x3);
         version = (byte) ((array[0] >> 3) & 0x7);
@@ -263,13 +257,117 @@ public class NtpMessage {
      * Constructs a new NtpMessage in client -> server mode, and sets the
      * transmit timestamp to the current time.
      */
-    public NtpMessage() {
+    NtpMessage() {
         // Note that all the other member variables are already set with
         // appropriate default values.
         this.mode = 3;
         this.transmitTimestamp = (System.currentTimeMillis() / 1000.0) + 2208988800.0;
     }
 
+    /**
+     * Converts an unsigned byte to a short.  By default, Java assumes that
+     * a byte is signed.
+     */
+    private static short unsignedByteToShort(byte b) {
+        if ((b & 0x80) == 0x80) return (short) (128 + (b & 0x7f));
+        else return (short) b;
+    }
+
+    /**
+     * Will read 8 bytes of a message beginning at <code>pointer</code>
+     * and return it as a double, according to the NTP 64-bit timestamp
+     * format.
+     */
+    private static double decodeTimestamp(byte[] array, int pointer) {
+        double r = 0.0;
+
+        for (int i = 0; i < 8; i++) {
+            r += unsignedByteToShort(array[pointer + i]) * Math.pow(2, (3 - i) * 8);
+        }
+
+        return r;
+    }
+
+    /**
+     * Encodes a timestamp in the specified position in the message
+     */
+    static void encodeTimestamp(byte[] array, int pointer, double timestamp) {
+        // Converts a double into a 64-bit fixed point
+        for (int i = 0; i < 8; i++) {
+            // 2^24, 2^16, 2^8, .. 2^-32
+            double base = Math.pow(2, (3 - i) * 8);
+
+            // Capture byte value
+            array[pointer + i] = (byte) (timestamp / base);
+
+            // Subtract captured value from remaining total
+            timestamp = timestamp - unsignedByteToShort(array[pointer + i]) * base;
+        }
+
+        // From RFC 2030: It is advisable to fill the non-significant
+        // low order bits of the timestamp with a random, unbiased
+        // bitstring, both to avoid systematic roundoff errors and as
+        // a means of loop detection and replay detection.
+        array[7] = (byte) (Math.random() * 255.0);
+    }
+
+    /**
+     * Returns a timestamp (number of seconds since 00:00 1-Jan-1900) as a
+     * formatted date/time string.
+     */
+    private static String timestampToString(double timestamp) {
+        if (timestamp == 0) return "0";
+
+        // timestamp is relative to 1900, utc is used by Java and is relative
+        // to 1970
+        double utc = timestamp - (2208988800.0);
+
+        // milliseconds
+        long ms = (long) (utc * 1000.0);
+
+        // date/time
+        String date = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(ms));
+
+        // fraction
+        double fraction = timestamp - ((long) timestamp);
+        String fractionSting = new DecimalFormat(".000000").format(fraction);
+
+        return date + fractionSting;
+    }
+
+    /**
+     * Returns a string representation of a reference identifier according
+     * to the rules set out in RFC 2030.
+     */
+    private static String referenceIdentifierToString(byte[] ref, short stratum, byte version) {
+        // From the RFC 2030:
+        // In the case of NTP Version 3 or Version 4 stratum-0 (unspecified)
+        // or stratum-1 (primary) servers, this is a four-character ASCII
+        // string, left justified and zero padded to 32 bits.
+        if (stratum == 0 || stratum == 1) {
+            return new String(ref);
+        }
+
+        // In NTP Version 3 secondary servers, this is the 32-bit IPv4
+        // address of the reference source.
+        else if (version == 3) {
+            return unsignedByteToShort(ref[0]) + "." +
+                    unsignedByteToShort(ref[1]) + "." +
+                    unsignedByteToShort(ref[2]) + "." +
+                    unsignedByteToShort(ref[3]);
+        }
+
+        // In NTP Version 4 secondary servers, this is the low order 32 bits
+        // of the latest transmit timestamp of the reference source.
+        else if (version == 4) {
+            return String.valueOf((unsignedByteToShort(ref[0]) / 256.0) +
+                    (unsignedByteToShort(ref[1]) / 65536.0) +
+                    (unsignedByteToShort(ref[2]) / 16777216.0) +
+                    (unsignedByteToShort(ref[3]) / 4294967296.0));
+        }
+
+        return "";
+    }
 
     /**
      * This method constructs the data bytes of a raw NTP packet.
@@ -280,8 +378,8 @@ public class NtpMessage {
 
         p[0] = (byte) (leapIndicator << 6 | version << 3 | mode);
         p[1] = (byte) stratum;
-        p[2] = (byte) pollInterval;
-        p[3] = (byte) precision;
+        p[2] = pollInterval;
+        p[3] = precision;
 
         // root delay is a signed 16.16-bit FP, in Java an int is 32-bits
         int l = (int) (rootDelay * 65536.0);
@@ -311,7 +409,6 @@ public class NtpMessage {
         return p;
     }
 
-
     /**
      * Returns a string representation of a NtpMessage
      */
@@ -334,82 +431,7 @@ public class NtpMessage {
                 "Transmit timestamp:  " + timestampToString(transmitTimestamp);
     }
 
-
-    /**
-     * Converts an unsigned byte to a short.  By default, Java assumes that
-     * a byte is signed.
-     */
-    public static short unsignedByteToShort(byte b) {
-        if ((b & 0x80) == 0x80) return (short) (128 + (b & 0x7f));
-        else return (short) b;
-    }
-
-
-    /**
-     * Will read 8 bytes of a message beginning at <code>pointer</code>
-     * and return it as a double, according to the NTP 64-bit timestamp
-     * format.
-     */
-    public static double decodeTimestamp(byte[] array, int pointer) {
-        double r = 0.0;
-
-        for (int i = 0; i < 8; i++) {
-            r += unsignedByteToShort(array[pointer + i]) * Math.pow(2, (3 - i) * 8);
-        }
-
-        return r;
-    }
-
-
-    /**
-     * Encodes a timestamp in the specified position in the message
-     */
-    public static void encodeTimestamp(byte[] array, int pointer, double timestamp) {
-        // Converts a double into a 64-bit fixed point
-        for (int i = 0; i < 8; i++) {
-            // 2^24, 2^16, 2^8, .. 2^-32
-            double base = Math.pow(2, (3 - i) * 8);
-
-            // Capture byte value
-            array[pointer + i] = (byte) (timestamp / base);
-
-            // Subtract captured value from remaining total
-            timestamp = timestamp - (double) (unsignedByteToShort(array[pointer + i]) * base);
-        }
-
-        // From RFC 2030: It is advisable to fill the non-significant
-        // low order bits of the timestamp with a random, unbiased
-        // bitstring, both to avoid systematic roundoff errors and as
-        // a means of loop detection and replay detection.
-        array[7] = (byte) (Math.random() * 255.0);
-    }
-
-
-    /**
-     * Returns a timestamp (number of seconds since 00:00 1-Jan-1900) as a
-     * formatted date/time string.
-     */
-    public static String timestampToString(double timestamp) {
-        if (timestamp == 0) return "0";
-
-        // timestamp is relative to 1900, utc is used by Java and is relative
-        // to 1970
-        double utc = timestamp - (2208988800.0);
-
-        // milliseconds
-        long ms = (long) (utc * 1000.0);
-
-        // date/time
-        String date = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date(ms));
-
-        // fraction
-        double fraction = timestamp - ((long) timestamp);
-        String fractionSting = new DecimalFormat(".000000").format(fraction);
-
-        return date + fractionSting;
-    }
-
-    public ZonedDateTime getCurrentZonedDateTime() {
+    ZonedDateTime getCurrentZonedDateTime() {
         // timestamp from server is relative to 1900, utc is used by Java and is relative to 1970
         double utc = transmitTimestamp - (2208988800.0);
 
@@ -417,40 +439,5 @@ public class NtpMessage {
         long ms = (long) (utc * 1000.0);
 
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(ms), ZoneId.systemDefault());
-    }
-
-
-    /**
-     * Returns a string representation of a reference identifier according
-     * to the rules set out in RFC 2030.
-     */
-    public static String referenceIdentifierToString(byte[] ref, short stratum, byte version) {
-        // From the RFC 2030:
-        // In the case of NTP Version 3 or Version 4 stratum-0 (unspecified)
-        // or stratum-1 (primary) servers, this is a four-character ASCII
-        // string, left justified and zero padded to 32 bits.
-        if (stratum == 0 || stratum == 1) {
-            return new String(ref);
-        }
-
-        // In NTP Version 3 secondary servers, this is the 32-bit IPv4
-        // address of the reference source.
-        else if (version == 3) {
-            return unsignedByteToShort(ref[0]) + "." +
-                    unsignedByteToShort(ref[1]) + "." +
-                    unsignedByteToShort(ref[2]) + "." +
-                    unsignedByteToShort(ref[3]);
-        }
-
-        // In NTP Version 4 secondary servers, this is the low order 32 bits
-        // of the latest transmit timestamp of the reference source.
-        else if (version == 4) {
-            return "" + ((unsignedByteToShort(ref[0]) / 256.0) +
-                    (unsignedByteToShort(ref[1]) / 65536.0) +
-                    (unsignedByteToShort(ref[2]) / 16777216.0) +
-                    (unsignedByteToShort(ref[3]) / 4294967296.0));
-        }
-
-        return "";
     }
 }
