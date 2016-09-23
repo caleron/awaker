@@ -1,16 +1,22 @@
 package com.awaker.test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import com.awaker.config.ConfigKey;
 
 class Test {
     public static void main(String[] args) {
-        String command = "aäß@\n";
+        System.out.println(ConfigKey.LIGHT_ON_SUNRISE.accepts(123));
+        System.out.println(ConfigKey.LIGHT_ON_SUNRISE.accepts(true));
+        System.out.println(ConfigKey.LIGHT_ON_SUNRISE.accepts("true"));
+        System.out.println(ConfigKey.LIGHT_ON_SUNRISE.accepts("hello"));
 
-        System.out.println(Arrays.toString(command.getBytes(StandardCharsets.UTF_8)));
-        System.out.println(String.format("%s hochgeladen (%s/%s)", 23 + "%", 300000, 400535));
-        System.out.println(System.getProperty("user.home"));
+        System.out.println(ConfigKey.SUNSET_TIME_OFFSET.accepts(123));
+        System.out.println(ConfigKey.SUNSET_TIME_OFFSET.accepts(true));
+        System.out.println(ConfigKey.SUNSET_TIME_OFFSET.accepts("true"));
+        System.out.println(ConfigKey.SUNSET_TIME_OFFSET.accepts("hello"));
 
-        System.out.println("asfg".contains(""));
+        System.out.println(ConfigKey.TIME_SERVER.accepts(123));
+        System.out.println(ConfigKey.TIME_SERVER.accepts(true));
+        System.out.println(ConfigKey.TIME_SERVER.accepts("true"));
+        System.out.println(ConfigKey.TIME_SERVER.accepts("hello"));
     }
 }

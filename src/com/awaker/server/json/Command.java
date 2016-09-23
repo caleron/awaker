@@ -225,7 +225,7 @@ public class Command {
                 answer = Answer.config();
                 answer.name = name;
                 ConfigKey key = ConfigKey.getForKey(name);
-                Config.setString(key, value);
+                Config.set(key, value);
                 answer.value = Config.getString(key);
                 return answer;
 

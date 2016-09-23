@@ -1,5 +1,7 @@
 package com.awaker.sntp_client;
 
+import com.awaker.config.Config;
+import com.awaker.config.ConfigKey;
 import com.awaker.util.Log;
 
 import java.net.DatagramPacket;
@@ -40,7 +42,7 @@ import java.time.ZonedDateTime;
 public class SntpClient {
     public static ZonedDateTime getTime() {
         try {
-            String serverName = "time-c.nist.gov";
+            String serverName = Config.getString(ConfigKey.TIME_SERVER);
 
             // Send request
             DatagramSocket socket = new DatagramSocket();

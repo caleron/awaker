@@ -28,12 +28,15 @@ public class Config {
         listeners.put(listener, key);
     }
 
-    public static void setString(ConfigKey key, String value) {
+    public static boolean set(ConfigKey key, Object value) {
         if (key == null)
-            return;
+            return false;
 
-        DbManager.setConfig(key.getKey(), value);
-        config.put(key.getKey(), value);
+        if (!key.accepts(value))
+            return false;
+
+        DbManager.setConfig(key.getKey(), value.toString());
+        config.put(key.getKey(), value.toString());
 
         //Events feuern
         listeners.forEach((listener, configKeys) -> {
@@ -42,14 +45,7 @@ public class Config {
                 new Thread(() -> listener.configChanged(key)).start();
             }
         });
-    }
-
-    public static void setBool(ConfigKey key, Boolean value) {
-        setString(key, value.toString());
-    }
-
-    public static void setInt(ConfigKey key, Integer value) {
-        setString(key, value.toString());
+        return true;
     }
 
     public static String getString(ConfigKey key) {

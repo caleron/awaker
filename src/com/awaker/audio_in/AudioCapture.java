@@ -15,8 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
-public class AudioCapture implements ConfigChangeListener{
-    private static AudioCapture instance;
+public class AudioCapture implements ConfigChangeListener {
     private final FFTAnalyzer analyzer;
     private Thread thread;
 
@@ -32,10 +31,11 @@ public class AudioCapture implements ConfigChangeListener{
     }
 
     public static void start(EnvironmentEventListener listener) {
-        instance = new AudioCapture(listener);
+        new AudioCapture(listener);
     }
 
     private void startCapture() {
+        stopCapture();
         thread = new Thread(this::capture);
         thread.start();
     }
@@ -74,7 +74,9 @@ public class AudioCapture implements ConfigChangeListener{
     }
 
     private void stopCapture() {
-        thread.interrupt();
+        if (thread != null) {
+            thread.interrupt();
+        }
     }
 
     @Override
