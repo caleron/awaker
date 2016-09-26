@@ -18,6 +18,7 @@ import java.nio.ShortBuffer;
 public class AudioCapture implements ConfigChangeListener {
     private final FFTAnalyzer analyzer;
     private Thread thread;
+    private boolean shouldRun = false;
 
     public AudioCapture(EnvironmentEventListener listener) {
         analyzer = new FFTAnalyzer(new ClapDetector(listener), 1);
@@ -36,6 +37,7 @@ public class AudioCapture implements ConfigChangeListener {
 
     private void startCapture() {
         stopCapture();
+        shouldRun = true;
         thread = new Thread(this::capture);
         thread.start();
     }
@@ -56,7 +58,7 @@ public class AudioCapture implements ConfigChangeListener {
             int bufferSize = 2048;
             byte byteBuffer[] = new byte[bufferSize];
 
-            while (!thread.isInterrupted()) {
+            while (!thread.isInterrupted() && shouldRun) {
                 int count = line.read(byteBuffer, 0, byteBuffer.length);
 
                 if (count > 0) {
@@ -75,8 +77,9 @@ public class AudioCapture implements ConfigChangeListener {
     }
 
     private void stopCapture() {
-        Log.message("stopping audio capture");
+        shouldRun = false;
         if (thread != null) {
+            Log.message("stopping audio capture");
             thread.interrupt();
         }
     }
