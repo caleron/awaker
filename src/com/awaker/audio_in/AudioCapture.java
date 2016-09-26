@@ -41,6 +41,7 @@ public class AudioCapture implements ConfigChangeListener {
     }
 
     private void capture() {
+        Log.message("Starting audio capture");
         AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
 
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -74,6 +75,7 @@ public class AudioCapture implements ConfigChangeListener {
     }
 
     private void stopCapture() {
+        Log.message("stopping audio capture");
         if (thread != null) {
             thread.interrupt();
         }

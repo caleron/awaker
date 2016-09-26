@@ -35,6 +35,9 @@ public class Config {
         if (!key.accepts(value))
             return false;
 
+        if (value.toString().equals(getString(key)))
+            return false;
+
         DbManager.setConfig(key.getKey(), value.toString());
         config.put(key.getKey(), value.toString());
 
