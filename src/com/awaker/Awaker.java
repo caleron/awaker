@@ -60,12 +60,6 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         Config.init();
         MediaManager.startScanFiles();
 
-        server = new MyWebSocketServer(this);
-        server.start();
-
-        WebContentServer.start();
-        HttpUploadServer.start(this);
-
         playerMaster = new PlayerMaster(this, this);
 
         if (isWindows) {
@@ -75,6 +69,12 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
             lightController = new LightController();
         }
         new Automator(lightController);
+
+        server = new MyWebSocketServer(this);
+        server.start();
+
+        WebContentServer.start();
+        HttpUploadServer.start(this);
     }
 
 
