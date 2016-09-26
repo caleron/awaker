@@ -37,7 +37,7 @@ class AutoLighter implements ConfigChangeListener {
         }
 
         ConfigKey[] listenEvents = new ConfigKey[]{
-                ConfigKey.SUNRISE_TIME_OFFSET, ConfigKey.SUNSET_TIME_OFFSET,
+                ConfigKey.SUNRISE_TIME_OFFSET_SECONDS, ConfigKey.SUNSET_TIME_OFFSET_SECONDS,
                 ConfigKey.LIGHT_ON_SUNRISE, ConfigKey.LIGHT_ON_SUNSET
         };
         Config.addListener(this, listenEvents);
@@ -62,8 +62,8 @@ class AutoLighter implements ConfigChangeListener {
             }
         }
 
-        int sunriseOffset = Config.getInt(ConfigKey.SUNRISE_TIME_OFFSET);
-        int sunsetOffset = Config.getInt(ConfigKey.SUNSET_TIME_OFFSET);
+        int sunriseOffset = Config.getInt(ConfigKey.SUNRISE_TIME_OFFSET_SECONDS);
+        int sunsetOffset = Config.getInt(ConfigKey.SUNSET_TIME_OFFSET_SECONDS);
 
         //Events abbrechen, falls gesetzt
         if (sunriseSchedule != null) {
