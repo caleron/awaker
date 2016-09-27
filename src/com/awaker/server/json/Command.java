@@ -2,7 +2,6 @@ package com.awaker.server.json;
 
 import com.awaker.config.Config;
 import com.awaker.config.ConfigKey;
-import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.server.ServerListener;
@@ -102,7 +101,7 @@ public class Command {
                 break;
 
             case PLAY_ID_LIST:
-                listener.playIdList(name, trackId, idList);
+                listener.playIdList(trackId, idList);
                 break;
 
             case PLAY_FROM_POSITION:
@@ -267,7 +266,7 @@ public class Command {
                 .map(track -> new Track(track.getId(), track.title, track.artist, track.album, track.trackLength))
                 .collect(Collectors.toList()));
 
-        library.playLists = DbManager.getAllPlaylistsForJSON();
+        library.playLists = MediaManager.getPlayListsForJson();
 
         return library;
     }

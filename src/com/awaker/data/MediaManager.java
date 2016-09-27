@@ -1,12 +1,14 @@
 package com.awaker.data;
 
 import com.awaker.audio.PlayList;
+import com.awaker.server.json.Playlist;
 import com.awaker.util.Log;
 import com.mpatric.mp3agic.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -18,24 +20,21 @@ public class MediaManager {
     private static ArrayList<TrackWrapper> allTracks;
     private static ArrayList<PlayList> playLists;
 
-    private static void loadTracks() {
-        allTracks = DbManager.getAllTracks();
-        if (allTracks != null) {
-            Log.message("Mediathek enthält " + allTracks.size() + " Tracks");
-        } else {
-            Log.message("allTracks ist null");
+    private static List<MediaEventListener> listeners = new ArrayList<>();
+
+    public static void addListener(MediaEventListener listener) {
+        listeners.add(listener);
+    }
+
+    private static void raiseMediaReadyEvent() {
+        for (MediaEventListener listener : listeners) {
+            listener.mediaReady();
         }
     }
 
-    private static void loadData() {
-        loadTracks();
-        loadPlaylists();
+    public static void init() {
+        new Thread(MediaManager::scanFiles).start();
     }
-
-    private static void loadPlaylists() {
-        playLists = DbManager.getAllPlaylists(allTracks);
-    }
-
 
     /**
      * Gibt den InputStream zu einem Track zurück
@@ -60,6 +59,90 @@ public class MediaManager {
             Log.error(e);
         }
         return null;
+    }
+
+
+    private static void loadTracks() {
+        allTracks = DbManager.getAllTracks();
+        if (allTracks != null) {
+            Log.message("Mediathek enthält " + allTracks.size() + " Tracks");
+        } else {
+            Log.message("allTracks ist null");
+        }
+    }
+
+    private static void loadData() {
+        loadTracks();
+        loadPlaylists();
+        raiseMediaReadyEvent();
+    }
+
+    private static void loadPlaylists() {
+        playLists = DbManager.getAllPlaylists(allTracks);
+    }
+
+    /**
+     * Führt den Dateiscan im Ordner media durch
+     */
+    private static void scanFiles() {
+        Log.message("Dateiscan gestartet");
+
+        File folder = new File("media/");
+        if (!folder.exists()) {
+            if (!folder.mkdir()) {
+                Log.message("Cant create media folder");
+                return;
+            }
+        }
+
+        //Pfade der dateien sind relativ, also beginnen mit media/
+        File[] files = folder.listFiles(file -> file.isFile() && file.getPath().endsWith(".mp3"));
+
+        ArrayList<File> fileList = new ArrayList<>(Arrays.asList(files));
+
+        ArrayList<TrackWrapper> tracksOfDb = DbManager.getAllTracks();
+
+        //Schnittmenge der Listen entfernen
+        if (tracksOfDb != null && fileList.size() > 0) {
+            for (int i = 0; i < fileList.size(); i++) {
+                String path = fileList.get(i).getPath();
+
+                boolean trackExistingInDb = false;
+
+                for (int j = 0; j < tracksOfDb.size(); j++) {
+                    TrackWrapper track = tracksOfDb.get(j);
+                    if (track.filePath.equals(path)) {
+                        tracksOfDb.remove(j);
+                        trackExistingInDb = true;
+                        break;
+                    }
+                }
+
+                if (trackExistingInDb) {
+                    fileList.remove(i);
+                    i--;
+                }
+            }
+        }
+
+        //überzählige Dateien einlesen und in Datenbank schreiben
+        ArrayList<TrackWrapper> newTracks = new ArrayList<>();
+
+        for (File file : fileList) {
+            TrackWrapper track = readFile(file);
+            if (file != null) {
+                newTracks.add(track);
+            }
+        }
+        DbManager.addTracks(newTracks);
+
+        //Überzählige DB-Einträge löschen
+        if (tracksOfDb != null) {
+            tracksOfDb.forEach(DbManager::removeTrack);
+        }
+        Log.message("Scan abgeschlossen");
+
+        loadData();
     }
 
     /**
@@ -158,74 +241,6 @@ public class MediaManager {
             Log.error(e);
         }
         return null;
-    }
-
-    public static void startScanFiles() {
-        new Thread(MediaManager::scanFiles).start();
-    }
-
-    /**
-     * Führt den Dateiscan im Ordner media durch
-     */
-    private static void scanFiles() {
-        Log.message("Dateiscan gestartet");
-
-        File folder = new File("media/");
-        if (!folder.exists()) {
-            if (!folder.mkdir()) {
-                Log.message("Cant create media folder");
-                return;
-            }
-        }
-
-        //Pfade der dateien sind relativ, also beginnen mit media/
-        File[] files = folder.listFiles(file -> file.isFile() && file.getPath().endsWith(".mp3"));
-
-        ArrayList<File> fileList = new ArrayList<>(Arrays.asList(files));
-
-        ArrayList<TrackWrapper> tracksOfDb = DbManager.getAllTracks();
-
-        //Schnittmenge der Listen entfernen
-        if (tracksOfDb != null && fileList.size() > 0) {
-            for (int i = 0; i < fileList.size(); i++) {
-                String path = fileList.get(i).getPath();
-
-                boolean trackExistingInDb = false;
-
-                for (int j = 0; j < tracksOfDb.size(); j++) {
-                    TrackWrapper track = tracksOfDb.get(j);
-                    if (track.filePath.equals(path)) {
-                        tracksOfDb.remove(j);
-                        trackExistingInDb = true;
-                        break;
-                    }
-                }
-
-                if (trackExistingInDb) {
-                    fileList.remove(i);
-                    i--;
-                }
-            }
-        }
-
-        //überzählige Dateien einlesen und in Datenbank schreiben
-        ArrayList<TrackWrapper> newTracks = new ArrayList<>();
-
-        for (File file : fileList) {
-            TrackWrapper track = readFile(file);
-            if (file != null) {
-                newTracks.add(track);
-            }
-        }
-        DbManager.addTracks(newTracks);
-
-        //Überzählige DB-Einträge löschen
-        if (tracksOfDb != null) {
-            tracksOfDb.forEach(DbManager::removeTrack);
-        }
-        Log.message("Scan abgeschlossen");
-
-        loadData();
     }
 
     /**
@@ -372,7 +387,11 @@ public class MediaManager {
         return allTracks;
     }
 
-    public static ArrayList<PlayList> getPlayLists() {
-        return playLists;
+    public static ArrayList<Playlist> getPlayListsForJson() {
+        ArrayList<Playlist> list = new ArrayList<>();
+        for (PlayList playList : playLists) {
+            list.add(playList.toJSONPlaylist());
+        }
+        return list;
     }
 }
