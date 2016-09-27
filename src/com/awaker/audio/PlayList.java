@@ -145,6 +145,14 @@ public class PlayList {
         tracks.remove(track);
     }
 
+    boolean hasTrack(TrackWrapper track) {
+        for (TrackWrapper trackWrapper : tracks) {
+            if (trackWrapper.getId() == track.getId())
+                return true;
+        }
+        return false;
+    }
+
     public String getName() {
         return name;
     }

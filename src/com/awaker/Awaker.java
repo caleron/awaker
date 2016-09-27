@@ -314,8 +314,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void playIdList(String name, int playNowId, int[] list) {
-        List idList = Arrays.asList(list);
+    public void playIdList(String name, Integer playNowId, Integer[] list) {
+        List<Integer> idList = new ArrayList<Integer>(Arrays.asList(list));
         ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
         ArrayList<TrackWrapper> tracks = new ArrayList<>();
 

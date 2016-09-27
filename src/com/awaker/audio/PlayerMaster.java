@@ -52,7 +52,9 @@ public class PlayerMaster implements PlayerListener {
         analyzer.reset();
 
         if (fis != null) {
-            currentPlayList = PlayList.ALL_TRACKS;
+            if (!currentPlayList.hasTrack(track)) {
+                currentPlayList = PlayList.ALL_TRACKS;
+            }
             currentPlayList.setCurrentTrack(track);
 
             if (player != null) {
@@ -108,9 +110,11 @@ public class PlayerMaster implements PlayerListener {
         currentPlayList = playList;
         if (firstId >= 0) {
             currentPlayList.setCurrentTrack(firstId);
+            return playFile(currentPlayList.getCurrentTrack());
+        } else {
+            playNext();
+            return true;
         }
-        playNext();
-        return true;
     }
 
     /**

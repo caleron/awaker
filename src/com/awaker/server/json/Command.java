@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 public class Command {
 
     private static final String PLAY = "play";
-    private static final String PLAY_ID = "play_id";
-    private static final String PLAY_ID_LIST = "play_id_list";
+    private static final String PLAY_ID = "playId";
+    private static final String PLAY_ID_LIST = "playIdList";
     private static final String PLAY_FROM_POSITION = "playFromPosition";
     private static final String PAUSE = "pause";
     private static final String STOP = "stop";
@@ -66,7 +66,7 @@ public class Command {
     private String value;
     private int playlistId;
     private int trackId;
-    private int[] idList;
+    private Integer[] idList;
 
     private String title;
     private String artist;
