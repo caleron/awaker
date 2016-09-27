@@ -314,7 +314,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void playIdList(int[] list, String name) {
+    public void playIdList(String name, int playNowId, int[] list) {
         List idList = Arrays.asList(list);
         ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
         ArrayList<TrackWrapper> tracks = new ArrayList<>();
@@ -328,7 +328,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         if (name.length() == 0)
             name = "Warteschlange";
 
-        playerMaster.playPlaylist(new PlayList(-1, name, tracks));
+        playerMaster.playPlaylist(new PlayList(-1, name, tracks), playNowId);
     }
 
     @Override

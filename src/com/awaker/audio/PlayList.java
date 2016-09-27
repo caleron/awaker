@@ -161,6 +161,15 @@ public class PlayList {
         return currentTrack;
     }
 
+    public void setCurrentTrack(int id) {
+        for (TrackWrapper track : tracks) {
+            if (track.getId() == id) {
+                currentTrack = track;
+                break;
+            }
+        }
+    }
+
     public void setCurrentTrack(TrackWrapper currentTrack) {
         this.currentTrack = currentTrack;
     }

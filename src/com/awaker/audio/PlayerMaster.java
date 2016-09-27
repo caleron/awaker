@@ -99,16 +99,28 @@ public class PlayerMaster implements PlayerListener {
     /**
      * Spielt eine Playlist ab und setzt sie als aktiv.
      *
-     * @param playList Die Playlist.
      * @return False, falls die playList null ist.
      */
-    public boolean playPlaylist(PlayList playList) {
+    public boolean playPlaylist(PlayList playList, int firstId) {
         if (playList == null)
             return false;
 
         currentPlayList = playList;
+        if (firstId >= 0) {
+            currentPlayList.setCurrentTrack(firstId);
+        }
         playNext();
         return true;
+    }
+
+    /**
+     * Spielt eine Playlist ab und setzt sie als aktiv.
+     *
+     * @param playList Die Playlist.
+     * @return False, falls die playList null ist.
+     */
+    public boolean playPlaylist(PlayList playList) {
+        return playPlaylist(playList, -1);
     }
 
     /**

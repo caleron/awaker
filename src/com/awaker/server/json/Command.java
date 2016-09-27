@@ -105,7 +105,7 @@ public class Command {
                 break;
 
             case PLAY_ID_LIST:
-                listener.playIdList(idList, name);
+                listener.playIdList(name, trackId, idList);
                 break;
 
             case PLAY_FROM_POSITION:

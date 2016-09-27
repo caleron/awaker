@@ -73,7 +73,7 @@ public interface ServerListener {
 
     void play(int trackId);
 
-    void playIdList(int[] list, String name);
+    void playIdList(String name, int playNowId, int[] list);
 
     void playTrackNext(int id);
 
