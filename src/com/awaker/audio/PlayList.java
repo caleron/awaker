@@ -20,7 +20,6 @@ public class PlayList {
 
     private ArrayList<TrackWrapper> tracks;
 
-
     /**
      * Erstellt eine neue Playlist
      *
@@ -60,6 +59,7 @@ public class PlayList {
      * Fügt einen Track zur Playlist hinzu.
      *
      * @param track Der neue Track.
+     * @return False, wenn der Track bereits in der Playlist ist.
      */
     public boolean addTrack(TrackWrapper track) {
         if (hasTrack(track))
@@ -78,6 +78,12 @@ public class PlayList {
         tracks.remove(track);
     }
 
+    /**
+     * Sucht den Track in der TrackListe
+     *
+     * @param track Der zu suchende Track
+     * @return True, wenn der Track zur Playlist gehört.
+     */
     private boolean hasTrack(TrackWrapper track) {
         for (TrackWrapper trackWrapper : tracks) {
             if (trackWrapper.getId() == track.getId())
@@ -98,6 +104,11 @@ public class PlayList {
         return tracks;
     }
 
+    /**
+     * Generiert ein Objekt für die JSON-Repräsentation dieser Playlist.
+     *
+     * @return Playlist-Objekt
+     */
     public Playlist toJSONPlaylist() {
         List<Integer> idList = new ArrayList<>();
         for (TrackWrapper track : tracks) {
