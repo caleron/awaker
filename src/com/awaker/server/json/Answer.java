@@ -29,7 +29,7 @@ public class Answer {
 
     public List<Track> tracks;
     public List<Playlist> playLists;
-    public Playlist currentPlaylist;
+    public Playlist trackQueue;
 
     public String name;
     public String value;
