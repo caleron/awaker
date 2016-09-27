@@ -296,7 +296,11 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
             answer.trackLength = currentTrack.trackLength;
             answer.currentTrackId = currentTrack.getId();
 
-            answer.playPosition = (int) (player.getPosition() / 1000.0);
+            if (player == null) {
+                answer.playPosition = 0;
+            } else {
+                answer.playPosition = (int) (player.getPosition() / 1000.0);
+            }
         }
 
         answer.trackQueue = trackQueue.toJSONPlaylist();
