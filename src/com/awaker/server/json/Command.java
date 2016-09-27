@@ -20,6 +20,7 @@ public class Command {
 
     private static final String PLAY = "play";
     private static final String PLAY_ID = "play_id";
+    private static final String PLAY_ID_LIST = "play_id_list";
     private static final String PLAY_FROM_POSITION = "playFromPosition";
     private static final String PAUSE = "pause";
     private static final String STOP = "stop";
@@ -45,6 +46,8 @@ public class Command {
     private static final String REMOVE_TRACK_FROM_PLAYLIST = "removeTrackFromPlaylist";
     private static final String PLAY_PLAYLIST = "playPlaylist";
     private static final String PLAY_TRACK_OF_PLAYLIST = "playTrackOfPlaylist";
+    private static final String ADD_TRACK_TO_QUEUE = "addTrackToQueue";
+    private static final String PLAY_TRACK_NEXT = "playTrackNext";
     private static final String GET_STATUS = "getStatus";
     private static final String GET_LIBRARY = "getLibrary";
     private static final String SEND_STRING = "sendString";
@@ -63,6 +66,7 @@ public class Command {
     private String value;
     private int playlistId;
     private int trackId;
+    private int[] idList;
 
     private String title;
     private String artist;
@@ -98,8 +102,12 @@ public class Command {
 
             case PLAY_ID:
                 listener.play(trackId);
-
                 break;
+
+            case PLAY_ID_LIST:
+                listener.playIdList(idList, name);
+                break;
+
             case PLAY_FROM_POSITION:
                 listener.playFromPosition(position);
                 break;
@@ -202,6 +210,14 @@ public class Command {
 
             case PLAY_TRACK_OF_PLAYLIST:
                 listener.playTrackOfPlaylist(playlistId, trackId);
+                break;
+
+            case PLAY_TRACK_NEXT:
+                listener.playTrackNext(trackId);
+                break;
+
+            case ADD_TRACK_TO_QUEUE:
+                listener.addTrackToQueue(trackId);
                 break;
 
             case GET_STATUS:

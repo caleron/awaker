@@ -72,4 +72,10 @@ public interface ServerListener {
     void shutdown();
 
     void play(int trackId);
+
+    void playIdList(int[] list, String name);
+
+    void playTrackNext(int id);
+
+    void addTrackToQueue(int id);
 }

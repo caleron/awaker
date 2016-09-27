@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Playlist {
 
+    //wenn -1, dann Album oder Artist
     public int id;
     public String name;
     public List<Integer> trackIdList = new ArrayList<>();

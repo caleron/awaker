@@ -2,6 +2,7 @@ package com.awaker.audio;
 
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.server.json.Playlist;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,6 +185,16 @@ public class PlayList {
         return String.format("INSERT INTO playlists (name) VALUES (\"%s\")", name);
     }
 
+    public Playlist toJSONPlaylist() {
+        ArrayList<Integer> idList = new ArrayList<>();
+
+        for (TrackWrapper track : tracks) {
+            idList.add(track.getId());
+        }
+
+        return new Playlist(id, name, idList);
+    }
+
     public static String getCreateTableSql() {
         return String.format("CREATE TABLE IF NOT EXISTS \"%s\" " +
                 "(\"%s\" INTEGER PRIMARY KEY, " +
@@ -195,5 +206,15 @@ public class PlayList {
                 "(\"%s\" INTEGER PRIMARY KEY, " +
                 "\"%s\" INTEGER," +
                 "\"%s\" INTEGER)", PLAYLIST_TRACKS_TABLE_NAME, ID, PLAYLIST_TRACKS_PLAYLIST_ID, PLAYLIST_TRACKS_TRACK_ID);
+    }
+
+    //TODO machen
+    public void addToQueue(TrackWrapper track) {
+        tracks.add(track);
+    }
+
+    //TODO machen
+    public void playNext(TrackWrapper track) {
+        tracks.add(track);
     }
 }

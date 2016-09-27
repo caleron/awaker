@@ -107,7 +107,7 @@ public class PlayerMaster implements PlayerListener {
             return false;
 
         currentPlayList = playList;
-        play();
+        playNext();
         return true;
     }
 
@@ -269,6 +269,8 @@ public class PlayerMaster implements PlayerListener {
             answer.playPosition = (int) (player.getPosition() / 1000.0);
         }
 
+        answer.currentPlaylist = currentPlayList.toJSONPlaylist();
+
         return answer;
     }
 
@@ -320,5 +322,13 @@ public class PlayerMaster implements PlayerListener {
     @Override
     public void playbackPaused() {
 
+    }
+
+    public void addTrackToQueue(TrackWrapper track) {
+        currentPlayList.addToQueue(track);
+    }
+
+    public void playTrackNext(TrackWrapper track) {
+        currentPlayList.playNext(track);
     }
 }

@@ -2,10 +2,12 @@ package com.awaker;
 
 import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.ColorTranslator;
+import com.awaker.audio.PlayList;
 import com.awaker.audio.PlaybackListener;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.audio.RepeatMode;
 import com.awaker.automation.Automator;
+import com.awaker.config.Config;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
@@ -15,7 +17,6 @@ import com.awaker.gpio.LightChannel;
 import com.awaker.gpio.LightController;
 import com.awaker.server.*;
 import com.awaker.server.json.Answer;
-import com.awaker.config.Config;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
 
@@ -26,9 +27,8 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackListener, AnalogListener {
     //Ausgabefenster und -feld beim Betrieb auf Windows
@@ -311,6 +311,34 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     @Override
     public void addTrackToPlaylist(int playlistId, int trackId) {
         MediaManager.addTrackToPlaylist(playlistId, trackId);
+    }
+
+    @Override
+    public void playIdList(int[] list, String name) {
+        List idList = Arrays.asList(list);
+        ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
+        ArrayList<TrackWrapper> tracks = new ArrayList<>();
+
+        for (TrackWrapper track : allTracks) {
+            if (idList.contains(track.getId())) {
+                tracks.add(track);
+            }
+        }
+
+        if (name.length() == 0)
+            name = "Warteschlange";
+
+        playerMaster.playPlaylist(new PlayList(-1, name, tracks));
+    }
+
+    @Override
+    public void playTrackNext(int id) {
+        playerMaster.playTrackNext(MediaManager.getTrack(id));
+    }
+
+    @Override
+    public void addTrackToQueue(int id) {
+        playerMaster.addTrackToQueue(MediaManager.getTrack(id));
     }
 
     @Override

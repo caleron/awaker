@@ -43,7 +43,6 @@ public class Config {
 
         //Events feuern
         listeners.forEach((listener, configKeys) -> {
-            Arrays.stream(configKeys);
             if (Arrays.asList(configKeys).contains(key)) {
                 new Thread(() -> listener.configChanged(key)).start();
             }
