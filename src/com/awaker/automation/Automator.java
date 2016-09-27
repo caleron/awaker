@@ -35,7 +35,7 @@ public class Automator implements EnvironmentEventListener {
         Log.message("Sun is rising! Lighting if necessary...");
 
         if (lightController.getChannelBrightness(LightChannel.ALL) < 10) {
-            lightController.setBrightness(LightChannel.WHITE, 40, 10000);
+            lightController.setBrightness(LightChannel.WHITE, 40, 30000);
         }
     }
 
@@ -46,8 +46,8 @@ public class Automator implements EnvironmentEventListener {
 
         Log.message("Sun is setting! Lighting if necessary...");
 
-        if (lightController.getChannelBrightness(LightChannel.ALL) < 10) {
-            lightController.setBrightness(LightChannel.WHITE, 50, 10000);
+        if (lightController.getChannelBrightness(LightChannel.ALL) < 20) {
+            lightController.setBrightness(LightChannel.WHITE, 50, 30000);
         }
     }
 }

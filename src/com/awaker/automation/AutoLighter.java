@@ -78,19 +78,19 @@ class AutoLighter implements ConfigChangeListener {
 
         //Sonnenaufgang setzen
         if (now.isBefore(sunrise) && Config.getBool(ConfigKey.LIGHT_ON_SUNRISE)) {
-            long secondsToSunrise = now.until(sunrise, ChronoUnit.SECONDS);
-            secondsToSunrise += sunriseOffset;
+            ZonedDateTime lightTime = sunrise.plusSeconds(sunriseOffset);
+            long secondsToSunrise = now.until(lightTime, ChronoUnit.SECONDS);
 
-            Log.message("Timing sunrise to " + sunrise.toString() + " (" + secondsToSunrise + "s remaining)");
+            Log.message("Timing sunrise to " + lightTime.toString() + " (" + secondsToSunrise + "s remaining)");
             sunriseSchedule = executor.schedule(listener::sunrise, secondsToSunrise, TimeUnit.SECONDS);
         }
 
         //Sonnenuntergang setzen
         if (now.isBefore(sunset) && Config.getBool(ConfigKey.LIGHT_ON_SUNSET)) {
-            long secondsToSunset = now.until(sunset, ChronoUnit.SECONDS);
-            secondsToSunset += sunsetOffset;
+            ZonedDateTime lightTime = sunset.plusSeconds(sunsetOffset);
+            long secondsToSunset = now.until(lightTime, ChronoUnit.SECONDS);
 
-            Log.message("Timing sunset to " + sunset.toString() + " (" + secondsToSunset + "s remaining)");
+            Log.message("Timing sunset to " + lightTime.toString() + " (" + secondsToSunset + "s remaining)");
             sunsetSchedule = executor.schedule(listener::sunset, secondsToSunset, TimeUnit.SECONDS);
         }
 
