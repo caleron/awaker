@@ -25,10 +25,7 @@ public class Command {
     private static final String PAUSE = "pause";
     private static final String STOP = "stop";
     private static final String TOGGLE_PLAY_PAUSE = "togglePlayPause";
-    private static final String PLAY_FILE = "playFile";
-    private static final String UPLOAD_AND_PLAY_FILE = "uploadAndPlayFile";
     private static final String CHECK_FILE = "checkFile";
-    private static final String UPLOAD_FILE = "uploadFile";
     private static final String PLAY_NEXT = "playNext";
     private static final String PLAY_PREVIOUS = "playPrevious";
     private static final String SET_SHUFFLE = "setShuffle";
@@ -74,7 +71,7 @@ public class Command {
 
     private int position;
     private int length;
-    private int repeatMode;
+    private String repeatMode;
 
     private int red;
     private int green;
@@ -124,25 +121,11 @@ public class Command {
                 listener.togglePlayPause();
                 break;
 
-            case PLAY_FILE:
-                if (!listener.playFile(new TrackWrapper(title, artist))) {
-                    return Answer.fileNotFound();
-                }
-                break;
-
-            //case UPLOAD_AND_PLAY_FILE:
-            //abspielen
-            //break;
-
             case CHECK_FILE:
                 if (!listener.containsFile(new TrackWrapper(title, artist))) {
                     return Answer.fileNotFound();
                 }
                 break;
-
-            //case UPLOAD_FILE:
-            //herunterladen
-            //  break;
 
             case PLAY_NEXT:
                 listener.playNext();

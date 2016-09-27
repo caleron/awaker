@@ -20,7 +20,7 @@ public class Answer {
     public String currentAlbum;
     public String currentArtist;
     public int currentTrackId;
-    public int repeatMode;
+    public String repeatMode;
     public int volume;
     public int trackLength;
     public int playPosition;

@@ -5,7 +5,10 @@ package com.awaker.config;
  */
 public enum ConfigKey {
 
-    TIME_SERVER("time_server", "time-c.nist.gov"),
+    SHUFFLE("shuffle", true),
+    REPEAT_MODE("repeat_mode", "all", new String[]{"all", "track", "none"}),
+
+    TIME_SERVER("time_server", "time-c.nist.gov", null),
     DETECT_CLAPS("detect_claps", false),
     LIGHT_ON_SUNRISE("light_on_sunrise", false),
     SUNRISE_TIME_OFFSET_SECONDS("sunrise_time_offset_seconds", 0),
@@ -14,10 +17,12 @@ public enum ConfigKey {
 
     private String key;
     private Object def;
+    private String[] possibleValues = null;
 
-    ConfigKey(String key, String def) {
+    ConfigKey(String key, String def, String[] possibleValues) {
         this.key = key;
         this.def = def;
+        this.possibleValues = possibleValues;
     }
 
     ConfigKey(String key, Boolean def) {
@@ -35,6 +40,15 @@ public enum ConfigKey {
             return false;
 
         if (def.getClass().equals(obj.getClass())) {
+            if (def instanceof String && possibleValues != null) {
+                //Falls nur bestimmte Werte erlaubt sind, hier überprüfen
+                for (String value : possibleValues) {
+                    if (value.equals(obj)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             return true;
         } else {
             String tmp = obj.toString().toLowerCase();
