@@ -197,8 +197,10 @@ public class PlayList {
     public Playlist toJSONPlaylist() {
         ArrayList<Integer> idList = new ArrayList<>();
 
-        for (TrackWrapper track : tracks) {
-            idList.add(track.getId());
+        if (tracks != null) {
+            for (TrackWrapper track : tracks) {
+                idList.add(track.getId());
+            }
         }
 
         return new Playlist(id, name, idList);
