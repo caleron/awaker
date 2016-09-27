@@ -2,7 +2,9 @@ package com.awaker.audio;
 
 import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.FFTAnalyzer;
-import com.awaker.data.DbManager;
+import com.awaker.config.Config;
+import com.awaker.config.ConfigKey;
+import com.awaker.data.MediaEventListener;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.server.json.Answer;
@@ -10,9 +12,12 @@ import com.awaker.util.Log;
 import javazoom.jl.decoder.JavaLayerException;
 
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class PlayerMaster implements PlayerListener {
-    private PlayList currentPlayList = PlayList.ALL_TRACKS;
+public class PlayerMaster implements PlayerListener, MediaEventListener {
+    private TrackQueue trackQueue;
 
     private CustomPlayer player;
     private final FFTAnalyzer analyzer;
@@ -30,101 +35,51 @@ public class PlayerMaster implements PlayerListener {
     public PlayerMaster(PlaybackListener playbackListener, AnalyzeResultListener analyzeResultListener) {
         analyzer = new FFTAnalyzer(analyzeResultListener);
         this.playbackListener = playbackListener;
+        MediaManager.addListener(this);
+    }
+
+    @Override
+    public void mediaReady() {
+        trackQueue = TrackQueue.getInstance();
+    }
+
+    private boolean playCurrentTrack() {
+        return playCurrentTrack(0);
     }
 
     /**
-     * Spielt einen Track ab.
+     * Spielt den aktuellen Track ab.
      *
-     * @param track Der abzuspielende Track
      * @return false, wenn die Datei nicht gefunden wurde
      */
-    public boolean playFile(TrackWrapper track) {
+    private boolean playCurrentTrack(int position) {
+        TrackWrapper track = trackQueue.currentTrack();
+
         if (track == null)
             return false;
-
-        if (track.filePath == null || track.filePath.length() == 0) {
-            //Track aus der Datenbank holen, falls der Wrapper vom Server erstellt wurde
-            track = DbManager.getTrack(track.title, track.artist);
-        }
 
         FileInputStream fis = MediaManager.getFileStream(track);
 
         analyzer.reset();
 
         if (fis != null) {
-            if (!currentPlayList.hasTrack(track)) {
-                currentPlayList = PlayList.ALL_TRACKS;
-            }
-            currentPlayList.setCurrentTrack(track);
-
             if (player != null) {
                 player.stop();
             }
             analyzer.reset();
             try {
                 player = new CustomPlayer(this, fis, volume);
-                player.play();
+                if (position == 0) {
+                    player.play();
+                } else {
+                    player.playFromPosition(position);
+                }
                 return true;
             } catch (JavaLayerException e) {
                 Log.error(e);
             }
         }
         return false;
-    }
-
-    /**
-     * Spielt einen Track aus einer Playlist ab und setzt die Playlist als aktive Playlist fest.
-     *
-     * @param playList Die Playlist mit dem Track.
-     * @param track    Der abzuspielende Track.
-     * @return False, falls playList oder track null sind.
-     */
-    public boolean playTrackOfPlaylist(PlayList playList, TrackWrapper track) {
-        if (playList == null || track == null)
-            return false;
-
-        currentPlayList = playList;
-        currentPlayList.setCurrentTrack(track);
-        playFile(track);
-        return true;
-    }
-
-    /**
-     * Spielt einen Track aus der All-PlayList ab.
-     *
-     * @param track Der Track
-     */
-    public boolean play(TrackWrapper track) {
-        return playTrackOfPlaylist(PlayList.ALL_TRACKS, track);
-    }
-
-    /**
-     * Spielt eine Playlist ab und setzt sie als aktiv.
-     *
-     * @return False, falls die playList null ist.
-     */
-    public boolean playPlaylist(PlayList playList, int firstId) {
-        if (playList == null)
-            return false;
-
-        currentPlayList = playList;
-        if (firstId >= 0) {
-            currentPlayList.setCurrentTrack(firstId);
-            return playFile(currentPlayList.getCurrentTrack());
-        } else {
-            playNext();
-            return true;
-        }
-    }
-
-    /**
-     * Spielt eine Playlist ab und setzt sie als aktiv.
-     *
-     * @param playList Die Playlist.
-     * @return False, falls die playList null ist.
-     */
-    public boolean playPlaylist(PlayList playList) {
-        return playPlaylist(playList, -1);
     }
 
     /**
@@ -134,22 +89,75 @@ public class PlayerMaster implements PlayerListener {
      * @return false, wenn die Datei nicht gefunden wurde
      */
     public boolean playFromPosition(int position) {
-        FileInputStream fis = MediaManager.getFileStream(currentPlayList.getCurrentTrack());
+        return playCurrentTrack(position);
+    }
 
-        if (fis != null) {
-            if (player != null) {
-                player.stop();
-            }
-            analyzer.reset();
-            try {
-                player = new CustomPlayer(this, fis, volume);
-                player.playFromPosition(position);
-                return true;
-            } catch (JavaLayerException e) {
-                Log.error(e);
+    /**
+     * Spielt einen Track aus einer Playlist ab und setzt die Playlist als aktive Playlist fest.
+     *
+     * @param playListId Die ID der Playlist mit dem Track.
+     * @param trackId    Die Track-ID des abzuspielenden Tracks
+     * @return False, falls playList oder track null sind.
+     */
+    public boolean playTrackOfPlaylist(int playListId, int trackId) {
+        trackQueue.setPlaylist(playListId);
+        trackQueue.setCurrentTrack(trackId);
+
+        return playCurrentTrack();
+    }
+
+    /**
+     * Spielt einen Track aus der All-PlayList ab.
+     *
+     * @param trackId Die Track-ID des abzuspieldenden Tracks
+     * @return True, wenn abgespielt wird
+     */
+    public boolean play(int trackId) {
+        return playTrackOfPlaylist(-1, trackId);
+    }
+
+    /**
+     * Spielt eine Playlist ab und setzt sie als aktiv.
+     *
+     * @return False, falls die playList null ist.
+     */
+    public boolean playPlaylist(int playListId, int firstId) {
+        trackQueue.setPlaylist(playListId);
+        if (firstId >= 0) {
+            trackQueue.setCurrentTrack(firstId);
+            return playCurrentTrack();
+        } else {
+            playNext();
+            return true;
+        }
+    }
+
+    /**
+     * Spielt eine Playlist ab und setzt sie als aktiv.
+     *
+     * @param playListId Die ID der Playlist.
+     * @return False, falls die playList null ist.
+     */
+    public boolean playPlaylist(int playListId) {
+        return playPlaylist(playListId, -1);
+    }
+
+    public boolean playIdList(Integer playNowId, Integer[] list) {
+        List<Integer> idList = new ArrayList<>(Arrays.asList(list));
+        ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
+        ArrayList<TrackWrapper> tracks = new ArrayList<>();
+
+        for (TrackWrapper track : allTracks) {
+            if (idList.contains(track.getId())) {
+                tracks.add(track);
             }
         }
-        return false;
+
+        trackQueue.setTrackList(tracks);
+        if (playNowId >= 0) {
+            trackQueue.setCurrentTrack(playNowId);
+        }
+        return playCurrentTrack();
     }
 
     /**
@@ -172,14 +180,16 @@ public class PlayerMaster implements PlayerListener {
      * Spielt die nächste Datei in der Playlist ab.
      */
     public void playNext() {
-        playFile(currentPlayList.nextTrack());
+        trackQueue.nextTrack();
+        playCurrentTrack();
     }
 
     /**
      * Spielt den vorigen Song in der Playlist ab.
      */
     public void playPrevious() {
-        playFile(currentPlayList.previousTrack());
+        trackQueue.previousTrack();
+        playCurrentTrack();
     }
 
     /**
@@ -191,6 +201,24 @@ public class PlayerMaster implements PlayerListener {
         } else {
             play();
         }
+    }
+
+    /**
+     * Fügt der Warteschlange einen Track am Ende hinzu.
+     *
+     * @param id Die Id des Tracks.
+     */
+    public void addTrackToQueue(int id) {
+        trackQueue.addToQueue(id);
+    }
+
+    /**
+     * Fügt den Track zur ID als nächstes in die Warteschlange ein.
+     *
+     * @param id Die ID des Tracks.
+     */
+    public void playTrackNext(int id) {
+        trackQueue.playAsNext(id);
     }
 
     /**
@@ -212,14 +240,6 @@ public class PlayerMaster implements PlayerListener {
             player.stop();
         }
         playbackListener.playbackPaused();
-    }
-
-    public void setShuffle(boolean shuffle) {
-        currentPlayList.setShuffle(shuffle);
-    }
-
-    public void setRepeatMode(RepeatMode repeatMode) {
-        currentPlayList.setRepeatMode(repeatMode);
     }
 
     /**
@@ -256,19 +276,13 @@ public class PlayerMaster implements PlayerListener {
      */
     public Answer getStatus(Answer answer) {
         answer.playing = player != null && player.isPlaying();
-        answer.shuffle = currentPlayList.isShuffle();
+        answer.shuffle = Config.getBool(ConfigKey.SHUFFLE);
 
-        if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_ALL) {
-            answer.repeatMode = 2;
-        } else if (currentPlayList.getRepeatMode() == RepeatMode.REPEAT_MODE_FILE) {
-            answer.repeatMode = 1;
-        } else {
-            answer.repeatMode = 0;
-        }
+        answer.repeatMode = Config.getString(ConfigKey.REPEAT_MODE);
 
         answer.volume = volume;
 
-        TrackWrapper currentTrack = currentPlayList.getCurrentTrack();
+        TrackWrapper currentTrack = trackQueue.currentTrack();
         if (currentTrack != null) {
             if (currentTrack.title.length() > 0) {
                 answer.currentTitle = currentTrack.title;
@@ -285,7 +299,7 @@ public class PlayerMaster implements PlayerListener {
             answer.playPosition = (int) (player.getPosition() / 1000.0);
         }
 
-        answer.currentPlaylist = currentPlayList.toJSONPlaylist();
+        answer.trackQueue = trackQueue.toJSONPlaylist();
 
         return answer;
     }
@@ -338,13 +352,5 @@ public class PlayerMaster implements PlayerListener {
     @Override
     public void playbackPaused() {
 
-    }
-
-    public void addTrackToQueue(TrackWrapper track) {
-        currentPlayList.addToQueue(track);
-    }
-
-    public void playTrackNext(TrackWrapper track) {
-        currentPlayList.playNext(track);
     }
 }

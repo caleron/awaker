@@ -2,12 +2,11 @@ package com.awaker;
 
 import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.ColorTranslator;
-import com.awaker.audio.PlayList;
 import com.awaker.audio.PlaybackListener;
 import com.awaker.audio.PlayerMaster;
-import com.awaker.audio.RepeatMode;
 import com.awaker.automation.Automator;
 import com.awaker.config.Config;
+import com.awaker.config.ConfigKey;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
@@ -27,8 +26,9 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackListener, AnalogListener {
     //Ausgabefenster und -feld beim Betrieb auf Windows
@@ -58,7 +58,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
         DbManager.init();
         Config.init();
-        MediaManager.startScanFiles();
+        MediaManager.init();
 
         playerMaster = new PlayerMaster(this, this);
 
@@ -117,15 +117,10 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public boolean playFile(TrackWrapper track) {
-        return playerMaster.playFile(track);
-    }
-
-    @Override
     public TrackWrapper downloadFile(InputStream is, int length, String fileName, boolean play) {
         TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
         if (play && track != null) {
-            playFile(track);
+            playerMaster.play(track.getId());
         }
         return track;
     }
@@ -149,7 +144,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
     @Override
     public void play(int trackId) {
-        playerMaster.play(MediaManager.getTrack(trackId));
+        playerMaster.play(trackId);
     }
 
     @Override
@@ -179,7 +174,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
     @Override
     public void setShuffle(boolean shuffle) {
-        playerMaster.setShuffle(shuffle);
+        Config.set(ConfigKey.SHUFFLE, shuffle);
     }
 
     @Override
@@ -188,21 +183,8 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void setRepeatMode(int repeatMode) {
-        RepeatMode mode;
-        switch (repeatMode) {
-            case 0:
-                mode = RepeatMode.REPEAT_MODE_NONE;
-                break;
-            case 1:
-                mode = RepeatMode.REPEAT_MODE_FILE;
-                break;
-            default:
-                mode = RepeatMode.REPEAT_MODE_ALL;
-                break;
-        }
-
-        playerMaster.setRepeatMode(mode);
+    public void setRepeatMode(String repeatMode) {
+        Config.set(ConfigKey.REPEAT_MODE, repeatMode);
     }
 
     @Override
@@ -290,12 +272,12 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
     @Override
     public void playPlaylist(int id) {
-        playerMaster.playPlaylist(MediaManager.getPlayList(id));
+        playerMaster.playPlaylist(id);
     }
 
     @Override
     public void playTrackOfPlaylist(int playlistId, int trackId) {
-        playerMaster.playTrackOfPlaylist(MediaManager.getPlayList(playlistId), MediaManager.getTrack(trackId));
+        playerMaster.playTrackOfPlaylist(playlistId, trackId);
     }
 
     @Override
@@ -314,38 +296,24 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void playIdList(String name, Integer playNowId, Integer[] list) {
-        List<Integer> idList = new ArrayList<Integer>(Arrays.asList(list));
-        ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
-        ArrayList<TrackWrapper> tracks = new ArrayList<>();
-
-        for (TrackWrapper track : allTracks) {
-            if (idList.contains(track.getId())) {
-                tracks.add(track);
-            }
-        }
-
-        if (name.length() == 0)
-            name = "Warteschlange";
-
-        playerMaster.playPlaylist(new PlayList(-1, name, tracks), playNowId);
-    }
-
-    @Override
-    public void playTrackNext(int id) {
-        playerMaster.playTrackNext(MediaManager.getTrack(id));
-    }
-
-    @Override
-    public void addTrackToQueue(int id) {
-        playerMaster.addTrackToQueue(MediaManager.getTrack(id));
-    }
-
-    @Override
     public void removeTrackFromPlaylist(int playlistId, int trackId) {
         MediaManager.removeTrackFromPlaylist(playlistId, trackId);
     }
 
+    @Override
+    public void playIdList(Integer playNowId, Integer[] list) {
+        playerMaster.playIdList(playNowId, list);
+    }
+
+    @Override
+    public void playTrackNext(int id) {
+        playerMaster.playTrackNext(id);
+    }
+
+    @Override
+    public void addTrackToQueue(int id) {
+        playerMaster.addTrackToQueue(id);
+    }
 
     @Override
     public Answer getStatus(Answer answer) {

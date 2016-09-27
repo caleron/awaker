@@ -9,8 +9,6 @@ import java.io.InputStream;
 public interface ServerListener {
     TrackWrapper downloadFile(InputStream is, int length, String fileName, boolean play);
 
-    boolean playFile(TrackWrapper track);
-
     boolean containsFile(TrackWrapper track);
 
     void play();
@@ -32,7 +30,7 @@ public interface ServerListener {
      *
      * @param repeatMode Der Modus
      */
-    void setRepeatMode(int repeatMode);
+    void setRepeatMode(String repeatMode);
 
     void setVolume(int volume);
 
@@ -73,7 +71,7 @@ public interface ServerListener {
 
     void play(int trackId);
 
-    void playIdList(String name, Integer playNowId, Integer[] list);
+    void playIdList(Integer playNowId, Integer[] list);
 
     void playTrackNext(int id);
 
