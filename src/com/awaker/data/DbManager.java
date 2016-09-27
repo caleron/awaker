@@ -1,14 +1,12 @@
 package com.awaker.data;
 
 import com.awaker.audio.PlayList;
-import com.awaker.server.json.Playlist;
 import com.awaker.config.Config;
 import com.awaker.util.Log;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DbManager {
@@ -137,7 +135,7 @@ public class DbManager {
      *
      * @param resultSet Das ResultSet mit dem Cursor auf dem auszulesenden Track
      * @return Der Track
-     * @throws SQLException
+     * @throws SQLException Bei Fehlern
      */
     private static TrackWrapper readTrack(ResultSet resultSet) throws SQLException {
         int id = resultSet.getInt(TrackWrapper.ID);
@@ -210,59 +208,6 @@ public class DbManager {
     }
 
     /**
-     * Gibt eine Liste aller Playlists zurück, die wiederum nur die IDs der Tracks enthalten. Für das Serialisieren mit
-     * JSON zusätzlich zur Liste aller vollständigen Tracks gedacht.
-     *
-     * @return Liste aller Playlists
-     */
-    public static List<Playlist> getAllPlaylistsForJSON() {
-        try {
-            ArrayList<Playlist> res = new ArrayList<>();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM playlists");
-
-            while (resultSet.next()) {
-                int id = resultSet.getInt(PlayList.ID);
-                String name = resultSet.getString(PlayList.NAME);
-
-                res.add(new Playlist(id, name, getTrackIDsOfPlaylist(id)));
-            }
-
-            resultSet.close();
-            statement.close();
-            return res;
-        } catch (SQLException e) {
-            Log.error(e);
-        }
-        return null;
-    }
-
-    /**
-     * Gibt eine Liste aller Track-IDs der Playlist zur ID zurück.
-     *
-     * @param id Die ID der Playlist
-     * @return Liste der Track-IDs
-     */
-    private static List<Integer> getTrackIDsOfPlaylist(int id) {
-        try {
-            ArrayList<Integer> res = new ArrayList<>();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT track_id FROM playlist_tracks WHERE id = " + id);
-
-            while (resultSet.next()) {
-                res.add(resultSet.getInt(PlayList.PLAYLIST_TRACKS_TRACK_ID));
-            }
-
-            resultSet.close();
-            statement.close();
-            return res;
-        } catch (SQLException e) {
-            Log.error(e);
-        }
-        return null;
-    }
-
-    /**
      * Gibt alle Playlists mit korrekten Referenzen aus.
      *
      * @param allTracks Alle Tracks.
@@ -274,7 +219,7 @@ public class DbManager {
         try {
             //alle Playlists laden
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM playlists");
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + PlayList.TABLE_NAME);
 
             while (resultSet.next()) {
                 int id = resultSet.getInt(PlayList.ID);
@@ -288,7 +233,7 @@ public class DbManager {
 
             //Titel den Playlists zuweisen
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM playlist_tracks");
+            resultSet = statement.executeQuery("SELECT * FROM " + PlayList.PLAYLIST_TRACKS_TABLE_NAME);
 
             while (resultSet.next()) {
                 Integer trackId = resultSet.getInt(PlayList.PLAYLIST_TRACKS_TRACK_ID);
@@ -383,6 +328,11 @@ public class DbManager {
         }
     }
 
+    /**
+     * Gibt eine HashMap der Konfiguration zurück.
+     *
+     * @return HashMap mit Schlüssel-Wert-Paaren
+     */
     public static HashMap<String, String> getConfig() {
         try {
             HashMap<String, String> res = new HashMap<>();
@@ -402,6 +352,12 @@ public class DbManager {
         return null;
     }
 
+    /**
+     * Setzt eine Einstellung.
+     *
+     * @param key   Der Schlüssel.
+     * @param value Der neue Wert.
+     */
     public static void setConfig(String key, String value) {
         try {
             Statement statement = connection.createStatement();
