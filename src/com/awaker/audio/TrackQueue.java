@@ -213,6 +213,7 @@ class TrackQueue implements ConfigChangeListener {
                         break;
                     }
                 }
+                usingShuffledList = false;
             }
         }
     }
