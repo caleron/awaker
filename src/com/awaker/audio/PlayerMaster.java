@@ -282,29 +282,29 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
 
         answer.volume = volume;
 
-        TrackWrapper currentTrack = trackQueue.currentTrack();
-        if (currentTrack != null) {
-            if (currentTrack.title.length() > 0) {
-                answer.currentTitle = currentTrack.title;
-            }
-            if (currentTrack.artist != null && currentTrack.artist.length() > 0) {
-                answer.currentArtist = currentTrack.artist;
-            }
-            if (currentTrack.album != null && currentTrack.album.length() > 0) {
-                answer.currentAlbum = currentTrack.album;
-            }
-            answer.trackLength = currentTrack.trackLength;
-            answer.currentTrackId = currentTrack.getId();
+        if (trackQueue != null) {
+            TrackWrapper currentTrack = trackQueue.currentTrack();
+            if (currentTrack != null) {
+                if (currentTrack.title.length() > 0) {
+                    answer.currentTitle = currentTrack.title;
+                }
+                if (currentTrack.artist != null && currentTrack.artist.length() > 0) {
+                    answer.currentArtist = currentTrack.artist;
+                }
+                if (currentTrack.album != null && currentTrack.album.length() > 0) {
+                    answer.currentAlbum = currentTrack.album;
+                }
+                answer.trackLength = currentTrack.trackLength;
+                answer.currentTrackId = currentTrack.getId();
 
-            if (player == null) {
-                answer.playPosition = 0;
-            } else {
-                answer.playPosition = (int) (player.getPosition() / 1000.0);
+                if (player == null) {
+                    answer.playPosition = 0;
+                } else {
+                    answer.playPosition = (int) (player.getPosition() / 1000.0);
+                }
             }
+            answer.trackQueue = trackQueue.toJSONPlaylist();
         }
-
-        answer.trackQueue = trackQueue.toJSONPlaylist();
-
         return answer;
     }
 

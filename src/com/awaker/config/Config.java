@@ -14,18 +14,31 @@ public class Config {
 
     private static HashMap<String, String> config;
     private static HashMap<ConfigChangeListener, ConfigKey[]> listeners;
+    /**
+     * Listener, die Synchron aufgerufen werden sollen
+     */
+    private static HashMap<ConfigChangeListener, ConfigKey[]> listenersSync;
 
     public static void init() {
         config = DbManager.getConfig();
         listeners = new HashMap<>();
+        listenersSync = new HashMap<>();
     }
 
     public static void addListener(ConfigChangeListener listener, ConfigKey key) {
         addListener(listener, new ConfigKey[]{key});
     }
 
+    public static void addSyncListener(ConfigChangeListener listener, ConfigKey key) {
+        addSyncListener(listener, new ConfigKey[]{key});
+    }
+
     public static void addListener(ConfigChangeListener listener, ConfigKey[] key) {
         listeners.put(listener, key);
+    }
+
+    public static void addSyncListener(ConfigChangeListener listener, ConfigKey[] key) {
+        listenersSync.put(listener, key);
     }
 
     public static boolean set(ConfigKey key, Object value) {
@@ -45,6 +58,12 @@ public class Config {
         listeners.forEach((listener, configKeys) -> {
             if (Arrays.asList(configKeys).contains(key)) {
                 new Thread(() -> listener.configChanged(key)).start();
+            }
+        });
+        //ohne Thread
+        listenersSync.forEach((listener, configKeys) -> {
+            if (Arrays.asList(configKeys).contains(key)) {
+                listener.configChanged(key);
             }
         });
         return true;

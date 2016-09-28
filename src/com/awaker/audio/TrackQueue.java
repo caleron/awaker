@@ -41,7 +41,7 @@ class TrackQueue implements ConfigChangeListener {
      * Privater Konstruktor, da Einzelinstanz-Klasse
      */
     private TrackQueue() {
-        Config.addListener(this, new ConfigKey[]{ConfigKey.REPEAT_MODE, ConfigKey.SHUFFLE});
+        Config.addSyncListener(this, new ConfigKey[]{ConfigKey.REPEAT_MODE, ConfigKey.SHUFFLE});
         setPlaylist(-1);
     }
 
@@ -56,7 +56,8 @@ class TrackQueue implements ConfigChangeListener {
         //Mischen, wenn nötig
         if (Config.getBool(ConfigKey.SHUFFLE)) {
             //noinspection unchecked
-            shuffledTracks = (ArrayList<TrackWrapper>) tracks.clone();
+            shuffledTracks = new ArrayList<>();
+            shuffledTracks.addAll(tracks);
             Collections.shuffle(shuffledTracks);
             usingShuffledList = true;
         } else {
@@ -191,9 +192,9 @@ class TrackQueue implements ConfigChangeListener {
                 Wechseln auf gemischte Liste
                 Der Teil der Liste unterhalb des aktuellen Tracks wird dabei nur gemischt, der übrige Teil inklusive
                 dem aktuellen Track bleibt unberührt.  */
+                List<TrackWrapper> unshuffledPart = new ArrayList<>(tracks.subList(0, currentTrackIndex + 1));
+                List<TrackWrapper> shuffledPart = new ArrayList<>(tracks.subList(currentTrackIndex + 1, tracks.size()));
 
-                List<TrackWrapper> unshuffledPart = tracks.subList(0, currentTrackIndex + 1);
-                List<TrackWrapper> shuffledPart = tracks.subList(currentTrackIndex + 1, tracks.size());
                 Collections.shuffle(shuffledPart);
 
                 ArrayList<TrackWrapper> newShuffledList = new ArrayList<>(unshuffledPart);
