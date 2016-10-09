@@ -71,7 +71,8 @@ public class Log {
      */
     private static void writeError(String err) {
         try {
-            errorWriter.write(err);
+            String out = String.format(format, new Date(), "error", err);
+            errorWriter.write(out);
             errorWriter.flush();
         } catch (IOException e1) {
             e1.printStackTrace();
