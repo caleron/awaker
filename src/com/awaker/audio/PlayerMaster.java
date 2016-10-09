@@ -55,10 +55,6 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
         return playCurrentTrack(0);
     }
 
-    //TODO wenn man nach start play drückt, wechselt der song direkt
-    //TODO maximale Lautstärke auf 0dB setzen (<70)
-    //TODO lautstärke beim öffnen der Line setzen
-
     /**
      * Spielt den aktuellen Track ab.
      *
@@ -177,7 +173,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      */
     public synchronized void play() {
         if (player == null || player.getStatus() == PlaybackStatus.STOPPED) {
-            playNext();
+            playCurrentTrack();
         } else {
             try {
                 player.play();
