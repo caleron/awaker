@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PlayerMaster implements PlayerListener, MediaEventListener {
+    private static PlayerMaster instance = null;
     private TrackQueue trackQueue;
 
     private CustomPlayer player;
@@ -28,11 +29,18 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     private int volume = 70;
 
     /**
-     * Erstellt eine neue Instanz
+     * Erstellt eine neue Instanz. Es darf nur eine einzige Instanz existieren. Falls der Konstruktor ein zweites Mal
+     * aufgerufen wird, wird eine {@link RuntimeException} geworfen.
      *
      * @param analyzeResultListener Der Listener für die Ergebnisse der Analyse mit FFT
      */
     public PlayerMaster(PlaybackListener playbackListener, AnalyzeResultListener analyzeResultListener) {
+        //Nur eine Instanz erlauben, damit nicht 2 Songs gleichzeitig abgespielt werden können.
+        if (instance != null) {
+            throw new RuntimeException("PlayerMaster already existing");
+        }
+        instance = this;
+
         analyzer = new FFTAnalyzer(analyzeResultListener);
         this.playbackListener = playbackListener;
         MediaManager.addListener(this);
@@ -43,16 +51,20 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
         trackQueue = TrackQueue.getInstance();
     }
 
-    private boolean playCurrentTrack() {
+    private synchronized boolean playCurrentTrack() {
         return playCurrentTrack(0);
     }
+
+    //TODO wenn man nach start play drückt, wechselt der song direkt
+    //TODO maximale Lautstärke auf 0dB setzen (<70)
+    //TODO lautstärke beim öffnen der Line setzen
 
     /**
      * Spielt den aktuellen Track ab.
      *
      * @return false, wenn die Datei nicht gefunden wurde
      */
-    private boolean playCurrentTrack(int position) {
+    private synchronized boolean playCurrentTrack(int position) {
         TrackWrapper track = trackQueue.currentTrack();
 
         if (track == null)
@@ -88,7 +100,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param position Die Position in Sekunden
      * @return false, wenn die Datei nicht gefunden wurde
      */
-    public boolean playFromPosition(int position) {
+    public synchronized boolean playFromPosition(int position) {
         return playCurrentTrack(position);
     }
 
@@ -99,7 +111,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param trackId    Die Track-ID des abzuspielenden Tracks
      * @return False, falls playList oder track null sind.
      */
-    public boolean playTrackOfPlaylist(int playListId, int trackId) {
+    public synchronized boolean playTrackOfPlaylist(int playListId, int trackId) {
         trackQueue.setPlaylist(playListId);
         trackQueue.setCurrentTrack(trackId);
 
@@ -112,7 +124,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param trackId Die Track-ID des abzuspieldenden Tracks
      * @return True, wenn abgespielt wird
      */
-    public boolean play(int trackId) {
+    public synchronized boolean play(int trackId) {
         return playTrackOfPlaylist(-1, trackId);
     }
 
@@ -121,7 +133,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @return False, falls die playList null ist.
      */
-    public boolean playPlaylist(int playListId, int firstId) {
+    public synchronized boolean playPlaylist(int playListId, int firstId) {
         trackQueue.setPlaylist(playListId);
         if (firstId >= 0) {
             trackQueue.setCurrentTrack(firstId);
@@ -138,11 +150,11 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param playListId Die ID der Playlist.
      * @return False, falls die playList null ist.
      */
-    public boolean playPlaylist(int playListId) {
+    public synchronized boolean playPlaylist(int playListId) {
         return playPlaylist(playListId, -1);
     }
 
-    public boolean playIdList(Integer playNowId, Integer[] list) {
+    public synchronized boolean playIdList(Integer playNowId, Integer[] list) {
         List<Integer> idList = new ArrayList<>(Arrays.asList(list));
         ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
         ArrayList<TrackWrapper> tracks = new ArrayList<>();
@@ -163,7 +175,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Startet die Wiedergabe. wählt den nächsten Song aus, falls die Wiedergabe gestoppt wurde.
      */
-    public void play() {
+    public synchronized void play() {
         if (player == null || player.getStatus() == PlaybackStatus.STOPPED) {
             playNext();
         } else {
@@ -179,7 +191,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Spielt die nächste Datei in der Playlist ab.
      */
-    public void playNext() {
+    public synchronized void playNext() {
         trackQueue.nextTrack();
         playCurrentTrack();
     }
@@ -187,7 +199,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Spielt den vorigen Song in der Playlist ab.
      */
-    public void playPrevious() {
+    public synchronized void playPrevious() {
         trackQueue.previousTrack();
         playCurrentTrack();
     }
@@ -195,7 +207,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Wechselt zwischen Play und Pause.
      */
-    public void tooglePlayPause() {
+    public synchronized void tooglePlayPause() {
         if (player != null && player.isPlaying()) {
             pause();
         } else {
@@ -208,7 +220,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @param id Die Id des Tracks.
      */
-    public void addTrackToQueue(int id) {
+    public synchronized void addTrackToQueue(int id) {
         trackQueue.addToQueue(id);
     }
 
@@ -217,14 +229,14 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @param id Die ID des Tracks.
      */
-    public void playTrackNext(int id) {
+    public synchronized void playTrackNext(int id) {
         trackQueue.playAsNext(id);
     }
 
     /**
      * Pausiert die Wiedergabe
      */
-    public void pause() {
+    public synchronized void pause() {
         if (player != null) {
             player.pause();
             analyzer.reset();
@@ -235,7 +247,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Stoppt die Wiedergabe
      */
-    public void stop() {
+    public synchronized void stop() {
         if (player != null) {
             player.stop();
         }
@@ -325,7 +337,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
         }
     }
 
-    public void setVolume(int newVolume) {
+    public synchronized void setVolume(int newVolume) {
         this.volume = Math.min(100, Math.max(newVolume, 0));
         if (player != null) {
             player.setVolume(volume);
