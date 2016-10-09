@@ -16,6 +16,12 @@ class CustomDevice extends AudioDeviceBase {
 
     private byte[] byteBuf = new byte[4096];
 
+    private int volume;
+
+    CustomDevice(int volume) {
+        this.volume = volume;
+    }
+
     private AudioFormat getAudioFormat() {
         if (fmt == null) {
             Decoder decoder = getDecoder();
@@ -56,6 +62,8 @@ class CustomDevice extends AudioDeviceBase {
                 gainControlSupported = source.isControlSupported(FloatControl.Type.MASTER_GAIN);
 
                 source.start();
+
+                setVolume(volume);
             }
         } catch (RuntimeException | LinkageError | LineUnavailableException ex) {
             t = ex;
@@ -119,13 +127,15 @@ class CustomDevice extends AudioDeviceBase {
     void setVolume(int value) {
         if (gainControlSupported && source != null) {
             FloatControl c = (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
-            float range = c.getMaximum() - c.getMinimum();
+            //Maximal 0dB zulassen
+            float max = Math.min(0f, c.getMaximum());
+            float range = max - c.getMinimum();
 
             float factor = (float) Math.log10(value);
 
             float newValue = c.getMinimum() + range * (factor / 2f);
-
-            c.setValue(Math.max(c.getMinimum(), Math.min(c.getMaximum(), newValue)));
+            //Sicherstellen, dass der neue Wert im Bereich liegt
+            c.setValue(Math.max(c.getMinimum(), Math.min(max, newValue)));
         }
     }
 }

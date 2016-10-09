@@ -55,17 +55,13 @@ class CustomPlayer {
 
     /**
      * Öffnet das Audiogerät
-     *
-     * @throws JavaLayerException
      */
     private synchronized void openAudio() throws JavaLayerException {
         if (audio == null) {
             //FactoryRegistry r = FactoryRegistry.systemRegistry();
             //audio = r.createAudioDevice();
-            audio = new CustomDevice();
+            audio = new CustomDevice(volume);
             audio.open(decoder);
-
-            setVolume(volume);
         }
     }
 
@@ -95,9 +91,9 @@ class CustomPlayer {
         }
 
         openAudio();
-        /**
-         * Muss hier schon gesetzt werden, damit der Status nach Ausführung dieser Methode auf PLAYING ist,
-         * ansonsten bekommt die App eine falsche Antwort.
+        /*
+          Muss hier schon gesetzt werden, damit der Status nach Ausführung dieser Methode auf PLAYING ist,
+          ansonsten bekommt die App eine falsche Antwort.
          */
         status = PlaybackStatus.PLAYING;
         Thread playerThread = new Thread(() -> {
@@ -114,7 +110,6 @@ class CustomPlayer {
      * Beginnt die Wiedergabe ab einer bestimmten Position
      *
      * @param targetSecond Die Position in Sekunden
-     * @throws JavaLayerException
      */
     void playFromPosition(int targetSecond) throws JavaLayerException {
         lastHeader = bitstream.readFrame();
@@ -131,7 +126,6 @@ class CustomPlayer {
      * Spielt die aktuelle Datei ab. Blockiert die Ausführung, sollte also in einem eigenen Thread ausgeführt werden.
      *
      * @param start Die Anzahl an Frames, die übersprungen werden sollen.
-     * @throws JavaLayerException
      */
     private void runPlayback(final int start) throws JavaLayerException {
         samplesListener.playbackStarted();
@@ -185,8 +179,6 @@ class CustomPlayer {
 
     /**
      * Setzt die Wiedergabe fort.
-     *
-     * @throws JavaLayerException
      */
     private void resume() throws JavaLayerException {
         if (status != PlaybackStatus.PAUSED)
@@ -296,7 +288,6 @@ class CustomPlayer {
      *
      * @param count Anzahl zu überspringender Frames
      * @return False, wenn das Ende des Streams erreicht wurde
-     * @throws JavaLayerException
      */
     private boolean skipFrames(int count) throws JavaLayerException {
         boolean ret = true;

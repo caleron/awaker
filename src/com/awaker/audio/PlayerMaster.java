@@ -26,7 +26,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
 
     private final PlaybackListener playbackListener;
 
-    private int volume = 70;
+    private int volume = 100;
 
     /**
      * Erstellt eine neue Instanz. Es darf nur eine einzige Instanz existieren. Falls der Konstruktor ein zweites Mal
