@@ -38,11 +38,11 @@ public class Command {
     private static final String CHANGE_VISUALIZATION = "changeVisualization";
     private static final String CREATE_PLAYLIST = "createPlaylist";
     private static final String REMOVE_PLAYLIST = "removePlaylist";
-    private static final String ADD_TRACK_TO_PLAYLIST = "addTrackToPlaylist";
-    private static final String REMOVE_TRACK_FROM_PLAYLIST = "removeTrackFromPlaylist";
+    private static final String ADD_TRACKS_TO_PLAYLIST = "addTracksToPlaylist";
+    private static final String REMOVE_TRACKS_FROM_PLAYLIST = "removeTracksFromPlaylist";
     private static final String PLAY_PLAYLIST = "playPlaylist";
     private static final String PLAY_TRACK_OF_PLAYLIST = "playTrackOfPlaylist";
-    private static final String ADD_TRACK_TO_QUEUE = "addTrackToQueue";
+    private static final String ADD_TRACKS_TO_QUEUE = "addTracksToQueue";
     private static final String PLAY_TRACK_NEXT = "playTrackNext";
     private static final String GET_STATUS = "getStatus";
     private static final String GET_LIBRARY = "getLibrary";
@@ -178,12 +178,12 @@ public class Command {
                 listener.removePlaylist(playlistId);
                 break;
 
-            case ADD_TRACK_TO_PLAYLIST:
-                listener.addTrackToPlaylist(playlistId, trackId);
+            case ADD_TRACKS_TO_PLAYLIST:
+                listener.addTracksToPlaylist(playlistId, idList);
                 break;
 
-            case REMOVE_TRACK_FROM_PLAYLIST:
-                listener.removeTrackFromPlaylist(playlistId, trackId);
+            case REMOVE_TRACKS_FROM_PLAYLIST:
+                listener.removeTracksFromPlaylist(playlistId, idList);
                 break;
 
             case PLAY_PLAYLIST:
@@ -198,8 +198,8 @@ public class Command {
                 listener.playTrackNext(trackId);
                 break;
 
-            case ADD_TRACK_TO_QUEUE:
-                listener.addTrackToQueue(trackId);
+            case ADD_TRACKS_TO_QUEUE:
+                listener.addTracksToQueue(idList);
                 break;
 
             case GET_STATUS:

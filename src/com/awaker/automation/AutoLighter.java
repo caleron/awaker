@@ -46,7 +46,7 @@ class AutoLighter implements ConfigChangeListener {
     public static void start(EnvironmentEventListener listener) {
         new Thread(() -> new AutoLighter(listener)).start();
     }
-
+//TODO Sommer/Winterzeit berücksichtigen
     private void scheduleEvents() {
         refreshTimes();
         ZonedDateTime now = null;

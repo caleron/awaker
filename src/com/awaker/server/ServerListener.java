@@ -61,9 +61,9 @@ public interface ServerListener {
 
     void removePlaylist(int id);
 
-    void addTrackToPlaylist(int playlistId, int trackId);
+    void addTracksToPlaylist(int playlistId, Integer[] list);
 
-    void removeTrackFromPlaylist(int playlistId, int trackId);
+    void removeTracksFromPlaylist(int playlistId, Integer[] list);
 
     void stringReceived(String str);
 
@@ -75,5 +75,5 @@ public interface ServerListener {
 
     void playTrackNext(int id);
 
-    void addTrackToQueue(int id);
+    void addTracksToQueue(Integer[] list);
 }

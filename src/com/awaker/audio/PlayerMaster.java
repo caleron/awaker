@@ -214,10 +214,12 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Fügt der Warteschlange einen Track am Ende hinzu.
      *
-     * @param id Die Id des Tracks.
+     * @param list Array von Track-IDs
      */
-    public synchronized void addTrackToQueue(int id) {
-        trackQueue.addToQueue(id);
+    public synchronized void addTracksToQueue(Integer[] list) {
+        for (Integer trackId : list) {
+            trackQueue.addToQueue(trackId);
+        }
     }
 
     /**

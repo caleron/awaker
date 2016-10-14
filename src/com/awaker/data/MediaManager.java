@@ -315,17 +315,22 @@ public class MediaManager {
      * Fügt einen Track zu einer Playlist hinzu.
      *
      * @param playListId Die ID der Playlist
-     * @param trackId    Die ID des Tracks
+     * @param list       Liste von Track-IDs
      */
-    public static void addTrackToPlaylist(int playListId, int trackId) {
+    public static void addTracksToPlaylist(int playListId, Integer[] list) {
         PlayList playList = getPlayList(playListId);
-        TrackWrapper track = getTrack(trackId);
-
-        if (track == null || playList == null)
+        if (playList == null)
             return;
 
-        DbManager.addTrackToPlaylist(playList, track);
-        playList.addTrack(track);
+        for (Integer trackId : list) {
+            TrackWrapper track = getTrack(trackId);
+
+            if (track == null)
+                continue;
+
+            DbManager.addTrackToPlaylist(playList, track);
+            playList.addTrack(track);
+        }
     }
 
 
@@ -333,17 +338,22 @@ public class MediaManager {
      * Entfernt einen Track von einer Playlist.
      *
      * @param playListId Die ID der Playlist
-     * @param trackId    Die ID des Tracks
+     * @param list       Liste von Track-IDs
      */
-    public static void removeTrackFromPlaylist(int playListId, int trackId) {
+    public static void removeTracksFromPlaylist(int playListId, Integer[] list) {
         PlayList playList = getPlayList(playListId);
-        TrackWrapper track = getTrack(trackId);
-
-        if (track == null || playList == null)
+        if (playList == null)
             return;
 
-        DbManager.removeTrackFromPlaylist(playList, track);
-        playList.removeTrack(track);
+        for (Integer trackId : list) {
+            TrackWrapper track = getTrack(trackId);
+
+            if (track == null)
+                continue;
+
+            DbManager.removeTrackFromPlaylist(playList, track);
+            playList.removeTrack(track);
+        }
     }
 
     /**
