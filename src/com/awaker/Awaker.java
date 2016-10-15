@@ -50,8 +50,6 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     private Awaker(boolean isWindows) {
         isMSWindows = isWindows;
 
-        new LegacyUploadServer(this);
-
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> Log.error(e));
 
         /*if (isMSWindows)
