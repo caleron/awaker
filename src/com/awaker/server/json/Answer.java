@@ -12,20 +12,20 @@ public class Answer {
     private String type;
 
     public String colorMode;
-    public int currentColor;
-    public int whiteBrightness;
-    public int animationBrightness;
+    public Integer currentColor;
+    public Integer whiteBrightness;
+    public Integer animationBrightness;
 
     public String currentTitle;
     public String currentAlbum;
     public String currentArtist;
-    public int currentTrackId;
+    public Integer currentTrackId;
     public String repeatMode;
-    public int volume;
-    public int trackLength;
-    public int playPosition;
-    public boolean playing;
-    public boolean shuffle;
+    public Integer volume;
+    public Integer trackLength;
+    public Integer playPosition;
+    public Boolean playing;
+    public Boolean shuffle;
 
     public List<Track> tracks;
     public List<Playlist> playLists;
@@ -36,7 +36,7 @@ public class Answer {
     public HashMap<String, String> config;
     public String[] configOptions;
 
-    private boolean fileNotFound;
+    private Boolean fileNotFound;
 
     public Answer() {
     }
