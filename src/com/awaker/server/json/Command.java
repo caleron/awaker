@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 public class Command {
+    //TODO commands können auch vom server zum client gesendet werden, etwa beim Hinzufügen eines Tracks zu einer Playlist,
+    //damit nicht zu jedem Client die gesamte Library geschickt werden muss
 
     private static final String PLAY = "play";
     private static final String PLAY_ID = "playId";
@@ -60,27 +62,27 @@ public class Command {
 
     private String name;
     private String value;
-    private int playlistId;
-    private int trackId;
+    private Integer playlistId;
+    private Integer trackId;
     private Integer[] idList;
 
     private String title;
     private String artist;
     private String fileName;
 
-    private int position;
-    private int length;
+    private Integer position;
+    private Integer length;
     private String repeatMode;
 
-    private int red;
-    private int green;
-    private int blue;
-    private boolean smooth;
+    private Integer red;
+    private Integer green;
+    private Integer blue;
+    private Boolean smooth;
 
-    private boolean shuffle;
-    private int volume;
-    private int brightness;
-    private int color;
+    private Boolean shuffle;
+    private Integer volume;
+    private Integer brightness;
+    private Integer color;
 
     private String colorMode;
     private String visualisation;
@@ -90,6 +92,7 @@ public class Command {
     }
 
     public Answer execute(ServerListener listener) throws Exceptions.CloseSocket, Exceptions.ShutdownServer, Exceptions.ShutdownRaspi, Exceptions.RebootServer, Exceptions.RebootRaspi {
+        boolean returnLibrary = false;
 
         switch (action) {
             case PLAY:
@@ -172,18 +175,22 @@ public class Command {
 
             case CREATE_PLAYLIST:
                 listener.createPlaylist(name);
+                returnLibrary = true;
                 break;
 
             case REMOVE_PLAYLIST:
                 listener.removePlaylist(playlistId);
+                returnLibrary = true;
                 break;
 
             case ADD_TRACKS_TO_PLAYLIST:
                 listener.addTracksToPlaylist(playlistId, idList);
+                returnLibrary = true;
                 break;
 
             case REMOVE_TRACKS_FROM_PLAYLIST:
                 listener.removeTracksFromPlaylist(playlistId, idList);
+                returnLibrary = true;
                 break;
 
             case PLAY_PLAYLIST:
@@ -200,6 +207,7 @@ public class Command {
 
             case ADD_TRACKS_TO_QUEUE:
                 listener.addTracksToQueue(idList);
+                returnLibrary = true;
                 break;
 
             case GET_STATUS:
@@ -207,7 +215,8 @@ public class Command {
                 break;
 
             case GET_LIBRARY:
-                return getLibrary(listener.getStatus(Answer.library()));
+                returnLibrary = true;
+                break;
 
             case SEND_STRING:
                 listener.stringReceived(text);
@@ -249,6 +258,9 @@ public class Command {
                 throw new Exceptions.CloseSocket();
         }
 
+        if (returnLibrary) {
+            return getLibrary(listener.getStatus(Answer.library()));
+        }
         return listener.getStatus(Answer.status());
     }
 
