@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 //TODO CommandRouter
 public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackListener, AnalogListener {
     //Ausgabefenster und -feld beim Betrieb auf Windows
@@ -296,7 +297,7 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public void removeTracksFromPlaylist(int playlistId,  Integer[] list) {
+    public void removeTracksFromPlaylist(int playlistId, Integer[] list) {
         MediaManager.removeTracksFromPlaylist(playlistId, list);
     }
 
@@ -318,6 +319,11 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     @Override
     public void removeTracksFromQueue(Integer[] idList) {
         playerMaster.removeTracksFromQueue(idList);
+    }
+
+    @Override
+    public void playTrackOfQueue(Integer id) {
+        playerMaster.playTrackOfQueue(id);
     }
 
     @Override

@@ -84,13 +84,13 @@ class TrackQueue implements ConfigChangeListener {
     /**
      * Setzt den aktuellen Track anhand dessen ID. Falls die ID nciht existiert, geschieht nichts.
      *
-     * @param id Die ID des Tracks.
+     * @param trackId Die ID des Tracks.
      */
-    void setCurrentTrack(int id) {
+    void setCurrentTrack(int trackId) {
         ArrayList<TrackWrapper> currentList = getCurrentList();
         for (int i = 0; i < currentList.size(); i++) {
             TrackWrapper track = currentList.get(i);
-            if (track.getId() == id)
+            if (track.getId() == trackId)
                 currentTrackIndex = i;
         }
     }

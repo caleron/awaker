@@ -115,6 +115,18 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     }
 
     /**
+     * Spielt einen Track aus der Queue ab.
+     *
+     * @param trackId Die ID des Tracks
+     * @return False, falls track null ist.
+     */
+    public synchronized boolean playTrackOfQueue(int trackId) {
+        trackQueue.setCurrentTrack(trackId);
+
+        return playCurrentTrack();
+    }
+
+    /**
      * Spielt einen Track aus der All-PlayList ab.
      *
      * @param trackId Die Track-ID des abzuspieldenden Tracks

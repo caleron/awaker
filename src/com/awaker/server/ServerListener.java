@@ -78,4 +78,6 @@ public interface ServerListener {
     void addTracksToQueue(Integer[] list);
 
     void removeTracksFromQueue(Integer[] idList);
+
+    void playTrackOfQueue(Integer id);
 }
