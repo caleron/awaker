@@ -316,6 +316,11 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
+    public void removeTracksFromQueue(Integer[] idList) {
+        playerMaster.removeTracksFromQueue(idList);
+    }
+
+    @Override
     public Answer getStatus(Answer answer) {
         playerMaster.getStatus(answer);
         if (!isMSWindows) {

@@ -166,6 +166,27 @@ class TrackQueue implements ConfigChangeListener {
     }
 
     /**
+     * Entfernt einen Track aus der Warteschlange.
+     *
+     * @param id Die Id des Tracks.
+     */
+    void removeFromQueue(int id) {
+        for (int i = 0; i < tracks.size(); i++) {
+            if (tracks.get(i).getId() == id) {
+                tracks.remove(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < shuffledTracks.size(); i++) {
+            if (shuffledTracks.get(i).getId() == id) {
+                shuffledTracks.remove(i);
+                break;
+            }
+        }
+    }
+
+    /**
      * Fügt den Track zur ID als nächstes in die Warteschlange ein.
      *
      * @param id Die ID des Tracks.

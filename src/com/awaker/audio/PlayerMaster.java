@@ -223,6 +223,17 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     }
 
     /**
+     * Entfernt eine Trackmenge aus der Warteschlange.
+     *
+     * @param list Array von Track-IDs
+     */
+    public synchronized void removeTracksFromQueue(Integer[] list) {
+        for (Integer trackId : list) {
+            trackQueue.removeFromQueue(trackId);
+        }
+    }
+
+    /**
      * Fügt den Track zur ID als nächstes in die Warteschlange ein.
      *
      * @param id Die ID des Tracks.

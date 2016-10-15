@@ -45,6 +45,7 @@ public class Command {
     private static final String PLAY_PLAYLIST = "playPlaylist";
     private static final String PLAY_TRACK_OF_PLAYLIST = "playTrackOfPlaylist";
     private static final String ADD_TRACKS_TO_QUEUE = "addTracksToQueue";
+    private static final String REMOVE_TRACKS_FROM_QUEUE = "removeTracksFromQueue";
     private static final String PLAY_TRACK_NEXT = "playTrackNext";
     private static final String GET_STATUS = "getStatus";
     private static final String GET_LIBRARY = "getLibrary";
@@ -207,6 +208,11 @@ public class Command {
 
             case ADD_TRACKS_TO_QUEUE:
                 listener.addTracksToQueue(idList);
+                returnLibrary = true;
+                break;
+
+            case REMOVE_TRACKS_FROM_QUEUE:
+                listener.removeTracksFromQueue(idList);
                 returnLibrary = true;
                 break;
 
