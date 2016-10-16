@@ -1,14 +1,49 @@
-package com.awaker.util;
+package com.awaker.control;
 
 import com.awaker.Awaker;
+import com.awaker.global.*;
+import com.awaker.server.json.Answer;
+import com.awaker.server.json.JsonCommand;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class RaspiControl {
+public class RaspiControl implements CommandHandler {
 
-    public static boolean reboot() {
+    public static void init() {
+        CommandRouter.registerHandler(ControlCommand.class, new RaspiControl());
+    }
+
+    @Override
+    public Answer handleCommand(Command command, JsonCommand data) {
+        if (!(command instanceof ControlCommand)) {
+            throw new RuntimeException("Received Wrong Command");
+        }
+
+        ControlCommand cmd = (ControlCommand) command;
+
+        //in jedem Fall wird der Server beendet
+        EventRouter.raiseEvent(GlobalEvent.SHUTDOWN);
+
+        switch (cmd) {
+            case REBOOT_RASPI:
+                reboot();
+                break;
+            case SHUTDOWN_SERVER:
+                System.exit(0);
+                break;
+            case SHUTDOWN_RASPI:
+                shutdown();
+                break;
+            case REBOOT_SERVER:
+                restartApplication();
+                break;
+        }
+        return null;
+    }
+
+    private static boolean reboot() {
         String operatingSystem = System.getProperty("os.name");
 
         return "Linux".equals(operatingSystem) && execCommand("reboot now");
@@ -17,7 +52,7 @@ public class RaspiControl {
     /**
      * http://stackoverflow.com/a/25666/6655315
      */
-    public static boolean shutdown() {
+    private static boolean shutdown() {
         String operatingSystem = System.getProperty("os.name");
 
         return "Linux".equals(operatingSystem) && execCommand("shutdown -h now");
@@ -39,7 +74,7 @@ public class RaspiControl {
      * <p>
      * Quelle: http://stackoverflow.com/questions/4159802/how-can-i-restart-a-java-application
      */
-    public static void restartApplication() {
+    private static void restartApplication() {
         String operatingSystem = System.getProperty("os.name");
 
         final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";

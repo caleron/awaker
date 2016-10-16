@@ -2,17 +2,23 @@ package com.awaker.config;
 
 
 import com.awaker.data.DbManager;
+import com.awaker.global.Command;
+import com.awaker.global.CommandHandler;
+import com.awaker.global.CommandRouter;
+import com.awaker.server.json.Answer;
+import com.awaker.server.json.JsonCommand;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class Config {
+public class Config implements CommandHandler {
     private static final String TABLE_NAME = "config";
     private static final String NAME = "name";
     private static final String VALUE = "value";
 
     private static HashMap<String, String> config;
+    //TODO map umdrehen, zu ConfigKey, ConfigChangeListener
     private static HashMap<ConfigChangeListener, ConfigKey[]> listeners;
     /**
      * Listener, die Synchron aufgerufen werden sollen
@@ -23,6 +29,37 @@ public class Config {
         config = DbManager.getConfig();
         listeners = new HashMap<>();
         listenersSync = new HashMap<>();
+        CommandRouter.registerHandler(ConfigCommand.class, new Config());
+    }
+
+    @Override
+    public Answer handleCommand(Command command, JsonCommand data) {
+        if (!(command instanceof ConfigCommand)) {
+            throw new RuntimeException("Received Wrong Command");
+        }
+
+        ConfigCommand cmd = (ConfigCommand) command;
+
+        Answer answer = Answer.config();
+        switch (cmd) {
+            case GET_CONFIG:
+                answer.name = data.name;
+                answer.value = getString(ConfigKey.getForKey(data.name));
+                break;
+            case GET_CONFIG_LIST:
+                answer.config = getConfig();
+                break;
+            case GET_CONFIG_OPTIONS:
+                answer.configOptions = getConfigOptions();
+                break;
+            case SET_CONFIG:
+                answer.name = data.name;
+                ConfigKey key = ConfigKey.getForKey(data.name);
+                set(key, data.value);
+                answer.value = getString(key);
+                break;
+        }
+        return answer;
     }
 
     public static void addListener(ConfigChangeListener listener, ConfigKey key) {
@@ -87,7 +124,7 @@ public class Config {
         return Integer.valueOf(getString(key));
     }
 
-    public static String[] getConfigOptions() {
+    private static String[] getConfigOptions() {
         ConfigKey[] values = ConfigKey.values();
         ArrayList<String> list = new ArrayList<>();
         for (ConfigKey value : values) {
@@ -96,7 +133,7 @@ public class Config {
         return list.toArray(new String[list.size()]);
     }
 
-    public static HashMap<String, String> getConfig() {
+    private static HashMap<String, String> getConfig() {
         return config;
     }
 

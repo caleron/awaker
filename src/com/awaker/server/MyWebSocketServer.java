@@ -1,12 +1,12 @@
 package com.awaker.server;
 
 
-import com.awaker.server.json.Answer;
-import com.awaker.server.json.Command;
-import com.awaker.server.json.Exceptions;
+import com.awaker.global.CommandRouter;
+import com.awaker.global.DataCommand;
 import com.awaker.config.PortConfig;
+import com.awaker.server.json.Answer;
+import com.awaker.server.json.JsonCommand;
 import com.awaker.util.Log;
-import com.awaker.util.RaspiControl;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -22,7 +22,6 @@ import java.util.Collection;
  */
 public class MyWebSocketServer extends WebSocketServer {
     private final Gson gson;
-    private final ServerListener listener;
 
     //Timer, der 500ms nach dem letzten Befehl den Status sendet.
     private Timer timer = new Timer(500, e -> sendStatus());
@@ -34,12 +33,9 @@ public class MyWebSocketServer extends WebSocketServer {
      * Erstellt eine neue Instanz.
      * Verschlüsselung einführen, wenn ssl-server verwendet wird
      * http://stackoverflow.com/questions/9745249/html5-websocket-with-ssl
-     *
-     * @param listener Der {@link ServerListener}.
      */
-    public MyWebSocketServer(ServerListener listener) {
+    public MyWebSocketServer() {
         super(new InetSocketAddress(PortConfig.WEBSOCKET_PORT));
-        this.listener = listener;
         gson = new Gson();
 
         timer.setRepeats(false);
@@ -51,7 +47,7 @@ public class MyWebSocketServer extends WebSocketServer {
      */
     public void sendStatus() {
         longerTimer.stop();
-        Answer answer = listener.getStatus(Answer.status());
+        Answer answer = CommandRouter.handleCommand(DataCommand.GET_STATUS);
         Collection<WebSocket> connections = connections();
         String statusString = gson.toJson(answer);
 
@@ -73,21 +69,15 @@ public class MyWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         System.out.println(message);
-        Command command = gson.fromJson(message, Command.class);
+        JsonCommand jsonCommand = gson.fromJson(message, JsonCommand.class);
 
         try {
-            conn.send(gson.toJson(command.execute(listener)));
-        } catch (Exceptions.CloseSocket closeSocket) {
-            conn.close();
-        } catch (Exceptions.ShutdownServer e) {
-            conn.close();
-            listener.shutdown();
-        } catch (Exceptions.RebootServer e1) {
-            RaspiControl.restartApplication();
-        } catch (Exceptions.ShutdownRaspi e2) {
-            RaspiControl.shutdown();
-        } catch (Exceptions.RebootRaspi e3) {
-            RaspiControl.reboot();
+            Answer answer = CommandRouter.handleCommand(jsonCommand);
+            if (answer != null) {
+                conn.send(gson.toJson(answer));
+            }
+        } catch (Exception e) {
+            Log.error(e);
         }
 
         if (connections().size() > 1) {

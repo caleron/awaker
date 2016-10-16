@@ -1,6 +1,10 @@
 package com.awaker.data;
 
+import com.awaker.audio.AudioCommand;
 import com.awaker.audio.PlayList;
+import com.awaker.global.*;
+import com.awaker.server.json.Answer;
+import com.awaker.server.json.JsonCommand;
 import com.awaker.server.json.Playlist;
 import com.awaker.util.Log;
 import com.mpatric.mp3agic.*;
@@ -8,32 +12,54 @@ import com.mpatric.mp3agic.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 /**
  * Verwendet Mp3agic https://github.com/mpatric/mp3agic
  */
-public class MediaManager {
+public class MediaManager implements CommandHandler {
 
     private static Random rand = new Random();
     private static ArrayList<TrackWrapper> allTracks;
     private static ArrayList<PlayList> playLists;
 
-    private static List<MediaEventListener> listeners = new ArrayList<>();
-
-    public static void addListener(MediaEventListener listener) {
-        listeners.add(listener);
-    }
-
-    private static void raiseMediaReadyEvent() {
-        for (MediaEventListener listener : listeners) {
-            listener.mediaReady();
-        }
-    }
-
     public static void init() {
         new Thread(MediaManager::scanFiles).start();
+        CommandRouter.registerHandler(MediaCommand.class, new MediaManager());
+    }
+
+    @Override
+    public Answer handleCommand(Command command, JsonCommand data) {
+        if (!(command instanceof MediaCommand)) {
+            throw new RuntimeException("Received Wrong Command");
+        }
+
+        MediaCommand cmd = (MediaCommand) command;
+        switch (cmd) {
+            case CHECK_FILE:
+                TrackWrapper track = DbManager.getTrack(data.title, data.artist);
+                if (track != null) {
+                    File file = new File(track.filePath);
+
+                    if (!file.exists()) {
+                        return Answer.fileNotFound();
+                    }
+                }
+                break;
+            case CREATE_PLAYLIST:
+                createPlaylist(data.name);
+                break;
+            case REMOVE_PLAYLIST:
+                removePlaylist(data.playlistId);
+                break;
+            case ADD_TRACKS_TO_PLAYLIST:
+                addTracksToPlaylist(data.playlistId, data.idList);
+                break;
+            case REMOVE_TRACKS_FROM_PLAYLIST:
+                removeTracksFromPlaylist(data.playlistId, data.idList);
+                break;
+        }
+        return null;
     }
 
     /**
@@ -61,7 +87,6 @@ public class MediaManager {
         return null;
     }
 
-
     private static void loadTracks() {
         allTracks = DbManager.getAllTracks();
         if (allTracks != null) {
@@ -71,10 +96,11 @@ public class MediaManager {
         }
     }
 
+
     private static void loadData() {
         loadTracks();
         loadPlaylists();
-        raiseMediaReadyEvent();
+        EventRouter.raiseEvent(GlobalEvent.MEDIA_READY);
     }
 
     private static void loadPlaylists() {
@@ -97,6 +123,11 @@ public class MediaManager {
 
         //Pfade der dateien sind relativ, also beginnen mit media/
         File[] files = folder.listFiles(file -> file.isFile() && file.getPath().endsWith(".mp3"));
+
+        if (files == null) {
+            Log.error("Cant read media directory");
+            return;
+        }
 
         ArrayList<File> fileList = new ArrayList<>(Arrays.asList(files));
 
@@ -151,9 +182,29 @@ public class MediaManager {
      * @param is       Der InputStream
      * @param length   Die Dateilänge
      * @param fileName Der Dateiname
+     * @param play     True, wenn die Datei direkt abgespielt werden soll.
      * @return TrackWrapper zum Track
      */
-    public static TrackWrapper downloadFile(InputStream is, int length, String fileName) {
+    public static TrackWrapper downloadFile(InputStream is, int length, String fileName, boolean play) {
+        TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
+
+        if (play && track != null) {
+            JsonCommand data = new JsonCommand();
+            data.trackId = track.getId();
+            CommandRouter.handleCommand(AudioCommand.PLAY_ID, data);
+        }
+        return track;
+    }
+
+    /**
+     * Lädt einen Track in eine Datei und integriert diesen in die Datenbank.
+     *
+     * @param is       Der InputStream
+     * @param length   Die Dateilänge
+     * @param fileName Der Dateiname
+     * @return TrackWrapper zum Track
+     */
+    private static TrackWrapper downloadFile(InputStream is, int length, String fileName) {
         fileName = "media/" + fileName;
 
         final int BUFFER_SIZE = 8192;
@@ -294,7 +345,7 @@ public class MediaManager {
      *
      * @param name Der Name der Playlist.
      */
-    public static void createPlaylist(String name) {
+    private static void createPlaylist(String name) {
         DbManager.createPlaylist(name);
         loadPlaylists();
     }
@@ -305,7 +356,7 @@ public class MediaManager {
      *
      * @param playListId Die ID der zu löschenden Playlist.
      */
-    public static void removePlaylist(int playListId) {
+    private static void removePlaylist(int playListId) {
 
         DbManager.removePlaylist(playListId);
         loadPlaylists();
@@ -317,7 +368,7 @@ public class MediaManager {
      * @param playListId Die ID der Playlist
      * @param list       Liste von Track-IDs
      */
-    public static void addTracksToPlaylist(int playListId, Integer[] list) {
+    private static void addTracksToPlaylist(int playListId, Integer[] list) {
         PlayList playList = getPlayList(playListId);
         if (playList == null)
             return;
@@ -340,7 +391,7 @@ public class MediaManager {
      * @param playListId Die ID der Playlist
      * @param list       Liste von Track-IDs
      */
-    public static void removeTracksFromPlaylist(int playListId, Integer[] list) {
+    private static void removeTracksFromPlaylist(int playListId, Integer[] list) {
         PlayList playList = getPlayList(playListId);
         if (playList == null)
             return;

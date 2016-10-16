@@ -1,5 +1,8 @@
 package com.awaker.gpio;
 
+import com.awaker.audio.AudioCommand;
+import com.awaker.global.CommandRouter;
+import com.awaker.server.json.JsonCommand;
 import com.awaker.util.Log;
 import com.pi4j.gpio.extension.mcp.MCP3008GpioProvider;
 import com.pi4j.gpio.extension.mcp.MCP3008Pin;
@@ -16,8 +19,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class AnalogControls implements GpioPinListenerAnalog {
-    private AnalogListener listener;
-
     private static final int TOLERANCE = 10;
     private static final int INITIAL_THRESHOLD = 30;
     private static final int THRESHOLD_TIME = 5000;
@@ -36,18 +37,16 @@ public class AnalogControls implements GpioPinListenerAnalog {
     private GpioPinAnalogInput pin_green;
     private GpioPinAnalogInput pin_blue;
 
-    private HashMap<GpioPinAnalogInput, Double> lastValues = new HashMap<>();
-    private HashMap<GpioPinAnalogInput, Long> lastChange = new HashMap<>();
+    private final HashMap<GpioPinAnalogInput, Double> lastValues = new HashMap<>();
+    private final HashMap<GpioPinAnalogInput, Long> lastChange = new HashMap<>();
 
-    public AnalogControls(AnalogListener listener) {
-        this.listener = listener;
-
+    public AnalogControls() {
         MCP3008GpioProvider provider = null;
 
         try {
             provider = new MCP3008GpioProvider(SpiChannel.CS0);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
 
         if (provider == null) {
@@ -111,26 +110,32 @@ public class AnalogControls implements GpioPinListenerAnalog {
         lastValues.put(pin, value);
         int newValue = (int) ((event.getValue() / 1023.0) * 100.0);
 
+        JsonCommand data = new JsonCommand();
         if (pin_volume.equals(pin)) {
-            listener.setVolume(newValue);
-
-        } else if (pin_white.equals(pin)) {
-            listener.setWhiteBrightness(newValue, false);
-
-        } else if (pin_animation.equals(pin)) {
-            listener.setAnimationBrightness(newValue, false);
-
-        } else if (pin_red.equals(pin)) {
-            listener.setRed(newValue, false);
-
-        } else if (pin_green.equals(pin)) {
-            listener.setGreen(newValue, false);
-
-        } else if (pin_blue.equals(pin)) {
-            listener.setBlue(newValue, false);
+            data.volume = newValue;
+            CommandRouter.handleCommand(AudioCommand.SET_VOLUME, data);
 
         } else {
-            Log.message("received event from unknown pin: " + event.getPin().getName());
+            data.brightness = newValue;
+            data.smooth = false;
+            if (pin_white.equals(pin)) {
+                CommandRouter.handleCommand(LightCommand.SET_WHITE_BRIGHTNESS, data);
+
+            } else if (pin_animation.equals(pin)) {
+                CommandRouter.handleCommand(LightCommand.SET_ANIMATION_BRIGHTNESS, data);
+
+            } else if (pin_red.equals(pin)) {
+                CommandRouter.handleCommand(LightCommand.SET_RED_BRIGHTNESS, data);
+
+            } else if (pin_green.equals(pin)) {
+                CommandRouter.handleCommand(LightCommand.SET_GREEN_BRIGHTNESS, data);
+
+            } else if (pin_blue.equals(pin)) {
+                CommandRouter.handleCommand(LightCommand.SET_BLUE_BRIGHTNESS, data);
+
+            } else {
+                Log.message("received event from unknown pin: " + event.getPin().getName());
+            }
         }
     }
 }

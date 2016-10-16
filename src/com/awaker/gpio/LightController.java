@@ -1,11 +1,16 @@
 package com.awaker.gpio;
 
+import com.awaker.audio.PlayerMaster;
+import com.awaker.global.Command;
+import com.awaker.global.CommandHandler;
+import com.awaker.global.CommandRouter;
 import com.awaker.server.json.Answer;
+import com.awaker.server.json.JsonCommand;
 import com.awaker.util.Log;
 
 import java.awt.*;
 
-public class LightController {
+public class LightController implements CommandHandler {
 
     private int animationBrightness = 100;
 
@@ -14,7 +19,7 @@ public class LightController {
     private static final int PWM_PIN_BLUE = 0;
     private static final int PWM_PIN_WHITE = 8;
 
-    private PwmPin white, red, green, blue;
+    private final PwmPin white, red, green, blue;
     //Steht für die letzte über die Funktion updateColor gesetzte Farbe
     private Color currentColor = Color.BLACK;
 
@@ -35,7 +40,57 @@ public class LightController {
         blue = new PwmPin(PWM_PIN_BLUE);
         green = new PwmPin(PWM_PIN_GREEN);
 
+        CommandRouter.registerHandler(LightCommand.class, this);
         Log.message("Lightcontroller initialisiert");
+    }
+
+    @Override
+    public Answer handleCommand(Command command, JsonCommand data) {
+        if (!(command instanceof LightCommand)) {
+            throw new RuntimeException("Received Wrong Command");
+        }
+
+        LightCommand cmd = (LightCommand) command;
+        switch (cmd) {
+            case CHANGE_VISUALIZATION:
+                break;
+            case SET_ANIMATION_BRIGHTNESS:
+                setAnimationBrightness(data.brightness, data.smooth);
+                break;
+            case SET_COLOR:
+                Color color = new Color(data.color, false);
+                if (data.smooth) {
+                    updateColorSmooth(color);
+                } else {
+                    updateColor(color, false);
+                }
+                break;
+            case SET_COLOR_MODE:
+                setColorMode(data.colorMode);
+                PlayerMaster.getInstance().setColorMode(!data.colorMode.equals("music"));
+                break;
+            case SET_RGBCOLOR:
+                color = new Color(data.red, data.green, data.blue);
+                if (data.smooth) {
+                    updateColorSmooth(color);
+                } else {
+                    updateColor(color, false);
+                }
+                break;
+            case SET_WHITE_BRIGHTNESS:
+                setBrightness(LightChannel.WHITE, data.brightness, data.smooth);
+                break;
+            case SET_BLUE_BRIGHTNESS:
+                setBrightness(LightChannel.BLUE, data.brightness, data.smooth);
+                break;
+            case SET_GREEN_BRIGHTNESS:
+                setBrightness(LightChannel.GREEN, data.brightness, data.smooth);
+                break;
+            case SET_RED_BRIGHTNESS:
+                setBrightness(LightChannel.RED, data.brightness, data.smooth);
+                break;
+        }
+        return null;
     }
 
     /**
@@ -81,12 +136,8 @@ public class LightController {
         }
     }
 
-    public void setBrightness(LightChannel channel, int value) {
-        setBrightness(channel, value, false);
-    }
-
     @SuppressWarnings("Duplicates")
-    public void setBrightness(LightChannel channel, int value, boolean smooth) {
+    public void setBrightness(LightChannel channel, int value, Boolean smooth) {
         switch (channel) {
             case WHITE:
                 white.setValue(value, smooth);
@@ -175,7 +226,7 @@ public class LightController {
      *
      * @param newValue Farbhelligkeit als Wert zwischen 0 und 100
      */
-    public void setAnimationBrightness(int newValue, boolean smooth) {
+    private void setAnimationBrightness(int newValue, boolean smooth) {
         //wert zwischen 0 und 100 sicherstellen
         if (smooth) {
             new Thread(() -> {
@@ -222,7 +273,7 @@ public class LightController {
      *
      * @param color Die Farbe
      */
-    public void updateColorSmooth(Color color) {
+    private void updateColorSmooth(Color color) {
         currentColor = color;
         red.setValue((int) ((color.getRed() / 255f) * 100), true);
         green.setValue((int) ((color.getGreen() / 255f) * 100), true);
@@ -257,7 +308,7 @@ public class LightController {
      *
      * @param colorMode Der Farbmodus
      */
-    public void setColorMode(String colorMode) {
+    private void setColorMode(String colorMode) {
         this.colorMode = colorMode;
 
         switch (colorMode) {

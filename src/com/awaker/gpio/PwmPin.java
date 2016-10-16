@@ -2,16 +2,13 @@ package com.awaker.gpio;
 
 import com.pi4j.wiringpi.SoftPwm;
 
-/**
- * Created by Patrick on 18.09.2016.
- */
-public class PwmPin {
+class PwmPin {
     private final int pin;
     private int value;
 
     private Thread smoothThread;
 
-    public PwmPin(int pin) {
+    PwmPin(int pin) {
         this.pin = pin;
         SoftPwm.softPwmCreate(pin, 0, 100);
     }
@@ -28,7 +25,7 @@ public class PwmPin {
         SoftPwm.softPwmWrite(pin, value);
     }
 
-    public void setValue(int value, boolean smooth) {
+    void setValue(int value, Boolean smooth) {
         //wert zwischen 0 und 100 sicherstellen
         value = Math.max(0, Math.min(100, value));
 
@@ -40,7 +37,7 @@ public class PwmPin {
         }
     }
 
-    public void setValue(int value, int duration) {
+    void setValue(int value, int duration) {
         //wert zwischen 0 und 100 sicherstellen
         value = Math.max(0, Math.min(100, value));
 

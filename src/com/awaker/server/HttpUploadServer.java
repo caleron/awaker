@@ -1,9 +1,10 @@
 package com.awaker.server;
 
 import com.awaker.Awaker;
+import com.awaker.config.PortConfig;
+import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.server.json.UploadAnswer;
-import com.awaker.config.PortConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -16,21 +17,15 @@ import java.util.concurrent.Executors;
 
 public class HttpUploadServer implements HttpHandler {
 
-    private ServerListener listener;
-
-    public static void start(ServerListener listener) {
+    public static void start() {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(PortConfig.HTTP_UPLOAD_PORT), 0);
-            server.createContext("/", new HttpUploadServer(listener));
+            server.createContext("/", new HttpUploadServer());
             server.setExecutor(Executors.newCachedThreadPool());
             server.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public HttpUploadServer(ServerListener listener) {
-        this.listener = listener;
     }
 
     @Override
@@ -56,7 +51,7 @@ public class HttpUploadServer implements HttpHandler {
 
                 //Datei runterladen und integrieren
                 InputStream is = httpExchange.getRequestBody();
-                TrackWrapper wrapper = listener.downloadFile(is, length, fileName, false);
+                TrackWrapper wrapper = MediaManager.downloadFile(is, length, fileName, false);
 
                 //antwort generieren
                 answer = new UploadAnswer(wrapper, fileName);

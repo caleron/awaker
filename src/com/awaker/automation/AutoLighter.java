@@ -20,11 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 class AutoLighter implements ConfigChangeListener {
     private final EnvironmentEventListener listener;
-    private SunriseSunsetCalculator calculator;
+    private final SunriseSunsetCalculator calculator;
     private ZonedDateTime sunrise;
     private ZonedDateTime sunset;
 
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> sunriseSchedule, sunsetSchedule, midnightSchedule;
 
     private AutoLighter(EnvironmentEventListener listener) {

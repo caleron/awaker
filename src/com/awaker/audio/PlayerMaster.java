@@ -4,10 +4,11 @@ import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.FFTAnalyzer;
 import com.awaker.config.Config;
 import com.awaker.config.ConfigKey;
-import com.awaker.data.MediaEventListener;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.global.*;
 import com.awaker.server.json.Answer;
+import com.awaker.server.json.JsonCommand;
 import com.awaker.util.Log;
 import javazoom.jl.decoder.JavaLayerException;
 
@@ -16,15 +17,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PlayerMaster implements PlayerListener, MediaEventListener {
+public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiver {
     private static PlayerMaster instance = null;
     private TrackQueue trackQueue;
 
     private CustomPlayer player;
     private final FFTAnalyzer analyzer;
     private boolean customColorMode = false;
-
-    private final PlaybackListener playbackListener;
 
     private int volume = 100;
 
@@ -34,7 +33,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @param analyzeResultListener Der Listener für die Ergebnisse der Analyse mit FFT
      */
-    public PlayerMaster(PlaybackListener playbackListener, AnalyzeResultListener analyzeResultListener) {
+    public PlayerMaster(AnalyzeResultListener analyzeResultListener) {
         //Nur eine Instanz erlauben, damit nicht 2 Songs gleichzeitig abgespielt werden können.
         if (instance != null) {
             throw new RuntimeException("PlayerMaster already existing");
@@ -42,13 +41,94 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
         instance = this;
 
         analyzer = new FFTAnalyzer(analyzeResultListener);
-        this.playbackListener = playbackListener;
-        MediaManager.addListener(this);
+
+        CommandRouter.registerHandler(AudioCommand.class, this);
+        EventRouter.registerReceiver(this, GlobalEvent.SHUTDOWN);
+        EventRouter.registerReceiver(this, GlobalEvent.MEDIA_READY);
+    }
+
+    public static PlayerMaster getInstance() {
+        return instance;
     }
 
     @Override
-    public void mediaReady() {
-        trackQueue = TrackQueue.getInstance();
+    public Answer handleCommand(Command command, JsonCommand data) {
+        if (!(command instanceof AudioCommand)) {
+            throw new RuntimeException("Received Wrong Command");
+        }
+
+        AudioCommand cmd = (AudioCommand) command;
+
+        Answer answer = Answer.status();
+        switch (cmd) {
+            case PLAY:
+                play();
+                break;
+            case PLAY_ID:
+                play(data.trackId);
+                break;
+            case PLAY_ID_LIST:
+                playIdList(data.trackId, data.idList);
+                break;
+            case PLAY_FROM_POSITION:
+                playFromPosition(data.position);
+                break;
+            case PAUSE:
+                pause();
+                break;
+            case STOP:
+                stop();
+                break;
+            case TOGGLE_PLAY_PAUSE:
+                togglePlayPause();
+                break;
+            case PLAY_NEXT:
+                playNext();
+                break;
+            case PLAY_PREVIOUS:
+                playPrevious();
+                break;
+            case SET_SHUFFLE:
+                Config.set(ConfigKey.SHUFFLE, data.shuffle);
+                break;
+            case SET_REPEAT_MODE:
+                Config.set(ConfigKey.REPEAT_MODE, data.repeatMode);
+                break;
+            case SET_VOLUME:
+                setVolume(data.volume);
+                break;
+            case PLAY_PLAYLIST:
+                playPlaylist(data.playlistId);
+                break;
+            case PLAY_TRACK_OF_PLAYLIST:
+                playTrackOfPlaylist(data.playlistId, data.trackId);
+                break;
+            case ADD_TRACKS_TO_QUEUE:
+                addTracksToQueue(data.idList);
+                break;
+            case REMOVE_TRACKS_FROM_QUEUE:
+                removeTracksFromQueue(data.idList);
+                break;
+            case PLAY_TRACK_OF_QUEUE:
+                playTrackOfQueue(data.trackId);
+                break;
+            case PLAY_TRACK_NEXT:
+                playTrackNext(data.trackId);
+                break;
+        }
+        return answer;
+    }
+
+    @Override
+    public void receiveGlobalEvent(GlobalEvent globalEvent) {
+        switch (globalEvent) {
+            case SHUTDOWN:
+                stop();
+                break;
+            case MEDIA_READY:
+                trackQueue = TrackQueue.getInstance();
+                break;
+        }
     }
 
     private synchronized boolean playCurrentTrack() {
@@ -96,7 +176,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param position Die Position in Sekunden
      * @return false, wenn die Datei nicht gefunden wurde
      */
-    public synchronized boolean playFromPosition(int position) {
+    private synchronized boolean playFromPosition(int position) {
         return playCurrentTrack(position);
     }
 
@@ -107,7 +187,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param trackId    Die Track-ID des abzuspielenden Tracks
      * @return False, falls playList oder track null sind.
      */
-    public synchronized boolean playTrackOfPlaylist(int playListId, int trackId) {
+    private synchronized boolean playTrackOfPlaylist(int playListId, int trackId) {
         trackQueue.setPlaylist(playListId);
         trackQueue.setCurrentTrack(trackId);
 
@@ -120,7 +200,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param trackId Die ID des Tracks
      * @return False, falls track null ist.
      */
-    public synchronized boolean playTrackOfQueue(int trackId) {
+    private synchronized boolean playTrackOfQueue(int trackId) {
         trackQueue.setCurrentTrack(trackId);
 
         return playCurrentTrack();
@@ -132,7 +212,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param trackId Die Track-ID des abzuspieldenden Tracks
      * @return True, wenn abgespielt wird
      */
-    public synchronized boolean play(int trackId) {
+    private synchronized boolean play(int trackId) {
         return playTrackOfPlaylist(-1, trackId);
     }
 
@@ -141,7 +221,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @return False, falls die playList null ist.
      */
-    public synchronized boolean playPlaylist(int playListId, int firstId) {
+    private synchronized boolean playPlaylist(int playListId, int firstId) {
         trackQueue.setPlaylist(playListId);
         if (firstId >= 0) {
             trackQueue.setCurrentTrack(firstId);
@@ -158,11 +238,11 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      * @param playListId Die ID der Playlist.
      * @return False, falls die playList null ist.
      */
-    public synchronized boolean playPlaylist(int playListId) {
+    private synchronized boolean playPlaylist(int playListId) {
         return playPlaylist(playListId, -1);
     }
 
-    public synchronized boolean playIdList(Integer playNowId, Integer[] list) {
+    private synchronized boolean playIdList(Integer playNowId, Integer[] list) {
         List<Integer> idList = new ArrayList<>(Arrays.asList(list));
         ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
         ArrayList<TrackWrapper> tracks = new ArrayList<>();
@@ -183,7 +263,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Startet die Wiedergabe. wählt den nächsten Song aus, falls die Wiedergabe gestoppt wurde.
      */
-    public synchronized void play() {
+    private synchronized void play() {
         if (player == null || player.getStatus() == PlaybackStatus.STOPPED) {
             playCurrentTrack();
         } else {
@@ -199,7 +279,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Spielt die nächste Datei in der Playlist ab.
      */
-    public synchronized void playNext() {
+    private synchronized void playNext() {
         trackQueue.nextTrack();
         playCurrentTrack();
     }
@@ -207,7 +287,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Spielt den vorigen Song in der Playlist ab.
      */
-    public synchronized void playPrevious() {
+    private synchronized void playPrevious() {
         trackQueue.previousTrack();
         playCurrentTrack();
     }
@@ -215,7 +295,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     /**
      * Wechselt zwischen Play und Pause.
      */
-    public synchronized void tooglePlayPause() {
+    private synchronized void togglePlayPause() {
         if (player != null && player.isPlaying()) {
             pause();
         } else {
@@ -228,7 +308,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @param list Array von Track-IDs
      */
-    public synchronized void addTracksToQueue(Integer[] list) {
+    private synchronized void addTracksToQueue(Integer[] list) {
         for (Integer trackId : list) {
             trackQueue.addToQueue(trackId);
         }
@@ -239,7 +319,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @param list Array von Track-IDs
      */
-    public synchronized void removeTracksFromQueue(Integer[] list) {
+    private synchronized void removeTracksFromQueue(Integer[] list) {
         for (Integer trackId : list) {
             trackQueue.removeFromQueue(trackId);
         }
@@ -250,29 +330,29 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
      *
      * @param id Die ID des Tracks.
      */
-    public synchronized void playTrackNext(int id) {
+    private synchronized void playTrackNext(int id) {
         trackQueue.playAsNext(id);
     }
 
     /**
      * Pausiert die Wiedergabe
      */
-    public synchronized void pause() {
+    private synchronized void pause() {
         if (player != null) {
             player.pause();
             analyzer.reset();
         }
-        playbackListener.playbackPaused();
+        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_PAUSED);
     }
 
     /**
      * Stoppt die Wiedergabe
      */
-    public synchronized void stop() {
+    private synchronized void stop() {
         if (player != null) {
             player.stop();
         }
-        playbackListener.playbackPaused();
+        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_PAUSED);
     }
 
     /**
@@ -358,7 +438,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
         }
     }
 
-    public synchronized void setVolume(int newVolume) {
+    private synchronized void setVolume(int newVolume) {
         this.volume = Math.min(100, Math.max(newVolume, 0));
         if (player != null) {
             player.setVolume(volume);
@@ -378,7 +458,7 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     @Override
     public void playbackFinished() {
         playNext();
-        playbackListener.playbackNewSong();
+        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
     }
 
     @Override
@@ -390,4 +470,5 @@ public class PlayerMaster implements PlayerListener, MediaEventListener {
     public void playbackPaused() {
 
     }
+
 }

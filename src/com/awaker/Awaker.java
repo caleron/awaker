@@ -2,20 +2,23 @@ package com.awaker;
 
 import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.ColorTranslator;
-import com.awaker.audio.PlaybackListener;
+import com.awaker.audio.AudioCommand;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.automation.Automator;
 import com.awaker.config.Config;
-import com.awaker.config.ConfigKey;
+import com.awaker.control.RaspiControl;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.global.*;
 import com.awaker.gpio.AnalogControls;
-import com.awaker.gpio.AnalogListener;
-import com.awaker.gpio.LightChannel;
 import com.awaker.gpio.LightController;
-import com.awaker.server.*;
+import com.awaker.server.HttpUploadServer;
+import com.awaker.server.MyWebSocketServer;
+import com.awaker.server.WebContentServer;
 import com.awaker.server.json.Answer;
+import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.Track;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
 
@@ -24,26 +27,25 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-//TODO CommandRouter
-public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackListener, AnalogListener {
+public class Awaker implements AnalyzeResultListener, CommandHandler, EventReceiver {
     //Ausgabefenster und -feld beim Betrieb auf Windows
     private JFrame stringOutputFrame = null;
     private JTextArea stringOutputBox = null;
     private AwakerPanel panel = null;
 
-    private PlayerMaster playerMaster;
+    private final PlayerMaster playerMaster;
 
     public static final Gson GSON = new Gson();
-    private MyWebSocketServer server;
+    private final MyWebSocketServer server;
 
     private LightController lightController = null;
-    private AnalogControls analogControls = null;
 
     public static boolean isMSWindows = true;
 
@@ -58,22 +60,27 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
         DbManager.init();
         Config.init();
         MediaManager.init();
+        RaspiControl.init();
 
-        playerMaster = new PlayerMaster(this, this);
+        playerMaster = new PlayerMaster(this);
 
         if (isWindows) {
             panel = new AwakerPanel();
         } else {
-            analogControls = new AnalogControls(this);
+            new AnalogControls();
             lightController = new LightController();
         }
         new Automator(lightController);
 
-        server = new MyWebSocketServer(this);
+        server = new MyWebSocketServer();
         server.start();
 
         WebContentServer.start();
-        HttpUploadServer.start(this);
+        HttpUploadServer.start();
+
+        EventRouter.registerReceiver(this, GlobalEvent.PLAYBACK_PAUSED);
+        EventRouter.registerReceiver(this, GlobalEvent.PLAYBACK_NEW_SONG);
+        EventRouter.registerReceiver(this, GlobalEvent.SHUTDOWN);
     }
 
 
@@ -116,264 +123,80 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
     }
 
     @Override
-    public TrackWrapper downloadFile(InputStream is, int length, String fileName, boolean play) {
-        TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
-        if (play && track != null) {
-            playerMaster.play(track.getId());
+    public Answer handleCommand(Command command, JsonCommand data) {
+        if (!(command instanceof DataCommand)) {
+            throw new RuntimeException("Received Wrong Command");
         }
-        return track;
-    }
 
-    @Override
-    public boolean containsFile(TrackWrapper track) {
-        track = DbManager.getTrack(track.title, track.artist);
-        if (track != null) {
-            File file = new File(track.filePath);
+        DataCommand cmd = (DataCommand) command;
 
-            return file.exists();
-        } else {
-            return false;
-        }
-    }
+        Answer answer;
+        switch (cmd) {
+            case GET_LIBRARY:
+                answer = Answer.library();
+                answer.tracks = new ArrayList<>();
+                ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
 
-    @Override
-    public void play() {
-        playerMaster.play();
-    }
+                answer.tracks.addAll(allTracks.stream()
+                        .map(track -> new Track(track.getId(), track.title, track.artist, track.album, track.trackLength))
+                        .collect(Collectors.toList()));
 
-    @Override
-    public void play(int trackId) {
-        playerMaster.play(trackId);
-    }
+                answer.playLists = MediaManager.getPlayListsForJson();
+                break;
+            case GET_STATUS:
+                answer = Answer.status();
+                playerMaster.getStatus(answer);
+                if (!isMSWindows) {
+                    lightController.getStatus(answer);
+                }
+                break;
+            case SEND_STRING:
+                if (isMSWindows) {
+                    if (stringOutputFrame == null) {
+                        stringOutputFrame = new JFrame("Ausgabe");
+                        stringOutputFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
-    @Override
-    public void playFromPosition(int position) {
-        playerMaster.playFromPosition(position);
-    }
-
-    @Override
-    public void pause() {
-        playerMaster.pause();
-    }
-
-    @Override
-    public void stop() {
-        playerMaster.stop();
-    }
-
-    @Override
-    public void playNext() {
-        playerMaster.playNext();
-    }
-
-    @Override
-    public void playPrevious() {
-        playerMaster.playPrevious();
-    }
-
-    @Override
-    public void setShuffle(boolean shuffle) {
-        Config.set(ConfigKey.SHUFFLE, shuffle);
-    }
-
-    @Override
-    public void setVolume(int volume) {
-        playerMaster.setVolume(volume);
-    }
-
-    @Override
-    public void setRepeatMode(String repeatMode) {
-        Config.set(ConfigKey.REPEAT_MODE, repeatMode);
-    }
-
-    @Override
-    public void setAnimationBrightness(int brightness, boolean smooth) {
-        if (!isMSWindows) {
-            lightController.setAnimationBrightness(brightness, smooth);
-        }
-    }
-
-    @Override
-    public void setColor(Color color, boolean smooth) {
-        if (!isMSWindows) {
-            if (smooth) {
-                lightController.updateColorSmooth(color);
-            } else {
-                lightController.updateColor(color, false);
-            }
-        }
-    }
-
-    @Override
-    public void setColorMode(String mode) {
-        if (!isMSWindows) {
-            lightController.setColorMode(mode);
-        }
-        playerMaster.setColorMode(!mode.equals("music"));
-    }
-
-    @Override
-    public void stringReceived(String str) {
-        if (isMSWindows) {
-            if (stringOutputFrame == null) {
-                stringOutputFrame = new JFrame("Ausgabe");
-                stringOutputFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-
-                stringOutputBox = new JTextArea(30, 50);
-                JScrollPane scrollPane = new JScrollPane(stringOutputBox);
-                stringOutputFrame.setContentPane(scrollPane);
-                stringOutputFrame.pack();
-            }
-            stringOutputFrame.setVisible(true);
-            stringOutputBox.setText(stringOutputBox.getText() + "\n" + str);
-        }
-    }
-
-    @Override
-    public void shutdown() {
-        playerMaster.stop();
-
-        System.exit(0);
-    }
-
-    @Override
-    public void setWhiteBrightness(int brightness, boolean smooth) {
-        if (!isMSWindows) {
-            lightController.setBrightness(LightChannel.WHITE, brightness, smooth);
-        }
-    }
-
-    @Override
-    public void setRed(int brightness, boolean smooth) {
-        if (!isMSWindows) {
-            lightController.setBrightness(LightChannel.RED, brightness, smooth);
-        }
-    }
-
-    @Override
-    public void setGreen(int brightness, boolean smooth) {
-        if (!isMSWindows) {
-            lightController.setBrightness(LightChannel.GREEN, brightness, smooth);
-        }
-    }
-
-    @Override
-    public void setBlue(int brightness, boolean smooth) {
-        if (!isMSWindows) {
-            lightController.setBrightness(LightChannel.BLUE, brightness, smooth);
-        }
-    }
-
-    @Override
-    public void changeVisualisation(String newType) {
-
-    }
-
-    @Override
-    public void playPlaylist(int id) {
-        playerMaster.playPlaylist(id);
-    }
-
-    @Override
-    public void playTrackOfPlaylist(int playlistId, int trackId) {
-        playerMaster.playTrackOfPlaylist(playlistId, trackId);
-    }
-
-    @Override
-    public void createPlaylist(String name) {
-        MediaManager.createPlaylist(name);
-    }
-
-    @Override
-    public void removePlaylist(int id) {
-        MediaManager.removePlaylist(id);
-    }
-
-    @Override
-    public void addTracksToPlaylist(int playlistId, Integer[] list) {
-        MediaManager.addTracksToPlaylist(playlistId, list);
-    }
-
-    @Override
-    public void removeTracksFromPlaylist(int playlistId, Integer[] list) {
-        MediaManager.removeTracksFromPlaylist(playlistId, list);
-    }
-
-    @Override
-    public void playIdList(Integer playNowId, Integer[] list) {
-        playerMaster.playIdList(playNowId, list);
-    }
-
-    @Override
-    public void playTrackNext(int id) {
-        playerMaster.playTrackNext(id);
-    }
-
-    @Override
-    public void addTracksToQueue(Integer[] list) {
-        playerMaster.addTracksToQueue(list);
-    }
-
-    @Override
-    public void removeTracksFromQueue(Integer[] idList) {
-        playerMaster.removeTracksFromQueue(idList);
-    }
-
-    @Override
-    public void playTrackOfQueue(Integer id) {
-        playerMaster.playTrackOfQueue(id);
-    }
-
-    @Override
-    public Answer getStatus(Answer answer) {
-        playerMaster.getStatus(answer);
-        if (!isMSWindows) {
-            lightController.getStatus(answer);
+                        stringOutputBox = new JTextArea(30, 50);
+                        JScrollPane scrollPane = new JScrollPane(stringOutputBox);
+                        stringOutputFrame.setContentPane(scrollPane);
+                        stringOutputFrame.pack();
+                    }
+                    stringOutputFrame.setVisible(true);
+                    stringOutputBox.setText(stringOutputBox.getText() + "\n" + data.text);
+                }
+                answer = Answer.fileNotFound();
+                break;
+            default:
+                return null;
         }
         return answer;
     }
 
     @Override
-    public void togglePlayPause() {
-        playerMaster.tooglePlayPause();
-    }
-
-
-    @Override
-    public void playbackPaused() {
-        if (!isMSWindows) {
-            lightController.fadeOutColorLights();
+    public void receiveGlobalEvent(GlobalEvent globalEvent) {
+        switch (globalEvent) {
+            case PLAYBACK_NEW_SONG:
+                server.sendStatus();
+                break;
+            case PLAYBACK_PAUSED:
+                if (!isMSWindows) {
+                    lightController.fadeOutColorLights();
+                }
+                break;
         }
-    }
-
-    @Override
-    public void playbackNewSong() {
-        server.sendStatus();
     }
 
     /**
      * Panel zur grafischen Darstellung der Frequenzanalyse unter Windows
      */
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-    private class AwakerPanel extends JPanel {
+    private static class AwakerPanel extends JPanel {
         private static final long serialVersionUID = 1646200901514802932L;
 
         //Liste mit den Ergebnissen aus der Frequenzanalyse mit FFT
         private List<Map.Entry<Double, Double>> fftResultList;
 
         AwakerPanel() {
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() == MouseEvent.BUTTON1) {
-                        //linke Maustaste
-                        playerMaster.tooglePlayPause();
-                    } else if (e.getButton() == MouseEvent.BUTTON3) {
-                        //rechte Maustaste
-                        playerMaster.playNext();
-                    }
-                }
-            });
+            addMouseListener(new MyMouseAdapter());
         }
 
         @Override
@@ -412,6 +235,19 @@ public class Awaker implements AnalyzeResultListener, ServerListener, PlaybackLi
 
             g.setColor(new Color(0, 0, color.getBlue()));
             g.fillRect(space * 3 + fieldWidth * 2, 0, fieldWidth, fieldHeight);
+        }
+
+        private static class MyMouseAdapter extends MouseAdapter {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    //linke Maustaste
+                    CommandRouter.handleCommand(AudioCommand.TOGGLE_PLAY_PAUSE);
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    //rechte Maustaste
+                    CommandRouter.handleCommand(AudioCommand.PLAY_NEXT);
+                }
+            }
         }
     }
 }

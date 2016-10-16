@@ -15,8 +15,8 @@ public enum ConfigKey {
     LIGHT_ON_SUNSET("light_on_sunset", false),
     SUNSET_TIME_OFFSET_SECONDS("sunset_time_offset_seconds", 0);
 
-    private String key;
-    private Object def;
+    private final String key;
+    private final Object def;
     private String[] possibleValues = null;
 
     ConfigKey(String key, String def, String[] possibleValues) {
