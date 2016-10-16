@@ -70,6 +70,11 @@ public class Answer {
                 .collect(Collectors.toList()));
 
         answer.playLists = MediaManager.getPlayListsForJson();
+
+        PlayerMaster.getInstance().writeStatus(answer);
+        if (!Awaker.isMSWindows) {
+            LightController.getInstance().writeStatus(answer);
+        }
         return answer;
     }
 

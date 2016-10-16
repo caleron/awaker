@@ -5,6 +5,8 @@ import com.awaker.config.ConfigChangeListener;
 import com.awaker.config.ConfigKey;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.global.EventRouter;
+import com.awaker.global.GlobalEvent;
 import com.awaker.server.json.Playlist;
 
 import java.util.ArrayList;
@@ -93,6 +95,8 @@ class TrackQueue implements ConfigChangeListener {
             if (track.getId() == trackId)
                 currentTrackIndex = i;
         }
+
+        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
     }
 
     /**
@@ -115,6 +119,7 @@ class TrackQueue implements ConfigChangeListener {
                 currentTrackIndex++;
             }
         }
+        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
 
         return currentTrack();
     }
@@ -132,6 +137,7 @@ class TrackQueue implements ConfigChangeListener {
                 currentTrackIndex--;
             }
         }
+        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
 
         return currentTrack();
     }

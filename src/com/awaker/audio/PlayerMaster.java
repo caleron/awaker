@@ -457,7 +457,6 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     @Override
     public void playbackFinished() {
         playNext();
-        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
     }
 
     @Override
