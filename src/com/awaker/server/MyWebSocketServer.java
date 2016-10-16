@@ -45,7 +45,7 @@ public class MyWebSocketServer extends WebSocketServer {
     /**
      * Sendet den aktuellen Status an alle aktuellen Clients.
      */
-    public void sendStatus() {
+    void sendStatus() {
         longerTimer.stop();
         Answer answer = CommandRouter.handleCommand(DataCommand.GET_STATUS);
         Collection<WebSocket> connections = connections();

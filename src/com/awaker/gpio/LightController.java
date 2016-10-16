@@ -1,16 +1,14 @@
 package com.awaker.gpio;
 
 import com.awaker.audio.PlayerMaster;
-import com.awaker.global.Command;
-import com.awaker.global.CommandHandler;
-import com.awaker.global.CommandRouter;
+import com.awaker.global.*;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
 
 import java.awt.*;
 
-public class LightController implements CommandHandler {
+public class LightController implements CommandHandler, EventReceiver {
     private static LightController instance = null;
 
     private int animationBrightness = 100;
@@ -47,6 +45,7 @@ public class LightController implements CommandHandler {
         green = new PwmPin(PWM_PIN_GREEN);
 
         CommandRouter.registerHandler(LightCommand.class, this);
+        EventRouter.registerReceiver(this, GlobalEvent.PLAYBACK_PAUSED);
         Log.message("Lightcontroller initialisiert");
     }
 
@@ -103,10 +102,18 @@ public class LightController implements CommandHandler {
         return Answer.status();
     }
 
+    @Override
+    public void receiveGlobalEvent(GlobalEvent globalEvent) {
+        switch (globalEvent) {
+            case PLAYBACK_PAUSED:
+                fadeOutColorLights();
+        }
+    }
+
     /**
      * Startet die langsame Abdunkelung der Farb-LEDs
      */
-    public void fadeOutColorLights() {
+    private void fadeOutColorLights() {
         setBrightness(LightChannel.COLORS, 0, true);
     }
 

@@ -9,12 +9,13 @@ import com.awaker.config.Config;
 import com.awaker.control.RaspiControl;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
-import com.awaker.global.*;
+import com.awaker.global.Command;
+import com.awaker.global.CommandHandler;
+import com.awaker.global.CommandRouter;
+import com.awaker.global.DataCommand;
 import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.LightController;
-import com.awaker.server.HttpUploadServer;
-import com.awaker.server.MyWebSocketServer;
-import com.awaker.server.WebContentServer;
+import com.awaker.server.ServerManager;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
@@ -30,16 +31,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class Awaker implements AnalyzeResultListener, CommandHandler, EventReceiver {
+public class Awaker implements AnalyzeResultListener, CommandHandler {
     //Ausgabefenster und -feld beim Betrieb auf Windows
     private JFrame stringOutputFrame = null;
     private JTextArea stringOutputBox = null;
     private AwakerPanel panel = null;
 
-    private final PlayerMaster playerMaster;
-
     public static final Gson GSON = new Gson();
-    private final MyWebSocketServer server;
 
     private LightController lightController = null;
 
@@ -58,7 +56,7 @@ public class Awaker implements AnalyzeResultListener, CommandHandler, EventRecei
         MediaManager.init();
         RaspiControl.init();
 
-        playerMaster = new PlayerMaster(this);
+        new PlayerMaster(this);
 
         if (isWindows) {
             panel = new AwakerPanel();
@@ -68,15 +66,9 @@ public class Awaker implements AnalyzeResultListener, CommandHandler, EventRecei
         }
         new Automator(lightController);
 
-        server = new MyWebSocketServer();
-        server.start();
+        new ServerManager();
 
-        WebContentServer.start();
-        HttpUploadServer.start();
-
-        EventRouter.registerReceiver(this, GlobalEvent.PLAYBACK_PAUSED);
-        EventRouter.registerReceiver(this, GlobalEvent.PLAYBACK_NEW_SONG);
-        EventRouter.registerReceiver(this, GlobalEvent.SHUTDOWN);
+        CommandRouter.registerHandler(DataCommand.class, this);
     }
 
 
@@ -154,20 +146,6 @@ public class Awaker implements AnalyzeResultListener, CommandHandler, EventRecei
                 return null;
         }
         return answer;
-    }
-
-    @Override
-    public void receiveGlobalEvent(GlobalEvent globalEvent) {
-        switch (globalEvent) {
-            case PLAYBACK_NEW_SONG:
-                server.sendStatus();
-                break;
-            case PLAYBACK_PAUSED:
-                if (!isMSWindows) {
-                    lightController.fadeOutColorLights();
-                }
-                break;
-        }
     }
 
     /**
