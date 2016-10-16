@@ -40,12 +40,9 @@ public class MediaManager implements CommandHandler {
                 TrackWrapper track = DbManager.getTrack(data.title, data.artist);
                 if (track != null) {
                     File file = new File(track.filePath);
-
-                    if (!file.exists()) {
-                        return Answer.fileNotFound();
-                    }
+                    return Answer.fileStatus(!file.exists());
                 }
-                break;
+                return Answer.fileStatus(true);
             case CREATE_PLAYLIST:
                 createPlaylist(data.name);
                 break;
@@ -59,7 +56,7 @@ public class MediaManager implements CommandHandler {
                 removeTracksFromPlaylist(data.playlistId, data.idList);
                 break;
         }
-        return null;
+        return Answer.library();
     }
 
     /**

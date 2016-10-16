@@ -59,7 +59,6 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
 
         AudioCommand cmd = (AudioCommand) command;
 
-        Answer answer = Answer.status();
         switch (cmd) {
             case PLAY:
                 play();
@@ -116,7 +115,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
                 playTrackNext(data.trackId);
                 break;
         }
-        return answer;
+        return Answer.status();
     }
 
     @Override
@@ -387,7 +386,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
      * @param answer Das zu modifizierende Answer-Objekt
      * @return Das Answer-Objekt
      */
-    public Answer getStatus(Answer answer) {
+    public Answer writeStatus(Answer answer) {
         answer.playing = player != null && player.isPlaying();
         answer.shuffle = Config.getBool(ConfigKey.SHUFFLE);
 

@@ -11,6 +11,7 @@ import com.awaker.util.Log;
 import java.awt.*;
 
 public class LightController implements CommandHandler {
+    private static LightController instance = null;
 
     private int animationBrightness = 100;
 
@@ -27,6 +28,11 @@ public class LightController implements CommandHandler {
     private Thread animationThread;
 
     public LightController() {
+        //Nur eine Instanz erlauben
+        if (instance != null) {
+            throw new RuntimeException("LightController already existing");
+        }
+        instance = this;
         //wiringpi library initialisieren
         //Gpio.wiringPiSetup();
 
@@ -42,6 +48,10 @@ public class LightController implements CommandHandler {
 
         CommandRouter.registerHandler(LightCommand.class, this);
         Log.message("Lightcontroller initialisiert");
+    }
+
+    public static LightController getInstance() {
+        return instance;
     }
 
     @Override
@@ -90,7 +100,7 @@ public class LightController implements CommandHandler {
                 setBrightness(LightChannel.RED, data.brightness, data.smooth);
                 break;
         }
-        return null;
+        return Answer.status();
     }
 
     /**
@@ -351,7 +361,7 @@ public class LightController implements CommandHandler {
      * @param answer Das Answer-Objekt
      * @return das Answer-Objekt
      */
-    public Answer getStatus(Answer answer) {
+    public Answer writeStatus(Answer answer) {
         answer.colorMode = colorMode;
 
         if (colorMode.equals("custom")) {

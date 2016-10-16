@@ -9,7 +9,6 @@ import com.awaker.config.Config;
 import com.awaker.control.RaspiControl;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
-import com.awaker.data.TrackWrapper;
 import com.awaker.global.*;
 import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.LightController;
@@ -18,7 +17,6 @@ import com.awaker.server.MyWebSocketServer;
 import com.awaker.server.WebContentServer;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
-import com.awaker.server.json.Track;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
 
@@ -28,11 +26,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Awaker implements AnalyzeResultListener, CommandHandler, EventReceiver {
     //Ausgabefenster und -feld beim Betrieb auf Windows
@@ -134,21 +130,9 @@ public class Awaker implements AnalyzeResultListener, CommandHandler, EventRecei
         switch (cmd) {
             case GET_LIBRARY:
                 answer = Answer.library();
-                answer.tracks = new ArrayList<>();
-                ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
-
-                answer.tracks.addAll(allTracks.stream()
-                        .map(track -> new Track(track.getId(), track.title, track.artist, track.album, track.trackLength))
-                        .collect(Collectors.toList()));
-
-                answer.playLists = MediaManager.getPlayListsForJson();
                 break;
             case GET_STATUS:
                 answer = Answer.status();
-                playerMaster.getStatus(answer);
-                if (!isMSWindows) {
-                    lightController.getStatus(answer);
-                }
                 break;
             case SEND_STRING:
                 if (isMSWindows) {
@@ -164,7 +148,7 @@ public class Awaker implements AnalyzeResultListener, CommandHandler, EventRecei
                     stringOutputFrame.setVisible(true);
                     stringOutputBox.setText(stringOutputBox.getText() + "\n" + data.text);
                 }
-                answer = Answer.fileNotFound();
+                answer = Answer.action();
                 break;
             default:
                 return null;
