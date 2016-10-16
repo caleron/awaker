@@ -95,8 +95,6 @@ class TrackQueue implements ConfigChangeListener {
             if (track.getId() == trackId)
                 currentTrackIndex = i;
         }
-
-        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
     }
 
     /**
@@ -119,7 +117,6 @@ class TrackQueue implements ConfigChangeListener {
                 currentTrackIndex++;
             }
         }
-        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
 
         return currentTrack();
     }
@@ -137,7 +134,6 @@ class TrackQueue implements ConfigChangeListener {
                 currentTrackIndex--;
             }
         }
-        EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
 
         return currentTrack();
     }

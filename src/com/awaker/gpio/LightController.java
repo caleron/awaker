@@ -54,7 +54,7 @@ public class LightController implements CommandHandler, EventReceiver {
     }
 
     @Override
-    public Answer handleCommand(Command command, CommandData data) {
+    public Answer handleCommand(Command command, CommandData data, boolean buildAnswer) {
         if (!(command instanceof LightCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }
@@ -99,7 +99,10 @@ public class LightController implements CommandHandler, EventReceiver {
                 setBrightness(LightChannel.RED, data.brightness, data.smooth);
                 break;
         }
-        return Answer.status();
+        if (buildAnswer) {
+            return Answer.status();
+        }
+        return null;
     }
 
     @Override

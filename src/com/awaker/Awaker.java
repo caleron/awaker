@@ -111,13 +111,14 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
     }
 
     @Override
-    public Answer handleCommand(Command command, CommandData data) {
+    public Answer handleCommand(Command command, CommandData data, boolean buildAnswer) {
         if (!(command instanceof DataCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }
 
         DataCommand cmd = (DataCommand) command;
 
+        //immer Antwort bauen
         Answer answer;
         switch (cmd) {
             case GET_LIBRARY:

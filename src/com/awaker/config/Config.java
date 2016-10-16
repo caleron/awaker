@@ -33,12 +33,14 @@ public class Config implements CommandHandler {
     }
 
     @Override
-    public Answer handleCommand(Command command, CommandData data) {
+    public Answer handleCommand(Command command, CommandData data, boolean buildAnswer) {
         if (!(command instanceof ConfigCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }
 
         ConfigCommand cmd = (ConfigCommand) command;
+
+        //immer Antwort bauen
 
         Answer answer = Answer.config();
         switch (cmd) {

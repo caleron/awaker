@@ -16,7 +16,7 @@ public class RaspiControl implements CommandHandler {
     }
 
     @Override
-    public Answer handleCommand(Command command, CommandData data) {
+    public Answer handleCommand(Command command, CommandData data, boolean buildAnswer) {
         if (!(command instanceof ControlCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }

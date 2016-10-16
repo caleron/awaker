@@ -35,11 +35,22 @@ public class CommandRouter {
      * @return entsprechendes {@link Answer}-Objekt
      */
     public static Answer handleCommand(Command command, CommandData data) {
+        return handleCommand(command, data, false);
+    }
+
+    /**
+     * Löst alle Handler zu einem Befehl aus.
+     *
+     * @param command Der Befehl
+     * @param data    Die dazugehörigen Daten
+     * @return entsprechendes {@link Answer}-Objekt
+     */
+    public static Answer handleCommand(Command command, CommandData data, boolean buildAnswer) {
         CommandHandler commandHandler = handlerMap.get(command);
         if (commandHandler == null)
             return null;
 
-        return commandHandler.handleCommand(command, data);
+        return commandHandler.handleCommand(command, data, buildAnswer);
     }
 
     /**
@@ -49,7 +60,17 @@ public class CommandRouter {
      * @return entsprechendes {@link Answer}-Objekt
      */
     public static Answer handleCommand(Command command) {
-        return handleCommand(command, null);
+        return handleCommand(command, false);
+    }
+
+    /**
+     * Löst alle Handler zu einem Befehl aus. Sollte nur für Befehle ohne zusätzliche Daten verwendet werden.
+     *
+     * @param command Der Befehl
+     * @return entsprechendes {@link Answer}-Objekt
+     */
+    public static Answer handleCommand(Command command, boolean buildAnswer) {
+        return handleCommand(command, null, buildAnswer);
     }
 
     /**
@@ -58,7 +79,7 @@ public class CommandRouter {
      * @param data Das Daten-Objekt
      * @return entsprechendes {@link Answer}-Objekt
      */
-    public static Answer handleCommand(CommandData data) {
+    public static Answer handleCommand(CommandData data, boolean buildAnswer) {
         Command command = commandMap.get(data.action);
         if (command == null) {
             return null;
@@ -68,6 +89,6 @@ public class CommandRouter {
         if (commandHandler == null)
             return null;
 
-        return commandHandler.handleCommand(command, data);
+        return commandHandler.handleCommand(command, data, buildAnswer);
     }
 }

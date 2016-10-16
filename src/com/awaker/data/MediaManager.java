@@ -29,7 +29,7 @@ public class MediaManager implements CommandHandler {
     }
 
     @Override
-    public Answer handleCommand(Command command, CommandData data) {
+    public Answer handleCommand(Command command, CommandData data, boolean buildAnswer) {
         if (!(command instanceof MediaCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }
@@ -56,7 +56,10 @@ public class MediaManager implements CommandHandler {
                 removeTracksFromPlaylist(data.playlistId, data.idList);
                 break;
         }
-        return Answer.library();
+        if (buildAnswer) {
+            return Answer.library();
+        }
+        return null;
     }
 
     /**

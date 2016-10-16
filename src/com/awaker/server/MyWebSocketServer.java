@@ -1,9 +1,9 @@
 package com.awaker.server;
 
 
+import com.awaker.config.PortConfig;
 import com.awaker.global.CommandRouter;
 import com.awaker.global.DataCommand;
-import com.awaker.config.PortConfig;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
@@ -72,7 +72,7 @@ public class MyWebSocketServer extends WebSocketServer {
         CommandData commandData = gson.fromJson(message, CommandData.class);
 
         try {
-            Answer answer = CommandRouter.handleCommand(commandData);
+            Answer answer = CommandRouter.handleCommand(commandData, true);
             if (answer != null) {
                 conn.send(gson.toJson(answer));
             }

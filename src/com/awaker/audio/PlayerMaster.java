@@ -52,7 +52,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     }
 
     @Override
-    public Answer handleCommand(Command command, CommandData data) {
+    public Answer handleCommand(Command command, CommandData data, boolean buildAnswer) {
         if (!(command instanceof AudioCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }
@@ -115,7 +115,10 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
                 playTrackNext(data.trackId);
                 break;
         }
-        return Answer.status();
+        if (buildAnswer) {
+            return Answer.status();
+        }
+        return null;
     }
 
     @Override
@@ -161,11 +164,14 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
                 } else {
                     player.playFromPosition(position);
                 }
+
+                EventRouter.raiseEvent(GlobalEvent.PLAYBACK_NEW_SONG);
                 return true;
             } catch (JavaLayerException e) {
                 Log.error(e);
             }
         }
+
         return false;
     }
 
