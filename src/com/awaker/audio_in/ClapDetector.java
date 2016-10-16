@@ -38,17 +38,28 @@ public class ClapDetector implements AnalyzeResultListener {
                 long nowTime = new Date().getTime();
                 Map.Entry<Double, Double> loudestFreq = list.get(0);
                 System.out.println(loudestFreq);
-                if (nowTime - lastLoudTime < 1000) {
+
+                boolean clapDetected = false;
+
+                if (nowTime - lastLoudTime < 700) {
                     Double ampDiff = relativeDiff(lastLoud.getValue(), loudestFreq.getValue());
                     Double freqDiff = relativeDiff(lastLoud.getKey(), loudestFreq.getKey());
                     if (freqDiff < 2 && ampDiff < 2) {
-                        listener.clapDetected();
+                        clapDetected = true;
                     }
                 }
 
-                lastLoud = list.get(0);
-                lastLoudTime = new Date().getTime();
-                lastSilent = false;
+                if (clapDetected) {
+                    listener.clapDetected();
+                    //zurücksetzen
+                    lastSilent = true;
+                    lastLoudTime = 0L;
+                } else {
+                    lastLoud = loudestFreq;
+                    lastLoudTime = new Date().getTime();
+                    lastSilent = false;
+                }
+
             }
         }
     }
