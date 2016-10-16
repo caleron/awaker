@@ -6,6 +6,9 @@ import com.awaker.server.json.JsonCommand;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Zentraler Router für Befehle
+ */
 public class CommandRouter {
 
     private static final Map<String, Command> commandMap = new HashMap<>();
@@ -24,6 +27,13 @@ public class CommandRouter {
         }
     }
 
+    /**
+     * Löst alle Handler zu einem Befehl aus.
+     *
+     * @param command Der Befehl
+     * @param data    Die dazugehörigen Daten
+     * @return entsprechendes {@link Answer}-Objekt
+     */
     public static Answer handleCommand(Command command, JsonCommand data) {
         CommandHandler commandHandler = handlerMap.get(command);
         if (commandHandler == null)
@@ -32,10 +42,22 @@ public class CommandRouter {
         return commandHandler.handleCommand(command, data);
     }
 
+    /**
+     * Löst alle Handler zu einem Befehl aus. Sollte nur für Befehle ohne zusätzliche Daten verwendet werden.
+     *
+     * @param command Der Befehl
+     * @return entsprechendes {@link Answer}-Objekt
+     */
     public static Answer handleCommand(Command command) {
         return handleCommand(command, null);
     }
 
+    /**
+     * Löst alle Handler zu einem Befehl aus.
+     *
+     * @param data Das Daten-Objekt
+     * @return entsprechendes {@link Answer}-Objekt
+     */
     public static Answer handleCommand(JsonCommand data) {
         Command command = commandMap.get(data.action);
         if (command == null) {
