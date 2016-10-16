@@ -2,7 +2,7 @@ package com.awaker.gpio;
 
 import com.awaker.audio.AudioCommand;
 import com.awaker.global.CommandRouter;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
 import com.pi4j.gpio.extension.mcp.MCP3008GpioProvider;
 import com.pi4j.gpio.extension.mcp.MCP3008Pin;
@@ -110,7 +110,7 @@ public class AnalogControls implements GpioPinListenerAnalog {
         lastValues.put(pin, value);
         int newValue = (int) ((event.getValue() / 1023.0) * 100.0);
 
-        JsonCommand data = new JsonCommand();
+        CommandData data = new CommandData();
         if (pin_volume.equals(pin)) {
             data.volume = newValue;
             CommandRouter.handleCommand(AudioCommand.SET_VOLUME, data);

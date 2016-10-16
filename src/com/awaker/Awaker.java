@@ -17,7 +17,7 @@ import com.awaker.server.HttpUploadServer;
 import com.awaker.server.MyWebSocketServer;
 import com.awaker.server.WebContentServer;
 import com.awaker.server.json.Answer;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 import com.awaker.server.json.Track;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
@@ -123,7 +123,7 @@ public class Awaker implements AnalyzeResultListener, CommandHandler, EventRecei
     }
 
     @Override
-    public Answer handleCommand(Command command, JsonCommand data) {
+    public Answer handleCommand(Command command, CommandData data) {
         if (!(command instanceof DataCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }

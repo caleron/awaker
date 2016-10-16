@@ -5,7 +5,7 @@ import com.awaker.global.CommandRouter;
 import com.awaker.global.DataCommand;
 import com.awaker.config.PortConfig;
 import com.awaker.server.json.Answer;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
@@ -69,10 +69,10 @@ public class MyWebSocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         System.out.println(message);
-        JsonCommand jsonCommand = gson.fromJson(message, JsonCommand.class);
+        CommandData commandData = gson.fromJson(message, CommandData.class);
 
         try {
-            Answer answer = CommandRouter.handleCommand(jsonCommand);
+            Answer answer = CommandRouter.handleCommand(commandData);
             if (answer != null) {
                 conn.send(gson.toJson(answer));
             }

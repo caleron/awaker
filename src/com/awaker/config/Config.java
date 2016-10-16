@@ -6,7 +6,7 @@ import com.awaker.global.Command;
 import com.awaker.global.CommandHandler;
 import com.awaker.global.CommandRouter;
 import com.awaker.server.json.Answer;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ public class Config implements CommandHandler {
     }
 
     @Override
-    public Answer handleCommand(Command command, JsonCommand data) {
+    public Answer handleCommand(Command command, CommandData data) {
         if (!(command instanceof ConfigCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }

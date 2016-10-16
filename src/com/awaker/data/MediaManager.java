@@ -4,7 +4,7 @@ import com.awaker.audio.AudioCommand;
 import com.awaker.audio.PlayList;
 import com.awaker.global.*;
 import com.awaker.server.json.Answer;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 import com.awaker.server.json.Playlist;
 import com.awaker.util.Log;
 import com.mpatric.mp3agic.*;
@@ -29,7 +29,7 @@ public class MediaManager implements CommandHandler {
     }
 
     @Override
-    public Answer handleCommand(Command command, JsonCommand data) {
+    public Answer handleCommand(Command command, CommandData data) {
         if (!(command instanceof MediaCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }
@@ -189,7 +189,7 @@ public class MediaManager implements CommandHandler {
         TrackWrapper track = MediaManager.downloadFile(is, length, fileName);
 
         if (play && track != null) {
-            JsonCommand data = new JsonCommand();
+            CommandData data = new CommandData();
             data.trackId = track.getId();
             CommandRouter.handleCommand(AudioCommand.PLAY_ID, data);
         }

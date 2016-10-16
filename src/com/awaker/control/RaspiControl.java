@@ -3,7 +3,7 @@ package com.awaker.control;
 import com.awaker.Awaker;
 import com.awaker.global.*;
 import com.awaker.server.json.Answer;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class RaspiControl implements CommandHandler {
     }
 
     @Override
-    public Answer handleCommand(Command command, JsonCommand data) {
+    public Answer handleCommand(Command command, CommandData data) {
         if (!(command instanceof ControlCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }

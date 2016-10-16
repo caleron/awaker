@@ -8,7 +8,7 @@ import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
 import com.awaker.global.*;
 import com.awaker.server.json.Answer;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
 import javazoom.jl.decoder.JavaLayerException;
 
@@ -52,7 +52,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     }
 
     @Override
-    public Answer handleCommand(Command command, JsonCommand data) {
+    public Answer handleCommand(Command command, CommandData data) {
         if (!(command instanceof AudioCommand)) {
             throw new RuntimeException("Received Wrong Command");
         }

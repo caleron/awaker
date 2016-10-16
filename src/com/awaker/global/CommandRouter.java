@@ -1,7 +1,7 @@
 package com.awaker.global;
 
 import com.awaker.server.json.Answer;
-import com.awaker.server.json.JsonCommand;
+import com.awaker.server.json.CommandData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class CommandRouter {
      * @param data    Die dazugehörigen Daten
      * @return entsprechendes {@link Answer}-Objekt
      */
-    public static Answer handleCommand(Command command, JsonCommand data) {
+    public static Answer handleCommand(Command command, CommandData data) {
         CommandHandler commandHandler = handlerMap.get(command);
         if (commandHandler == null)
             return null;
@@ -58,7 +58,7 @@ public class CommandRouter {
      * @param data Das Daten-Objekt
      * @return entsprechendes {@link Answer}-Objekt
      */
-    public static Answer handleCommand(JsonCommand data) {
+    public static Answer handleCommand(CommandData data) {
         Command command = commandMap.get(data.action);
         if (command == null) {
             return null;

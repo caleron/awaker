@@ -5,7 +5,7 @@ package com.awaker.server.json;
  * Deserialisierung von JSON durch Gson gesetzt werden.
  */
 @SuppressWarnings("unused")
-public class JsonCommand {
+public class CommandData {
     //TODO commands können auch vom server zum client gesendet werden, etwa beim Hinzufügen eines Tracks zu einer Playlist,
     //damit nicht zu jedem Client die gesamte Library geschickt werden muss
 
