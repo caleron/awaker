@@ -31,6 +31,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+//TODO Audio-Loopback etwa für Spotify http://jackaudio.org/ und dann verbinden mit Spotify-Konto wie https://de.tobit.software/clipinc
+//TODO Preprocessing mit Pegelanpassung für einzelne Frequenzbereiche, auch in Relation falls einer hervorsticht
+//TODO https://de.wikipedia.org/wiki/Geh%C3%B6rrichtige_Lautst%C3%A4rke
+//TODO Verschiedene Verfahren für laute und leise Passagen
+//TODO Ahead of Time-Analyse
+//TODO Web notification
+
 public class Awaker implements AnalyzeResultListener, CommandHandler {
     //Ausgabefenster und -feld beim Betrieb auf Windows
     private JFrame stringOutputFrame = null;
