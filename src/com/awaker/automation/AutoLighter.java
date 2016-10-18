@@ -46,7 +46,8 @@ class AutoLighter implements ConfigChangeListener {
     public static void start(EnvironmentEventListener listener) {
         new Thread(() -> new AutoLighter(listener)).start();
     }
-//TODO Sommer/Winterzeit berücksichtigen
+    
+    //Sommer-/Winterzeit muss nicht berücksichtigt werden, da ZonedDateTime dies erledigt, welches auf UTC basiert
     private void scheduleEvents() {
         refreshTimes();
         ZonedDateTime now = null;
