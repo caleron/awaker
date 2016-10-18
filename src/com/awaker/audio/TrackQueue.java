@@ -5,8 +5,6 @@ import com.awaker.config.ConfigChangeListener;
 import com.awaker.config.ConfigKey;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
-import com.awaker.global.EventRouter;
-import com.awaker.global.GlobalEvent;
 import com.awaker.server.json.Playlist;
 
 import java.util.ArrayList;
@@ -71,16 +69,22 @@ class TrackQueue implements ConfigChangeListener {
      * Setzt die Playlist anhand dessen ID. Falls die ID -1 ist, werden alle Tracks verwendet.
      *
      * @param id Die ID der Playlist oder -1 für alle Tracks.
+     * @return False, falls die Playlist leer ist
      */
-    void setPlaylist(int id) {
+    boolean setPlaylist(int id) {
         if (id == -1) {
             basePlaylist = null;
             setTrackList(MediaManager.getAllTracks());
+            return true;
         } else {
             PlayList playlist = MediaManager.getPlayList(id);
-            basePlaylist = playlist;
-            setTrackList(playlist.getTracks());
+            if (playlist.getTracks().size() > 0) {
+                basePlaylist = playlist;
+                setTrackList(playlist.getTracks());
+                return true;
+            }
         }
+        return false;
     }
 
     /**

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 //TODO Audio-Loopback etwa für Spotify http://jackaudio.org/ und dann verbinden mit Spotify-Konto wie https://de.tobit.software/clipinc
+//clipinc verwendet für Windows als Loopback http://vb-audio.pagesperso-orange.fr/Cable/
 //TODO Preprocessing mit Pegelanpassung für einzelne Frequenzbereiche, auch in Relation falls einer hervorsticht
 //TODO https://de.wikipedia.org/wiki/Geh%C3%B6rrichtige_Lautst%C3%A4rke
 //TODO Verschiedene Verfahren für laute und leise Passagen

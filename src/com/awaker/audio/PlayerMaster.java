@@ -193,7 +193,9 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
      * @return False, falls playList oder track null sind.
      */
     private synchronized boolean playTrackOfPlaylist(int playListId, int trackId) {
-        trackQueue.setPlaylist(playListId);
+        if (!trackQueue.setPlaylist(playListId)) {
+            return false;
+        }
         trackQueue.setCurrentTrack(trackId);
 
         return playCurrentTrack();
@@ -227,7 +229,10 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
      * @return False, falls die playList null ist.
      */
     private synchronized boolean playPlaylist(int playListId, int firstId) {
-        trackQueue.setPlaylist(playListId);
+        if (!trackQueue.setPlaylist(playListId)) {
+            //Falls die Playlist leer ist, gibt das false zurück
+            return false;
+        }
         if (firstId >= 0) {
             trackQueue.setCurrentTrack(firstId);
             return playCurrentTrack();
@@ -248,6 +253,9 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     }
 
     private synchronized boolean playIdList(Integer playNowId, Integer[] list) {
+        if (list.length == 0)
+            return false;
+
         List<Integer> idList = new ArrayList<>(Arrays.asList(list));
         ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
         ArrayList<TrackWrapper> tracks = new ArrayList<>();
