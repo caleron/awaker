@@ -4,7 +4,10 @@ import com.awaker.config.Config;
 import com.awaker.config.ConfigKey;
 import com.awaker.util.Log;
 
-import java.net.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.time.ZonedDateTime;
 
 
@@ -67,7 +70,7 @@ public class SntpClient {
             socket.close();
 
             return currentZonedDateTime;
-        } catch (SocketTimeoutException | UnknownHostException e) {
+        } catch (IOException e) {
             Log.message("Couldn't fetch Time, unknown host or timeout");
         } catch (Exception e) {
             Log.error(e);
