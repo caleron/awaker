@@ -2,6 +2,7 @@ package com.awaker.global;
 
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
+import com.awaker.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class CommandRouter {
         if (commandHandler == null)
             return null;
 
+        Log.message("Routing command " + command.getAction());
+
         return commandHandler.handleCommand(command, data, buildAnswer);
     }
 
@@ -88,6 +91,8 @@ public class CommandRouter {
         CommandHandler commandHandler = handlerMap.get(command);
         if (commandHandler == null)
             return null;
+
+        Log.message("Routing command " + command.getAction());
 
         return commandHandler.handleCommand(command, data, buildAnswer);
     }
