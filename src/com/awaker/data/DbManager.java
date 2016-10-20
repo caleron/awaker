@@ -155,9 +155,14 @@ public class DbManager {
      */
     static void addTrack(TrackWrapper track) {
         try {
-            Statement statement = connection.createStatement();
+            PreparedStatement statement = connection.prepareStatement(TrackWrapper.getInsertSQL());
 
-            statement.executeUpdate(track.getInsertSQL());
+            statement.setString(1, track.artist);
+            statement.setString(2, track.title);
+            statement.setString(3, track.album);
+            statement.setString(4, track.filePath);
+            statement.setInt(5, track.trackLength);
+            statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {
             Log.error(e);
@@ -173,13 +178,18 @@ public class DbManager {
         if (tracks.isEmpty())
             return;
 
-        Statement statement;
+        PreparedStatement statement;
         try {
-            statement = connection.createStatement();
+            statement = connection.prepareStatement(TrackWrapper.getInsertSQL());
             connection.setAutoCommit(false);
 
             for (TrackWrapper track : tracks) {
-                statement.executeUpdate(track.getInsertSQL());
+                statement.setString(1, track.artist);
+                statement.setString(2, track.title);
+                statement.setString(3, track.album);
+                statement.setString(4, track.filePath);
+                statement.setInt(5, track.trackLength);
+                statement.executeUpdate();
             }
 
             connection.commit();

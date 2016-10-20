@@ -17,11 +17,6 @@ public class TrackWrapper {
     public String filePath;
     public int trackLength; //in Sekunden
 
-    public TrackWrapper(String title, String artist) {
-        this.title = title;
-        this.artist = artist;
-    }
-
     TrackWrapper(int id, String title, String artist, String album, String filePath, int trackLength) {
         this.id = id;
         this.title = title;
@@ -31,10 +26,9 @@ public class TrackWrapper {
         this.trackLength = trackLength;
     }
 
-    String getInsertSQL() {
-        return String.format("INSERT INTO %s (%s,%s,%s,%s, %s) VALUES (\"%s\",\"%s\",\"%s\",\"%s\", \"%s\")", TABLE_NAME,
-                ARTIST, TITLE, ALBUM, FILE_PATH, TRACK_LENGTH,
-                artist, title, album, filePath, trackLength);
+    static String getInsertSQL() {
+        return String.format("INSERT INTO %s (%s,%s,%s,%s, %s) VALUES (?,?,?,?,?)", TABLE_NAME,
+                ARTIST, TITLE, ALBUM, FILE_PATH, TRACK_LENGTH);
     }
 
     String getDeleteSql() {
@@ -48,7 +42,7 @@ public class TrackWrapper {
                 "\"%s\" TEXT," +
                 "\"%s\" TEXT," +
                 "\"%s\" TEXT,"
-                + "\"%s\" INTEGER)", TABLE_NAME, ID, TITLE,ARTIST,ALBUM, FILE_PATH, TRACK_LENGTH);
+                + "\"%s\" INTEGER)", TABLE_NAME, ID, TITLE, ARTIST, ALBUM, FILE_PATH, TRACK_LENGTH);
     }
 
     public int getId() {
