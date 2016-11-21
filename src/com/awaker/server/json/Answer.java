@@ -66,7 +66,7 @@ public class Answer {
         ArrayList<TrackWrapper> allTracks = MediaManager.getAllTracks();
 
         answer.tracks.addAll(allTracks.stream()
-                .map(track -> new Track(track.getId(), track.title, track.artist, track.album, track.trackLength))
+                .map(Track::new)
                 .collect(Collectors.toList()));
 
         answer.playLists = MediaManager.getPlayListsForJson();

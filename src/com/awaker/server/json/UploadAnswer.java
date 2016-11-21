@@ -4,7 +4,7 @@ import com.awaker.data.TrackWrapper;
 
 public class UploadAnswer {
     public String status;
-    public TrackWrapper track;
+    public Track track;
     public String filename;
 
     public UploadAnswer(TrackWrapper trackWrapper, String filename) {
@@ -14,7 +14,7 @@ public class UploadAnswer {
         }
         status = "success";
 
-        this.track = trackWrapper;
+        this.track = new Track(trackWrapper);
         this.filename = filename;
     }
 }

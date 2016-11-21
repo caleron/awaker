@@ -6,6 +6,7 @@ import com.awaker.util.Log;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -143,9 +144,10 @@ public class DbManager {
         String artist = resultSet.getString(TrackWrapper.ARTIST);
         String album = resultSet.getString(TrackWrapper.ALBUM);
         String file = resultSet.getString(TrackWrapper.FILE_PATH);
+        Date addDate = new Date(resultSet.getLong(TrackWrapper.ADD_DATE));
         int length = resultSet.getInt(TrackWrapper.TRACK_LENGTH);
 
-        return new TrackWrapper(id, title, artist, album, file, length);
+        return new TrackWrapper(id, title, artist, album, file, addDate, length);
     }
 
     /**
@@ -161,7 +163,8 @@ public class DbManager {
             statement.setString(2, track.title);
             statement.setString(3, track.album);
             statement.setString(4, track.filePath);
-            statement.setInt(5, track.trackLength);
+            statement.setLong(5, track.addDate.getTime());
+            statement.setInt(6, track.trackLength);
             statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {
@@ -188,7 +191,8 @@ public class DbManager {
                 statement.setString(2, track.title);
                 statement.setString(3, track.album);
                 statement.setString(4, track.filePath);
-                statement.setInt(5, track.trackLength);
+                statement.setLong(5, track.addDate.getTime());
+                statement.setInt(6, track.trackLength);
                 statement.executeUpdate();
             }
 

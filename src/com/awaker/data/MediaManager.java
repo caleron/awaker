@@ -12,6 +12,7 @@ import com.mpatric.mp3agic.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -160,8 +161,8 @@ public class MediaManager implements CommandHandler {
         ArrayList<TrackWrapper> newTracks = new ArrayList<>();
 
         for (File file : fileList) {
-            TrackWrapper track = readFile(file);
             if (file != null) {
+                TrackWrapper track = readFile(file);
                 newTracks.add(track);
             }
         }
@@ -332,7 +333,7 @@ public class MediaManager implements CommandHandler {
             if (album == null)
                 album = "";
 
-            return new TrackWrapper(-1, title, artist, album, file.getPath(), lengthInSeconds);
+            return new TrackWrapper(-1, title, artist, album, file.getPath(), new Date(), lengthInSeconds);
 
         } catch (IOException | UnsupportedTagException | InvalidDataException e) {
             Log.error(e);
