@@ -105,17 +105,22 @@ public class DbManager {
      * @param artist Der Künstler
      * @return der gesuchte Track
      */
-    public static TrackWrapper getTrack(String title, String artist) {
+    static TrackWrapper getTrack(String title, String artist) {
         try {
-            Statement statement = connection.createStatement();
             String sql;
-            if (artist == null || (artist.length() == 0)) {
-                sql = String.format("SELECT * FROM music WHERE title LIKE \"%s\" LIMIT 1", title);
+            if (artist == null || artist.length() == 0) {
+                sql = "SELECT * FROM music WHERE title LIKE ? LIMIT 1";
             } else {
-                sql = String.format("SELECT * FROM music WHERE artist LIKE \"%s\" AND title LIKE \"%s\" LIMIT 1", artist, title);
+                sql = "SELECT * FROM music WHERE artist LIKE ? AND title LIKE ? LIMIT 1";
+            }
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, title);
+
+            if (artist != null && artist.length() > 0) {
+                statement.setString(2, artist);
             }
 
-            ResultSet resultSet = statement.executeQuery(sql);
+            ResultSet resultSet = statement.executeQuery();
             TrackWrapper track = null;
 
             if (resultSet.next()) {
