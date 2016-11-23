@@ -111,7 +111,7 @@ public class DbManager {
             if (artist == null || artist.length() == 0) {
                 sql = "SELECT * FROM music WHERE title LIKE ? LIMIT 1";
             } else {
-                sql = "SELECT * FROM music WHERE artist LIKE ? AND title LIKE ? LIMIT 1";
+                sql = "SELECT * FROM music WHERE title LIKE ? AND artist LIKE ? LIMIT 1";
             }
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, title);
