@@ -5,6 +5,7 @@ import com.awaker.global.*;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
+import com.pi4j.wiringpi.Gpio;
 
 import java.awt.*;
 
@@ -32,7 +33,7 @@ public class LightController implements CommandHandler, EventReceiver {
         }
         instance = this;
         //wiringpi library initialisieren
-        //Gpio.wiringPiSetup();
+        Gpio.wiringPiSetup();
 
         /*
           Soft-PWM-Pins erstellen mit möglichen Werten zwischen 0 und 100. Der interne Taktzyklus ist 100µS lang.

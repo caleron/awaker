@@ -69,7 +69,7 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
         if (isWindows) {
             panel = new AwakerPanel();
         } else {
-            new AnalogControls();
+            //new AnalogControls();
             lightController = new LightController();
         }
         new Automator(lightController);
