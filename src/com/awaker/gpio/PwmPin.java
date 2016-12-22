@@ -37,6 +37,12 @@ class PwmPin {
         }
     }
 
+    /**
+     * Setzt den PWM-Wert des Pins.
+     *
+     * @param value    Wert zwischen 0 und 100
+     * @param duration Dauer der Animation in millisekunden
+     */
     void setValue(int value, int duration) {
         //wert zwischen 0 und 100 sicherstellen
         value = Math.max(0, Math.min(100, value));

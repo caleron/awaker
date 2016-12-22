@@ -99,6 +99,15 @@ public class LightController implements CommandHandler, EventReceiver {
             case SET_RED_BRIGHTNESS:
                 setBrightness(LightChannel.RED, data.brightness, data.smooth);
                 break;
+            case SWITCH_OFF_LIGHTS:
+                setBrightness(LightChannel.ALL, 0, 1000);
+                break;
+            case FADE_LIGHTS_OUT:
+                setBrightness(LightChannel.ALL, 0, 30000);
+                break;
+            case SWITCH_ON_WHITE_LIGHT:
+                setBrightness(LightChannel.WHITE, 70, 1000);
+                break;
         }
         if (buildAnswer) {
             return Answer.status();
@@ -210,6 +219,11 @@ public class LightController implements CommandHandler, EventReceiver {
         }
     }
 
+    /**
+     * @param channel  Der Lichtkanal
+     * @param value    Wert zwischen 0 und 100
+     * @param duration Dauer in ms
+     */
     @SuppressWarnings("Duplicates")
     public void setBrightness(LightChannel channel, int value, int duration) {
         switch (channel) {
