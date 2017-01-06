@@ -79,6 +79,10 @@ public class LightController implements CommandHandler, EventReceiver {
                 setColorMode(data.colorMode);
                 PlayerMaster.getInstance().setColorMode(!data.colorMode.equals("music"));
                 break;
+            case NEXT_COLOR_MODE:
+                nextColorMode();
+                PlayerMaster.getInstance().setColorMode(!this.colorMode.equals("music"));
+                break;
             case SET_RGBCOLOR:
                 color = new Color(data.red, data.green, data.blue);
                 if (data.smooth) {
@@ -335,6 +339,23 @@ public class LightController implements CommandHandler, EventReceiver {
             } catch (InterruptedException ex) {
                 return;
             }
+        }
+    }
+
+    /**
+     * Wechselt in den nächsten Farbmodus aus der Reihe custom, music, colorCircle.
+     */
+    private void nextColorMode() {
+        switch (this.colorMode) {
+            case "custom":
+                setColorMode("music");
+                break;
+            case "colorCircle":
+                setColorMode("custom");
+                break;
+            default: //also music
+                setColorMode("colorCircle");
+                break;
         }
     }
 

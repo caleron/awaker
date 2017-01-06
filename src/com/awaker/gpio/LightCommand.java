@@ -41,6 +41,11 @@ public enum LightCommand implements Command {
      * Setzt den Farbmodus auf <code>colorMode</code>
      */
     SET_COLOR_MODE("setColorMode"),
+
+    /**
+     * Wechselt in den nächsten Farbmodus
+     */
+    NEXT_COLOR_MODE("nextColorMode"),
     /**
      * Setzt die Farbe auf <code>color</code> als rgb-int.
      */
