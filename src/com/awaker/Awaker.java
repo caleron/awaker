@@ -6,6 +6,7 @@ import com.awaker.audio.AudioCommand;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.automation.Automator;
 import com.awaker.config.Config;
+import com.awaker.config.ConfigKey;
 import com.awaker.control.RaspiControl;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
@@ -13,8 +14,8 @@ import com.awaker.global.Command;
 import com.awaker.global.CommandHandler;
 import com.awaker.global.CommandRouter;
 import com.awaker.global.DataCommand;
-import com.awaker.gpio.AnalogControls;
 import com.awaker.gpio.LightController;
+import com.awaker.mesh.MeshMaster;
 import com.awaker.server.ServerManager;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
@@ -75,6 +76,10 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
         new Automator(lightController);
 
         new ServerManager();
+
+        if (Config.getBool(ConfigKey.MESH)) {
+            MeshMaster.start();
+        }
 
         CommandRouter.registerHandler(DataCommand.class, this);
     }

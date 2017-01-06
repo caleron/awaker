@@ -13,7 +13,8 @@ public enum ConfigKey {
     LIGHT_ON_SUNRISE("light_on_sunrise", false),
     SUNRISE_TIME_OFFSET_SECONDS("sunrise_time_offset_seconds", 0),
     LIGHT_ON_SUNSET("light_on_sunset", false),
-    SUNSET_TIME_OFFSET_SECONDS("sunset_time_offset_seconds", 0);
+    SUNSET_TIME_OFFSET_SECONDS("sunset_time_offset_seconds", 0),
+    MESH("mesh", true);
 
     private final String key;
     private final Object def;
