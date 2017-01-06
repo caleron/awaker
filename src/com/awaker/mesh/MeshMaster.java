@@ -20,7 +20,7 @@ public class MeshMaster {
         MeshLibrary library = MeshLibrary.INSTANCE;
         library.init(new UnsignedByte(97));
 
-        System.out.println("MeshMaster initialized");
+        Log.message("MeshMaster initialized");
 
         while (!meshThread.isInterrupted()) {
             library.updateAndDhcp();
@@ -33,7 +33,7 @@ public class MeshMaster {
             while (library.available()) {
                 short readBytes = library.readNext(type, sender, returnArray, (short) 32);
 
-                handleMessage(type.getByte(0), sender.getByte(0), readBytes, returnArray);
+                handleMessage(type.getShort(0), sender.getShort(0), readBytes, returnArray);
             }
             try {
                 Thread.sleep(100);
@@ -44,6 +44,7 @@ public class MeshMaster {
     }
 
     private static void handleMessage(int type, int senderNodeId, int readBytes, MyMemory data) {
+        senderNodeId = 10; //TODO irgendwie bekomme ich immer nur -1 für sender, fixen
         MeshNode sender = MeshNode.getNodeForId(senderNodeId);
         if (sender == null) {
             Log.message("unknown node " + senderNodeId);
@@ -107,6 +108,10 @@ public class MeshMaster {
     public static class MyMemory extends Memory {
         public MyMemory(long size) {
             super(size);
+        }
+
+        public int getUnsignedShort(int offset) {
+            return getShort(offset) & 0xffff;
         }
 
         public int getUnsignedByte(int offset) {

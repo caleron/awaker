@@ -16,8 +16,8 @@ public enum MeshNode {
                     SET_WHITE_BRIGHTNESS,
                     SET_ANIMATION_BRIGHTNESS,
                     SET_RED_BRIGHTNESS,
-                    SET_BLUE_BRIGHTNESS,
-                    SET_GREEN_BRIGHTNESS
+                    SET_GREEN_BRIGHTNESS,
+                    SET_BLUE_BRIGHTNESS
             },
             new Command[]{
                     PLAY_NEXT,
@@ -25,7 +25,8 @@ public enum MeshNode {
                     PLAY_PREVIOUS,
                     FADE_LIGHTS_OUT,
                     SWITCH_OFF_LIGHTS,
-                    SWITCH_ON_WHITE_LIGHT
+                    SWITCH_ON_WHITE_LIGHT,
+                    NEXT_COLOR_MODE
             });
 
     private int nodeId;
@@ -55,6 +56,7 @@ public enum MeshNode {
         } else if (command instanceof AudioCommand && command.equals(SET_VOLUME)) {
             data.volume = value;
         }
+        data.smooth = false;
 
         CommandRouter.handleCommand(command, data);
     }
