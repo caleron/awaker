@@ -1,6 +1,6 @@
 package com.awaker.analyzer;
 
-public class FFTAnalyzer {
+public class SampleProxy {
 
     private final short[] buffer;
     private int bufferedSampleCount = 0;
@@ -10,13 +10,13 @@ public class FFTAnalyzer {
     private static final int MIN_ANALYZE_SIZE = 1024;
 
     private final int channels;
-    private final FFTAnalyzeThread analyzeThread;
+    private final SampleAnalyzeThread analyzeThread;
 
-    public FFTAnalyzer(AnalyzeResultListener listener) {
+    public SampleProxy(AnalyzeResultListener listener) {
         this(listener, 2);
     }
 
-    public FFTAnalyzer(AnalyzeResultListener listener, int channels) {
+    public SampleProxy(AnalyzeResultListener listener, int channels) {
         if (channels != 1 && channels != 2) {
             throw new IllegalArgumentException("Invalid Channel count, only mono and stereo is supported");
         }
@@ -24,7 +24,7 @@ public class FFTAnalyzer {
         int bufferSize = MIN_ANALYZE_SIZE * channels;
 
         buffer = new short[bufferSize];
-        analyzeThread = new FFTAnalyzeThread(listener, channels);
+        analyzeThread = new SampleAnalyzeThread(listener, channels);
         analyzeThread.start();
     }
 

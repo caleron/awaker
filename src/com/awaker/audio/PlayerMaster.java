@@ -1,7 +1,7 @@
 package com.awaker.audio;
 
 import com.awaker.analyzer.AnalyzeResultListener;
-import com.awaker.analyzer.FFTAnalyzer;
+import com.awaker.analyzer.SampleProxy;
 import com.awaker.config.Config;
 import com.awaker.config.ConfigKey;
 import com.awaker.data.MediaManager;
@@ -22,7 +22,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     private TrackQueue trackQueue;
 
     private CustomPlayer player;
-    private final FFTAnalyzer analyzer;
+    private final SampleProxy analyzer;
     private boolean customColorMode = false;
 
     private int volume = 100;
@@ -40,7 +40,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
         }
         instance = this;
 
-        analyzer = new FFTAnalyzer(analyzeResultListener);
+        analyzer = new SampleProxy(analyzeResultListener);
 
         CommandRouter.registerHandler(AudioCommand.class, this);
         EventRouter.registerReceiver(this, GlobalEvent.SHUTDOWN);

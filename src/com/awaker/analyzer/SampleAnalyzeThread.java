@@ -5,7 +5,7 @@ import com.awaker.util.Log;
 
 import java.util.*;
 
-class FFTAnalyzeThread extends Thread {
+class SampleAnalyzeThread extends Thread {
     private final Queue<short[]> queue;
     private final Map<Integer, FFT> fftMap = new HashMap<>(3);
     private final AnalyzeResultListener listener;
@@ -25,7 +25,7 @@ class FFTAnalyzeThread extends Thread {
      */
     private int analyzeThreshold = 12;
 
-    FFTAnalyzeThread(AnalyzeResultListener listener, int channels) {
+    SampleAnalyzeThread(AnalyzeResultListener listener, int channels) {
         this.listener = listener;
         queue = new LinkedList<>();
         this.channels = channels;

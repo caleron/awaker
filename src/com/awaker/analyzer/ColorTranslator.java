@@ -32,7 +32,7 @@ public class ColorTranslator {
     public static Color translateDurchschnitt(List<Map.Entry<Double, Double>> list) {
         double hueSum = 0;
         double brightnessSum = 0;
-        list = FFTAnalyzeThread.findLocalMaxima(list, 0.2);
+        list = SampleAnalyzeThread.findLocalMaxima(list, 0.2);
 
         for (Map.Entry<Double, Double> entry : list) {
             double freq = entry.getKey();
@@ -63,7 +63,7 @@ public class ColorTranslator {
         double hueSum = 0;
         double brightnessSum = 0;
         double ampSum = 0;
-        list = FFTAnalyzeThread.findLocalMaxima(list, 0.2);
+        list = SampleAnalyzeThread.findLocalMaxima(list, 0.2);
 
         for (Map.Entry<Double, Double> entry : list) {
             double freq = entry.getKey();
