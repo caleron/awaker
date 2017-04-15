@@ -12,7 +12,11 @@ public class ServerManager implements EventReceiver {
 
     private final MyWebSocketServer server;
 
-    public ServerManager() {
+    public static void start() {
+        new ServerManager();
+    }
+
+    private ServerManager() {
         server = new MyWebSocketServer();
         server.start();
 

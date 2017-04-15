@@ -75,7 +75,7 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
         }
         new Automator(lightController);
 
-        new ServerManager();
+        ServerManager.start();
 
         if (Config.getBool(ConfigKey.MESH)) {
             MeshMaster.start();
