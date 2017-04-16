@@ -1,6 +1,6 @@
 package com.awaker.analyzer;
 
-public class SampleProxy {
+public class SampleQuantizer {
 
     private final short[] buffer;
     private int bufferedSampleCount = 0;
@@ -12,11 +12,11 @@ public class SampleProxy {
     private final int channels;
     private final SampleAnalyzeThread analyzeThread;
 
-    public SampleProxy(AnalyzeResultListener listener) {
+    public SampleQuantizer(AnalyzeResultListener listener) {
         this(listener, 2);
     }
 
-    public SampleProxy(AnalyzeResultListener listener, int channels) {
+    public SampleQuantizer(AnalyzeResultListener listener, int channels) {
         if (channels != 1 && channels != 2) {
             throw new IllegalArgumentException("Invalid Channel count, only mono and stereo is supported");
         }
