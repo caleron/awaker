@@ -24,9 +24,18 @@ public class MediaManager implements CommandHandler {
     private static ArrayList<TrackWrapper> allTracks;
     private static ArrayList<PlayList> playLists;
 
+    private static boolean isReady = false;
+
+    private static MediaManager instance;
+
     public static void init() {
         new Thread(MediaManager::scanFiles).start();
-        CommandRouter.registerHandler(MediaCommand.class, new MediaManager());
+        if (instance != null) {
+            throw new RuntimeException("MediaManager already exists");
+        }
+
+        instance = new MediaManager();
+        CommandRouter.registerHandler(MediaCommand.class, instance);
     }
 
     @Override
@@ -102,6 +111,7 @@ public class MediaManager implements CommandHandler {
         loadTracks();
         loadPlaylists();
         EventRouter.raiseEvent(GlobalEvent.MEDIA_READY);
+        isReady = true;
     }
 
     private static void loadPlaylists() {
@@ -455,5 +465,9 @@ public class MediaManager implements CommandHandler {
             list.add(playList.toJSONPlaylist());
         }
         return list;
+    }
+
+    public static boolean isReady() {
+        return isReady;
     }
 }
