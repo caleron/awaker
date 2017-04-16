@@ -1,6 +1,6 @@
 package com.awaker.analyzer;
 
-class SampleQuantizer {
+public class SampleQuantizer {
 
     private int bufferedSampleCount = 0;
     //1024 Samples entsprechen bei 44100Hz Abtastrate etwa 23ms
@@ -9,7 +9,7 @@ class SampleQuantizer {
     private final int channels;
     private final short[] buffer;
 
-    SampleQuantizer(int channels) {
+    public SampleQuantizer(int channels) {
         this.channels = channels;
 
         int bufferSize = MIN_ANALYZE_SIZE * channels;
@@ -17,7 +17,7 @@ class SampleQuantizer {
         buffer = new short[bufferSize];
     }
 
-    short[] quantize(short[] samples) {
+    public short[] quantize(short[] samples) {
         if (bufferedSampleCount + samples.length >= MIN_ANALYZE_SIZE * channels) {
             int newSamplesCount;
             short[] analyzeSamples;

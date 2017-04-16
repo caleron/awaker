@@ -21,7 +21,7 @@ public class TrackWrapper {
     public Date addDate;
     public int trackLength; //in Sekunden
 
-    TrackWrapper(int id, String title, String artist, String album, String filePath, Date addDate, int trackLength) {
+    public TrackWrapper(int id, String title, String artist, String album, String filePath, Date addDate, int trackLength) {
         this.id = id;
         this.title = title;
         this.artist = artist;

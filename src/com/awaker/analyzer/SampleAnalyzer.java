@@ -2,7 +2,7 @@ package com.awaker.analyzer;
 
 import java.util.*;
 
-class SampleAnalyzer {
+public class SampleAnalyzer {
     private static final Map<Integer, FFT> fftMap = new HashMap<>(3);
 
 
@@ -12,7 +12,7 @@ class SampleAnalyzer {
      *
      * @param samples Array aus Samples
      */
-    static List<Map.Entry<Double, Double>> analyzeSamples(short[] samples, int channels, int sampleRate) {
+    public static List<Map.Entry<Double, Double>> analyzeSamples(short[] samples, int channels, int sampleRate) {
         if (channels == 2) {
             int sampleFrame = samples.length / 2;
             //System.out.println(sampleFrame);
@@ -91,7 +91,6 @@ class SampleAnalyzer {
         }
         return amps;
     }
-
 
 
     /**
