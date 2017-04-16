@@ -1,5 +1,6 @@
 package com.awaker.mesh;
 
+import com.awaker.Awaker;
 import com.awaker.util.Log;
 import com.sun.jna.IntegerType;
 import com.sun.jna.Memory;
@@ -9,6 +10,10 @@ public class MeshMaster {
 
 
     public static void start() {
+        if (Awaker.isMSWindows) {
+            return;
+        }
+
         if (meshThread != null && meshThread.isAlive()) {
             meshThread.interrupt();
         }
