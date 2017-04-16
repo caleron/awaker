@@ -1,5 +1,10 @@
-package com.awaker.analyzer;
+package com.awaker.analyzer.aot;
 
+import com.awaker.analyzer.ColorTranslator;
+import com.awaker.analyzer.SampleAnalyzer;
+import com.awaker.analyzer.SampleQuantizer;
+import com.awaker.data.MediaManager;
+import com.awaker.data.TrackWrapper;
 import javazoom.jl.decoder.*;
 
 import java.awt.*;
@@ -9,6 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * not threadsafe
+ */
 public class PreAnalyzer {
 
     /**
@@ -20,19 +28,40 @@ public class PreAnalyzer {
     private final SampleQuantizer quantizer;
     private List<Byte> outputArray;
 
+    private List<List<Map.Entry<Double, Double>>> analyzedAudio;
+
     /**
      * Creates a new <code>Player</code> instance.
      */
     public PreAnalyzer() {
         decoder = new Decoder();
         quantizer = new SampleQuantizer(2);
+        analyzedAudio = new ArrayList<>();
+    }
+
+    public void analyze(TrackWrapper track) {
+        analyze(MediaManager.getFileStream(track));
+    }
+
+    public void analyze(InputStream inputStream) {
+        analyzedAudio.clear();
+        decodeAndTransform(inputStream);
+
+        for (List<Map.Entry<Double, Double>> result : analyzedAudio) {
+            //translate to color
+            Color color = ColorTranslator.translatePartition2(result);
+            //write color
+            addInt(color.getRGB());
+        }
+
+        System.out.println("single-threaded result size: " + outputArray.size());
+//        return outputArray;
     }
 
     /**
      * Decodes a single frame.
      */
-    public List<Byte> analyze(InputStream stream) {
-        long start = System.currentTimeMillis();
+    private void decodeAndTransform(InputStream stream) {
         try {
             Bitstream bitstream = new Bitstream(stream);
 
@@ -58,13 +87,29 @@ public class PreAnalyzer {
                 //read next frame
                 header = bitstream.readFrame();
             }
-            long diff = System.currentTimeMillis() - start;
-            return outputArray;
         } catch (JavaLayerException ex) {
-            return null;
+            throw new RuntimeException("error decoding file");
         }
     }
 
+
+    private int getVolume() {
+        int volumeSum = 0;
+
+        for (List<Map.Entry<Double, Double>> entries : analyzedAudio) {
+            double max = 0;
+            for (Map.Entry<Double, Double> entry : entries) {
+                if (entry.getValue() > max) {
+                    max = entry.getValue();
+                }
+            }
+            volumeSum += max;
+        }
+
+        int volume = volumeSum / analyzedAudio.size();
+
+        return volume;
+    }
 
     //1024 Samples entsprechen bei 44100Hz Abtastrate etwa 23ms
     //Samples für einen Channel, also insgesamt 2048 werden gebraucht
@@ -85,11 +130,7 @@ public class PreAnalyzer {
 
     private void analyzeSamples(short[] samples) {
         //analyze samples
-        List<Map.Entry<Double, Double>> result = SampleAnalyzer.analyzeSamples(samples, 2, sampleRate);
-        //translate to color
-        Color color = ColorTranslator.translatePartition2(result);
-        //write color
-        addInt(color.getRGB());
+        analyzedAudio.add(SampleAnalyzer.analyzeSamples(samples, 2, sampleRate));
     }
 
     private void addInt(int value) {
