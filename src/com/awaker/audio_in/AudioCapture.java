@@ -1,6 +1,6 @@
 package com.awaker.audio_in;
 
-import com.awaker.analyzer.SampleQuantizer;
+import com.awaker.analyzer.SampleAnalyzeProxy;
 import com.awaker.automation.EnvironmentEventListener;
 import com.awaker.config.Config;
 import com.awaker.config.ConfigChangeListener;
@@ -16,12 +16,12 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 public class AudioCapture implements ConfigChangeListener {
-    private final SampleQuantizer analyzer;
+    private final SampleAnalyzeProxy analyzer;
     private Thread thread;
     private boolean shouldRun = false;
 
     public AudioCapture(EnvironmentEventListener listener) {
-        analyzer = new SampleQuantizer(new ClapDetector(listener), 1);
+        analyzer = new SampleAnalyzeProxy(new ClapDetector(listener), 1);
         analyzer.updateAudioParams(44100, 10000000);
 
         Config.addListener(this, ConfigKey.DETECT_CLAPS);
