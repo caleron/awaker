@@ -45,6 +45,10 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
         CommandRouter.registerHandler(AudioCommand.class, this);
         EventRouter.registerReceiver(this, GlobalEvent.SHUTDOWN);
         EventRouter.registerReceiver(this, GlobalEvent.MEDIA_READY);
+
+        if (MediaManager.isReady()) {
+            trackQueue = TrackQueue.getInstance();
+        }
     }
 
     public static PlayerMaster getInstance() {
