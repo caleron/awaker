@@ -4,6 +4,7 @@ import com.awaker.Awaker;
 import com.awaker.config.PortConfig;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.global.UserActivityCenter;
 import com.awaker.server.json.UploadAnswer;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -30,6 +31,8 @@ public class HttpUploadServer implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        UserActivityCenter.reportActivity(this);
+
         try {
             //Header setzen
             //Access-Control-Header sind nur während debugging nötig

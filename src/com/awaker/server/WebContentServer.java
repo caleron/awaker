@@ -1,6 +1,7 @@
 package com.awaker.server;
 
 import com.awaker.config.PortConfig;
+import com.awaker.global.UserActivityCenter;
 import com.awaker.util.Log;
 import com.sun.net.httpserver.*;
 
@@ -87,6 +88,8 @@ public class WebContentServer implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        UserActivityCenter.reportActivity(this);
+
         String root = "./web";
         URI uri = httpExchange.getRequestURI();
 

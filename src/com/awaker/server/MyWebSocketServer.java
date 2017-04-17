@@ -2,8 +2,9 @@ package com.awaker.server;
 
 
 import com.awaker.config.PortConfig;
-import com.awaker.global.router.CommandRouter;
 import com.awaker.global.DataCommand;
+import com.awaker.global.UserActivityCenter;
+import com.awaker.global.router.CommandRouter;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
@@ -68,6 +69,8 @@ public class MyWebSocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        UserActivityCenter.reportActivity(this);
+
         System.out.println(message);
         CommandData commandData = gson.fromJson(message, CommandData.class);
 
