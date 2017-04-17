@@ -1,8 +1,8 @@
 package com.awaker.mesh;
 
 import com.awaker.audio.AudioCommand;
-import com.awaker.global.Command;
-import com.awaker.global.CommandRouter;
+import com.awaker.global.router.Command;
+import com.awaker.global.router.CommandRouter;
 import com.awaker.gpio.LightCommand;
 import com.awaker.server.json.CommandData;
 

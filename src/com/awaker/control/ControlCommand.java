@@ -1,6 +1,6 @@
 package com.awaker.control;
 
-import com.awaker.global.Command;
+import com.awaker.global.router.Command;
 
 enum ControlCommand implements Command {
     //Serverkontrolle

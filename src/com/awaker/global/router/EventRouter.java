@@ -1,4 +1,4 @@
-package com.awaker.global;
+package com.awaker.global.router;
 
 import java.util.ArrayList;
 import java.util.HashMap;

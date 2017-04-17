@@ -2,7 +2,7 @@ package com.awaker.data;
 
 import com.awaker.audio.AudioCommand;
 import com.awaker.audio.PlayList;
-import com.awaker.global.*;
+import com.awaker.global.router.*;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.server.json.Playlist;

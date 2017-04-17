@@ -2,9 +2,9 @@ package com.awaker.config;
 
 
 import com.awaker.data.DbManager;
-import com.awaker.global.Command;
-import com.awaker.global.CommandHandler;
-import com.awaker.global.CommandRouter;
+import com.awaker.global.router.Command;
+import com.awaker.global.router.CommandHandler;
+import com.awaker.global.router.CommandRouter;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 

@@ -1,6 +1,6 @@
 package com.awaker.data;
 
-import com.awaker.global.Command;
+import com.awaker.global.router.Command;
 
 public enum MediaCommand implements Command {
     //playlists und queue

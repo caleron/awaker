@@ -1,4 +1,4 @@
-package com.awaker.global;
+package com.awaker.global.router;
 
 public interface Command {
     String getAction();

@@ -1,6 +1,6 @@
 package com.awaker.audio;
 
-import com.awaker.global.Command;
+import com.awaker.global.router.Command;
 
 public enum AudioCommand implements Command {
     //direkt playerbezogene Sachen

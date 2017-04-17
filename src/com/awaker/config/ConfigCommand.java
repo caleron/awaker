@@ -1,6 +1,6 @@
 package com.awaker.config;
 
-import com.awaker.global.Command;
+import com.awaker.global.router.Command;
 
 public enum ConfigCommand implements Command {
     //Config

@@ -6,7 +6,7 @@ import com.awaker.config.Config;
 import com.awaker.config.ConfigKey;
 import com.awaker.data.MediaManager;
 import com.awaker.data.TrackWrapper;
-import com.awaker.global.*;
+import com.awaker.global.router.*;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;

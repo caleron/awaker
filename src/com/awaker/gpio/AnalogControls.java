@@ -1,7 +1,7 @@
 package com.awaker.gpio;
 
 import com.awaker.audio.AudioCommand;
-import com.awaker.global.CommandRouter;
+import com.awaker.global.router.CommandRouter;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
 import com.pi4j.gpio.extension.mcp.MCP3008GpioProvider;

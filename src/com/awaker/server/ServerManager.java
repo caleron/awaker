@@ -1,8 +1,8 @@
 package com.awaker.server;
 
-import com.awaker.global.EventReceiver;
-import com.awaker.global.EventRouter;
-import com.awaker.global.GlobalEvent;
+import com.awaker.global.router.EventReceiver;
+import com.awaker.global.router.EventRouter;
+import com.awaker.global.router.GlobalEvent;
 import com.awaker.util.Log;
 
 /**

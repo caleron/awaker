@@ -1,4 +1,4 @@
-package com.awaker.global;
+package com.awaker.global.router;
 
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;

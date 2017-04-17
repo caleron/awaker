@@ -1,7 +1,7 @@
 package com.awaker.control;
 
 import com.awaker.Awaker;
-import com.awaker.global.*;
+import com.awaker.global.router.*;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 

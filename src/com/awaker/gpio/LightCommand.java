@@ -1,6 +1,6 @@
 package com.awaker.gpio;
 
-import com.awaker.global.Command;
+import com.awaker.global.router.Command;
 
 public enum LightCommand implements Command {
     //Licht

@@ -1,5 +1,7 @@
 package com.awaker.global;
 
+import com.awaker.global.router.Command;
+
 public enum DataCommand implements Command {
 
     //datenaustausch

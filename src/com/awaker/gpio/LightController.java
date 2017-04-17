@@ -1,7 +1,7 @@
 package com.awaker.gpio;
 
 import com.awaker.audio.PlayerMaster;
-import com.awaker.global.*;
+import com.awaker.global.router.*;
 import com.awaker.server.json.Answer;
 import com.awaker.server.json.CommandData;
 import com.awaker.util.Log;
