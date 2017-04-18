@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 /**
- * Created by Patrick on 16.04.2017.
+ * Compares the performance of the single-threaded and the multi-threaded analyzer.
  */
 public class PerformanceTest {
     //around 10.5s

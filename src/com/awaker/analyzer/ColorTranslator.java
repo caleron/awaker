@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Contains some experimental functions to translate sample analysis results into colors
+ */
 @SuppressWarnings({"Duplicates", "unused"})
 public class ColorTranslator {
 
@@ -118,14 +121,23 @@ public class ColorTranslator {
         return new Color(red, green, blue);
     }
 
+    /**
+     * Translates the sample analysis results into a color by partitioning the frequency spectrum at fixed frequencies
+     * into 4 partitions.
+     *
+     * @param list result of frequency analysis
+     * @return the resulting color
+     */
     public static Color translatePartition2(List<Map.Entry<Double, Double>> list) {
         if (list == null || list.isEmpty())
             return Color.black;
 
+        //some fixed dividers
         final int freqDivider1 = 200;
         final int freqDivider2 = 900;
         final int freqDivider3 = 1500;
 
+        //divide the frequency spectrum into 4 partitions
         List<Map.Entry<Double, Double>> partition1 = new ArrayList<>(
                 list.stream().filter(entry -> entry.getKey() < freqDivider1).collect(Collectors.toList()));
         List<Map.Entry<Double, Double>> partition2 = new ArrayList<>(
@@ -135,20 +147,25 @@ public class ColorTranslator {
         List<Map.Entry<Double, Double>> partition4 = new ArrayList<>(
                 list.stream().filter(entry -> entry.getKey() > freqDivider3).collect(Collectors.toList()));
 
+        //find the maxima of each partition
         Map.Entry<Double, Double> max1 = findMaxima(partition1);
         Map.Entry<Double, Double> max2 = findMaxima(partition2);
         Map.Entry<Double, Double> max3 = findMaxima(partition3);
         Map.Entry<Double, Double> max4 = findMaxima(partition4);
 
+        //red color is only influenced by the first partition
         float red = cap((float) Math.pow(max1.getValue() / 13000.0, 2));
+        //second partition is the initially green value
         float green = (float) (max2.getValue() / 14000.0);
+        //fourth partition is the initially blue value
         float blue = (float) (max4.getValue() / 9000.0);
 
         int range = freqDivider3 - freqDivider2;
-
+        //scale the third partition into the green and blue value
         green += (1 - ((max3.getKey() - freqDivider2) / range)) * (max3.getValue() / 14000.0);
         blue += ((max3.getKey() - freqDivider2) / range) * (max3.getValue() / 8000.0);
 
+        //ensure that all values are between 0 and 1 (already done for red above)
         green = cap(Math.pow(green, 2));
         blue = cap(Math.pow(blue, 2));
 
@@ -157,6 +174,7 @@ public class ColorTranslator {
                     + " band1max = " + max1.getValue() + " band2max = " + max2.getValue() + " band3max = " + max3.getValue());
         }*/
 
+        //return new color with the calculated parts
         return new Color(red, green, blue);
     }
 
@@ -196,9 +214,22 @@ public class ColorTranslator {
         return maxAmp;
     }
 
+    /**
+     * Caps the given value to a value between 0 and 1.
+     *
+     * @param f the number to cap
+     * @return value between 0 and 1
+     */
     private static float cap(float f) {
         return Math.max(0, Math.min(f, 1));
     }
+
+    /**
+     * Caps the given value to a value between 0 and 1.
+     *
+     * @param f the number to cap
+     * @return value between 0 and 1
+     */
     private static float cap(double f) {
         return (float) Math.max(0, Math.min(f, 1));
     }

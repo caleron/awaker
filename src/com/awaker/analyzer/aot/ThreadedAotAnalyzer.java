@@ -16,26 +16,36 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Multi-threaded ahead of time frequency analyzer.
+ */
 public class ThreadedAotAnalyzer {
 
+    //the sample rate of the current track
     private int sampleRate;
 
     private final SampleQuantizer quantizer;
-    //    private List<Byte> outputArray;
+    //output array of integers
     private int[] outputArray;
 
+    //queue with quantized samples
     private final ConcurrentLinkedQueue<Map.Entry<Integer, short[]>> sampleQueue;
+    //the number of quantized sample arrays
     private int sampleCounter;
+    //queue with transformed samples for translation
     private final ConcurrentLinkedQueue<Map.Entry<Integer, List<Map.Entry<Double, Double>>>> transformedQueue;
 
+    //true if the decoding of the mp3 stream has finished
     private boolean decodingFinished = false;
 
+    //threads for transforming and translating
     private Thread transformThread1;
     private Thread transformThread2;
     private Thread transformThread3;
     private Thread transformThread4;
     private Thread translateThread;
 
+    //counter for checks (Atomic classes because of thread-safety
     private AtomicInteger transformCount = new AtomicInteger(0);
     private AtomicInteger translatedCount = new AtomicInteger(0);
     private AtomicInteger quantizedCount = new AtomicInteger(0);
@@ -43,7 +53,7 @@ public class ThreadedAotAnalyzer {
 //    private HashMap<Integer, List<Map.Entry<Double, Double>>> analyzedAudio;
 
     /**
-     * Creates a new <code>Player</code> instance.
+     * Creates a new {@link ThreadedAotAnalyzer} instance with 2 channels.
      */
     public ThreadedAotAnalyzer() {
         quantizer = new SampleQuantizer(2);
@@ -53,11 +63,24 @@ public class ThreadedAotAnalyzer {
         transformedQueue = new ConcurrentLinkedQueue<>();
     }
 
+    /**
+     * Analyzes the given {@link TrackWrapper}s underlying mp3 song.
+     *
+     * @param track the track to analyze
+     * @return true on success
+     */
     public boolean analyze(TrackWrapper track) {
         return analyze(MediaManager.getFileStream(track));
     }
 
+    /**
+     * Analyzes the given {@link InputStream}s underlying mp3 song.
+     *
+     * @param inputStream the stream of the track to analyze
+     * @return true on success
+     */
     public boolean analyze(InputStream inputStream) {
+        //reset counters and flags
         decodingFinished = false;
         sampleCounter = 0;
 
@@ -65,10 +88,11 @@ public class ThreadedAotAnalyzer {
         transformCount.set(0);
         quantizedCount.set(0);
 
-//        analyzedAudio.clear();
+        //clear queues
         sampleQueue.clear();
         transformedQueue.clear();
 
+        //start all threads
         transformThread1 = new Thread(this::transform);
         transformThread1.start();
         transformThread2 = new Thread(this::transform);
@@ -80,8 +104,10 @@ public class ThreadedAotAnalyzer {
         translateThread = new Thread(this::translate);
         translateThread.start();
 
+        //decode on current thread
         decodeAndQuantize(inputStream);
         decodingFinished = true;
+        //wait for other threads to complete
         try {
             transformThread1.join();
             transformThread2.join();
@@ -95,12 +121,13 @@ public class ThreadedAotAnalyzer {
         System.out.println("transformed: " + transformCount.get());
         System.out.println("translated: " + translatedCount.get());
         System.out.println("decoded/quantized: " + quantizedCount.get());
-//        return outputArray;
+
+        //return true if all steps handled the same amount
         return translatedCount.get() == transformCount.get() && transformCount.get() == quantizedCount.get();
     }
 
     /**
-     * Decodes a single frame.
+     * Decodes the given mp3 input stream and pushes the quantized samples into the analyze queue.
      */
     private void decodeAndQuantize(InputStream stream) {
         try {
@@ -121,6 +148,7 @@ public class ThreadedAotAnalyzer {
 
                 short[] samples = output.getBuffer();
 
+                //quantize the samples
                 quantizeSamples(samples);
 
                 //close the frame
@@ -134,8 +162,11 @@ public class ThreadedAotAnalyzer {
         }
     }
 
-
-    //1024 Samples entsprechen bei 44100Hz Abtastrate etwa 23ms
+    /**
+     * Quantizes the given samples in arrays of 2048 shorts (1024 * channels) and adds them to the sampleQueue.
+     *
+     * @param samples non-quantized short array output from decoding
+     */
     private void quantizeSamples(short[] samples) {
         short[] quantizedSamples = quantizer.quantize(samples);
         if (quantizedSamples.length == 2048) {
@@ -153,12 +184,12 @@ public class ThreadedAotAnalyzer {
         }
     }
 
-    //Samples für einen Channel, also insgesamt 2048 werden gebraucht
-
+    /**
+     * Transforms samples from the sampleQueue by using the FFT and adds the results to the transformedQueue.
+     */
     private void transform() {
         try {
-
-            //analyze samples
+            //analyze until decoding finished and sample queue is empty
             while (!decodingFinished || !sampleQueue.isEmpty()) {
                 Map.Entry<Integer, short[]> samples = sampleQueue.poll();
 
@@ -175,11 +206,12 @@ public class ThreadedAotAnalyzer {
         }
     }
 
-
+    /**
+     * Translates the analyze results from the transformedQueue to color values.
+     */
     private void translate() {
         try {
-            while (transformThread1.isAlive() || transformThread2.isAlive() || transformThread3.isAlive()
-                    || transformThread4.isAlive() || !transformedQueue.isEmpty()) {
+            while (transformingRunning() || !transformedQueue.isEmpty()) {
                 Map.Entry<Integer, List<Map.Entry<Double, Double>>> entry = transformedQueue.poll();
 
                 if (entry == null) {
@@ -189,12 +221,13 @@ public class ThreadedAotAnalyzer {
 
                 //translate to color
                 Color color = ColorTranslator.translatePartition2(entry.getValue());
-                //write color
 
+                //ensure the capacity is sufficient for the index
                 if (entry.getKey() > outputArray.length - 1) {
                     expandOutputArray(entry.getKey());
                 }
-                outputArray[entry.getKey()] = color.getRGB();
+                //write color to output array
+                outputArray[entry.getKey() + 1] = color.getRGB();
                 translatedCount.incrementAndGet();
             }
         } catch (Exception ex) {
@@ -202,11 +235,28 @@ public class ThreadedAotAnalyzer {
         }
     }
 
+    /**
+     * Returns a boolean indicating the status of the transforming threads.
+     *
+     * @return true if one of the transformer threads is still running.
+     */
+    private boolean transformingRunning() {
+        return transformThread1.isAlive() || transformThread2.isAlive() || transformThread3.isAlive()
+                || transformThread4.isAlive();
+    }
+
+    /**
+     * Expands the output array to ensure that the newIndex fits into it.
+     *
+     * @param newIndex the new index to access.
+     */
     private void expandOutputArray(int newIndex) {
         int[] tmpArray = outputArray;
 
+        //calculate new length
         int newLenght = (int) Math.max(tmpArray.length * 2, newIndex * 1.5);
         outputArray = new int[newLenght];
+        //copy contents of old array to new array
         System.arraycopy(tmpArray, 0, outputArray, 0, tmpArray.length);
     }
 

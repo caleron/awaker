@@ -1,14 +1,23 @@
 package com.awaker.analyzer;
 
+/**
+ * Quantizes samples. Takes samples from decoding and returns them in array sizes with a power of 2, so that the array
+ * is suitable for FFT analysis. Buffers overlapping samples.
+ */
 public class SampleQuantizer {
 
     private int bufferedSampleCount = 0;
     //1024 Samples entsprechen bei 44100Hz Abtastrate etwa 23ms
-    //Samples für einen Channel, also insgesamt 2048 werden gebraucht
+    //Samples jeweils für einen Channel, also insgesamt 2048 werden gebraucht
     private static final int MIN_ANALYZE_SIZE = 1024;
     private final int channels;
     private final short[] buffer;
 
+    /**
+     * Creates a new {@link SampleQuantizer}.
+     *
+     * @param channels the channel count
+     */
     public SampleQuantizer(int channels) {
         this.channels = channels;
 
@@ -17,6 +26,12 @@ public class SampleQuantizer {
         buffer = new short[bufferSize];
     }
 
+    /**
+     * Takes a sample array and returns an array which size is a power of 2. (1024 or 2048, multiplied by channel count)
+     *
+     * @param samples input samples
+     * @return short array with size equals 1024 or 2048 multiplied by channel count
+     */
     public short[] quantize(short[] samples) {
         if (bufferedSampleCount + samples.length >= MIN_ANALYZE_SIZE * channels) {
             int newSamplesCount;

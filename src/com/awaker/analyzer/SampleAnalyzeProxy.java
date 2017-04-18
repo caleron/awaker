@@ -1,5 +1,8 @@
 package com.awaker.analyzer;
 
+/**
+ * Class that controls the {@link SampleAnalyzeThread} and feeds it with new quantized samples.
+ */
 public class SampleAnalyzeProxy {
 
     private final SampleAnalyzeThread analyzeThread;
@@ -15,6 +18,7 @@ public class SampleAnalyzeProxy {
         }
         quantizer = new SampleQuantizer(channels);
 
+        //start the new thread
         analyzeThread = new SampleAnalyzeThread(listener, channels);
         analyzeThread.start();
     }
@@ -31,6 +35,12 @@ public class SampleAnalyzeProxy {
         }
     }
 
+    /**
+     * Should be called each time a new track is played.
+     *
+     * @param sampleRate the sample rate
+     * @param msPerFrame the number of ms per frame
+     */
     public void updateAudioParams(int sampleRate, float msPerFrame) {
         analyzeThread.updateAudioParams(sampleRate, msPerFrame);
     }

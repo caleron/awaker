@@ -3,8 +3,12 @@ package com.awaker.analyzer;
 import com.awaker.Awaker;
 import com.awaker.util.Log;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
+/**
+ * Thread that runs the actual analysis.
+ */
 class SampleAnalyzeThread extends Thread {
     private final Queue<short[]> queue;
     private final AnalyzeResultListener listener;
@@ -24,6 +28,12 @@ class SampleAnalyzeThread extends Thread {
      */
     private int analyzeThreshold = 12;
 
+    /**
+     * Creates a new {@link SampleAnalyzeThread}.
+     *
+     * @param listener The listener for the results.
+     * @param channels The channel count
+     */
     SampleAnalyzeThread(AnalyzeResultListener listener, int channels) {
         this.listener = listener;
         queue = new LinkedList<>();
@@ -83,8 +93,8 @@ class SampleAnalyzeThread extends Thread {
     /**
      * Wird aufgerufen, um aktuelle Audioparameter zu übermitteln. Mit diesen Informationen wird die Analyse mit der
      * Musik synchronisiert. Dies ist notwendig, da der Audiomixer (etwa Alsamixer auf dem Raspberry) einen Puffer oder
-     * ähnliches verwendet, also der Sound erst nach einer Verzögerung abgespielt wird, damit eine reibungslose
-     * Wiedergabe garantiert ist. Unter Windows ist diese Verzögerung anders als auf dem Raspberry.
+     * ähnliches verwendet, also der Sound erst nach einer Verzögerung abgespielt wird (damit wohl eine reibungslose
+     * Wiedergabe garantiert ist). Unter Windows ist diese Verzögerung anders als auf dem Raspberry.
      *
      * @param sampleRate Die aktuelle Samplerate
      * @param msPerFrame Zeit pro Frame (und damit Sampleblock) in ms
@@ -106,12 +116,22 @@ class SampleAnalyzeThread extends Thread {
         }
     }
 
+    /**
+     * Adds a new sample array for frequency analysis.
+     *
+     * @param samples array of samples which size is a power of 2.
+     */
     void pushAnalyzeArray(short[] samples) {
         standby = false;
         queue.add(samples);
     }
 
 
+    /**
+     * returns the analyzed sample count.
+     *
+     * @return number of analyzed samples since the last reset.
+     */
     long getAnalyzedSamplesCount() {
         return analyzedSamplesCount;
     }
