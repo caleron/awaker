@@ -54,6 +54,11 @@ public enum LightCommand implements Command {
      * Setzt die Farbe auf <code>green</code>, <code>red</code> und <code>blue</code>
      */
     SET_RGBCOLOR("setRGBColor"),
+
+    /**
+     * Setzt den angegebenen {@link LightChannel} auf die gesetzte brightness.
+     */
+    SET_CHANNEL_BRIGHTNESS("setChannelBrightness"),
     /**
      * Setzt Visualisationsmethode. Nicht unterstützt.
      */

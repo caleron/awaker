@@ -1,5 +1,7 @@
 package com.awaker.server.json;
 
+import com.awaker.gpio.LightChannel;
+
 /**
  * Repräsentiert einen Befehl, der von einem Client geschickt wurde. Beinhaltet alle möglichen Felder, die durch
  * Deserialisierung von JSON durch Gson gesetzt werden.
@@ -79,4 +81,6 @@ public class CommandData {
     public String colorMode;
     public String visualisation;
     public String text;
+
+    public LightChannel channel;
 }

@@ -112,6 +112,9 @@ public class LightController implements CommandHandler, EventReceiver {
             case SWITCH_ON_WHITE_LIGHT:
                 setBrightness(LightChannel.WHITE, 70, 1000);
                 break;
+            case SET_CHANNEL_BRIGHTNESS:
+                setBrightness(data.channel, data.brightness, data.smooth);
+                break;
         }
         if (buildAnswer) {
             return Answer.status();
