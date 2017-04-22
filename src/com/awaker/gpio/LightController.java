@@ -113,7 +113,11 @@ public class LightController implements CommandHandler, EventReceiver {
                 setBrightness(LightChannel.WHITE, 70, 1000);
                 break;
             case SET_CHANNEL_BRIGHTNESS:
-                setBrightness(data.channel, data.brightness, data.smooth);
+                if (data.duration != -1) {
+                    setBrightness(data.channel, data.brightness, data.duration);
+                } else {
+                    setBrightness(data.channel, data.brightness, data.smooth);
+                }
                 break;
         }
         if (buildAnswer) {
