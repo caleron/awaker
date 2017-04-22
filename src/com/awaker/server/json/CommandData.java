@@ -77,6 +77,7 @@ public class CommandData {
     public Integer volume;
     public Integer brightness;
     public Integer color;
+    public Integer duration;
 
     public String colorMode;
     public String visualisation;
