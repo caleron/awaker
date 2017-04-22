@@ -1,6 +1,8 @@
 package com.awaker.global.router;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class EventRouter {
     private static final HashMap<GlobalEvent, Set<EventReceiver>> listenerMap = new HashMap<>();
@@ -31,5 +33,18 @@ public class EventRouter {
                 receiver.receiveGlobalEvent(event);
             }
         }
+    }
+
+    /**
+     * Unregisters an {@link EventReceiver} for a {@link GlobalEvent}
+     *
+     * @param receiver the {@link EventReceiver}
+     * @param event    the {@link GlobalEvent}
+     */
+    public static void unregisterReceiver(EventReceiver receiver, GlobalEvent event) {
+        if (!listenerMap.containsKey(event)) {
+            return;
+        }
+        listenerMap.get(event).remove(receiver);
     }
 }

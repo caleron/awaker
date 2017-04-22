@@ -62,6 +62,10 @@ public class SunEventTrigger extends BaseTrigger {
         return list;
     }
 
+    @Override
+    public void unregisterEvents() {
+
+    }
 
     public enum SunEvent {
         SUNRISE,

@@ -25,6 +25,15 @@ public class TaskScheduler {
     }
 
     public void scheduleAll() {
+        //cancel all scheduled tasks before, to avoid double execution of tasks
+        for (ScheduledFuture future : futures) {
+            future.cancel(false);
+        }
+        //also unregister to events to avoid double execution, too
+        for (Task task : taskList) {
+            task.unregisterEvents();
+        }
+
         ZonedDateTime now = SntpClient.getTimeForSure();
 
         for (Task task : taskList) {

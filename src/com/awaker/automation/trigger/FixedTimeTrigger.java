@@ -28,4 +28,9 @@ public class FixedTimeTrigger extends BaseTrigger {
 
         return list;
     }
+
+    @Override
+    public void unregisterEvents() {
+
+    }
 }

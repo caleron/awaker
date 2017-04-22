@@ -24,6 +24,10 @@ public class Task {
         return trigger.scheduleForToday(now, action, executorService);
     }
 
+    public void unregisterEvents() {
+        trigger.unregisterEvents();
+    }
+
     public BaseTrigger getTrigger() {
         return trigger;
     }

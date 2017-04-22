@@ -43,4 +43,9 @@ public class TimeIntervalTrigger extends BaseTrigger {
 
         return list;
     }
+
+    @Override
+    public void unregisterEvents() {
+
+    }
 }
