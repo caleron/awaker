@@ -1,11 +1,9 @@
 package com.awaker.global.router;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class EventRouter {
-    private static final HashMap<GlobalEvent, List<EventReceiver>> listenerMap = new HashMap<>();
+    private static final HashMap<GlobalEvent, Set<EventReceiver>> listenerMap = new HashMap<>();
 
     /**
      * Registriert einen {@link EventReceiver} für globale Events
@@ -15,7 +13,7 @@ public class EventRouter {
      */
     public static void registerReceiver(EventReceiver receiver, GlobalEvent event) {
         if (!listenerMap.containsKey(event)) {
-            listenerMap.put(event, new ArrayList<>());
+            listenerMap.put(event, new HashSet<>());
         }
         listenerMap.get(event).add(receiver);
     }
@@ -26,7 +24,7 @@ public class EventRouter {
      * @param event Das auszulösende Event
      */
     public static void raiseEvent(GlobalEvent event) {
-        List<EventReceiver> receivers = listenerMap.get(event);
+        Set<EventReceiver> receivers = listenerMap.get(event);
 
         if (receivers != null) {
             for (EventReceiver receiver : receivers) {
