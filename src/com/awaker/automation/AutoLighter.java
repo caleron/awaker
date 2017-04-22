@@ -46,22 +46,11 @@ class AutoLighter implements ConfigChangeListener {
     public static void start(EnvironmentEventListener listener) {
         new Thread(() -> new AutoLighter(listener)).start();
     }
-    
+
     //Sommer-/Winterzeit muss nicht berücksichtigt werden, da ZonedDateTime dies erledigt, welches auf UTC basiert
     private void scheduleEvents() {
         refreshTimes();
-        ZonedDateTime now = null;
-        while (now == null) {
-            now = SntpClient.getTime();
-            if (now == null) {
-                Log.message("Getting Time failed, retrying in 30 seconds");
-                try {
-                    Thread.sleep(30000);
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
-            }
-        }
+        ZonedDateTime now = SntpClient.getTimeForSure();
 
         int sunriseOffset = Config.getInt(ConfigKey.SUNRISE_TIME_OFFSET_SECONDS);
         int sunsetOffset = Config.getInt(ConfigKey.SUNSET_TIME_OFFSET_SECONDS);

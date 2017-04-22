@@ -77,4 +77,20 @@ public class SntpClient {
         }
         return null;
     }
+
+    public static ZonedDateTime getTimeForSure() {
+        ZonedDateTime now = null;
+        while (now == null) {
+            now = SntpClient.getTime();
+            if (now == null) {
+                Log.message("Getting Time failed, retrying in 30 seconds");
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+            }
+        }
+        return now;
+    }
 }
