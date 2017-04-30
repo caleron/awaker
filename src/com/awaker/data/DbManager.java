@@ -5,6 +5,7 @@ import com.awaker.config.Config;
 import com.awaker.util.Log;
 
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,6 +66,7 @@ public class DbManager {
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate(TrackWrapper.getCreateTableSql());
+            statement.executeUpdate(TrackWrapper.getCreateColorsTableSql());
             statement.executeUpdate(PlayList.getCreateTableSql());
             statement.executeUpdate(PlayList.getCreatePlaylistTracksTableSql());
             statement.executeUpdate(Config.getCreateTableSQL());
@@ -387,5 +389,57 @@ public class DbManager {
         } catch (SQLException e) {
             Log.error(e);
         }
+    }
+
+    public static void setMusicColors(int trackId, byte[] colors, int version) {
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "REPLACE INTO music_colors(music_id, colors, analyzer_version, analyze_time) VALUES (?,?,?,?)");
+
+            statement.setInt(1, trackId);
+            statement.setBytes(2, colors);
+            statement.setInt(3, version);
+            statement.setDate(4, new java.sql.Date(Instant.now().getEpochSecond() * 1000));
+            statement.executeUpdate();
+
+            statement.close();
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+    }
+
+    public static TrackWrapper getTrackWithoutColors() {
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT id FROM music WHERE id NOT IN ( SELECT music_id FROM music_colors) LIMIT 1");
+
+            if (resultSet.next()) {
+                resultSet.close();
+
+                return MediaManager.getTrack(resultSet.getInt("id"));
+            } else {
+                resultSet.close();
+            }
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
+    public static byte[] getMusicColors(int trackId) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT colors FROM music_colors WHERE music_id = ?");
+            statement.setInt(1, trackId);
+            ResultSet rs = statement.executeQuery();
+
+            rs.next();
+            byte[] colors = rs.getBytes("colors");
+
+            rs.close();
+            return colors;
+        } catch (SQLException e) {
+            Log.error(e);
+        }
+        return null;
     }
 }

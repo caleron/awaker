@@ -51,6 +51,18 @@ public class TrackWrapper {
                 + "\"%s\" INTEGER)", TABLE_NAME, ID, TITLE, ARTIST, ALBUM, FILE_PATH, ADD_DATE, TRACK_LENGTH);
     }
 
+    static String getCreateColorsTableSql() {
+        return "CREATE TABLE IF NOT EXISTS music_colors(" +
+                "  music_id         INT PRIMARY KEY NOT NULL,\n" +
+                "  colors           BLOB            NOT NULL,\n" +
+                "  analyzer_version INT,\n" +
+                "  analyze_time     DATETIME,\n" +
+                "  CONSTRAINT music_colors_music_id_fk FOREIGN KEY (music_id) REFERENCES music (id)\n" +
+                "    ON DELETE CASCADE\n" +
+                "    ON UPDATE CASCADE\n" +
+                ")";
+    }
+
     public int getId() {
         return id;
     }
