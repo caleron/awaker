@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * not threadsafe
+ * not threadsafe, single-threaded
  */
 public class PreAnalyzer {
 
