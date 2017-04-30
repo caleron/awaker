@@ -9,6 +9,8 @@ import javazoom.jl.decoder.*;
 
 import java.awt.*;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
@@ -124,6 +126,13 @@ public class ThreadedAotAnalyzer {
 
         //return true if all steps handled the same amount
         return translatedCount.get() == transformCount.get() && transformCount.get() == quantizedCount.get();
+    }
+
+    public byte[] getOutputArray() {
+        ByteBuffer buffer = ByteBuffer.allocate(outputArray.length * 4);
+        IntBuffer intBuffer = buffer.asIntBuffer();
+        intBuffer.put(outputArray);
+        return buffer.array();
     }
 
     /**
