@@ -391,6 +391,13 @@ public class DbManager {
         }
     }
 
+    /**
+     * Sets the music color array for the given track id in the database. Stores also a version int for future usage.
+     *
+     * @param trackId the id of the track to which the colors belong
+     * @param colors  the color array, first int should be the sample rate
+     * @param version the version of the used analyzer for future usage.
+     */
     public static void setMusicColors(int trackId, byte[] colors, int version) {
         try {
             PreparedStatement statement = connection.prepareStatement(
@@ -408,15 +415,20 @@ public class DbManager {
         }
     }
 
+    /**
+     * Selects one track from the database which has not been analyzed yet.
+     *
+     * @return a {@link TrackWrapper} for a not analyzed track
+     */
     public static TrackWrapper getTrackWithoutColors() {
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT id FROM music WHERE id NOT IN ( SELECT music_id FROM music_colors) LIMIT 1");
 
             if (resultSet.next()) {
+                int id = resultSet.getInt("id");
                 resultSet.close();
-
-                return MediaManager.getTrack(resultSet.getInt("id"));
+                return MediaManager.getTrack(id);
             } else {
                 resultSet.close();
             }
@@ -426,6 +438,12 @@ public class DbManager {
         return null;
     }
 
+    /**
+     * Retrieves the color array from the database for a track.
+     *
+     * @param trackId the id of the track for which the colors should be retrieved.
+     * @return byte array, to be read as int array with the first int as sample rate
+     */
     public static byte[] getMusicColors(int trackId) {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT colors FROM music_colors WHERE music_id = ?");
