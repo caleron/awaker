@@ -1,7 +1,7 @@
 package com.awaker.audio;
 
 import com.awaker.analyzer.AnalyzeResultListener;
-import com.awaker.analyzer.SampleAnalyzeProxy;
+import com.awaker.analyzer.jit.SampleAnalyzeProxy;
 import com.awaker.config.Config;
 import com.awaker.config.ConfigKey;
 import com.awaker.data.MediaManager;

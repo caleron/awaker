@@ -1,6 +1,6 @@
 package com.awaker.audio_in;
 
-import com.awaker.analyzer.SampleAnalyzeProxy;
+import com.awaker.analyzer.jit.SampleAnalyzeProxy;
 import com.awaker.automation.EnvironmentEventListener;
 import com.awaker.config.Config;
 import com.awaker.config.ConfigChangeListener;

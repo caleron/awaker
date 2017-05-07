@@ -1,4 +1,7 @@
-package com.awaker.analyzer;
+package com.awaker.analyzer.jit;
+
+import com.awaker.analyzer.AnalyzeResultListener;
+import com.awaker.analyzer.SampleQuantizer;
 
 /**
  * Class that controls the {@link SampleAnalyzeThread} and feeds it with new quantized samples.

@@ -1,6 +1,8 @@
-package com.awaker.analyzer;
+package com.awaker.analyzer.jit;
 
 import com.awaker.Awaker;
+import com.awaker.analyzer.AnalyzeResultListener;
+import com.awaker.analyzer.SampleAnalyzer;
 import com.awaker.util.Log;
 
 import java.util.LinkedList;
