@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BackgroundAnalyzeTrackAction extends BaseTaskAction {
 
-    static final AtomicBoolean isRunning = new AtomicBoolean(false);
+    private static final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public BackgroundAnalyzeTrackAction(int id) {
         super(id);
@@ -50,7 +50,7 @@ public class BackgroundAnalyzeTrackAction extends BaseTaskAction {
             return false;
         }
 
-        DbManager.setMusicColors(track.getId(), analyzer.getOutputArray(), 1);
+        DbManager.setMusicColors(track.getId(), analyzer.getOutputArray(), ThreadedAotAnalyzer.ANALYZE_VERSION);
         return true;
     }
 }
