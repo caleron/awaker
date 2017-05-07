@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Multi-threaded ahead of time frequency analyzer.
  */
 public class ThreadedAotAnalyzer {
+    public static final int ANALYZE_VERSION = 1;
 
     //the sample rate of the current track
     private int sampleRate;
@@ -232,7 +233,7 @@ public class ThreadedAotAnalyzer {
                 Color color = ColorTranslator.translatePartition2(entry.getValue());
 
                 //ensure the capacity is sufficient for the index
-                if (entry.getKey() > outputArray.length - 1) {
+                if (entry.getKey() > outputArray.length - 2) {
                     expandOutputArray(entry.getKey());
                 }
                 //write color to output array
