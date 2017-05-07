@@ -155,7 +155,9 @@ class CustomPlayer {
     void stop() {
         status = PlaybackStatus.STOPPED;
         samplesListener.playbackStopped();
-        offsetPlayedMs += getPosition();
+        if (audio != null) {
+            offsetPlayedMs += audio.getPosition();
+        }
 
         close();
     }
