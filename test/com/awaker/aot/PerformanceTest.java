@@ -9,6 +9,8 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.util.Date;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Compares the performance of the single-threaded and the multi-threaded analyzer.
  */
@@ -37,7 +39,7 @@ public class PerformanceTest {
 
         long start = System.currentTimeMillis();
 
-        preAnalyzer.analyze(stream);
+        assertTrue(preAnalyzer.analyze(stream));
 
         System.out.println((System.currentTimeMillis() - start));
     }
