@@ -442,7 +442,8 @@ public class DbManager {
      * Retrieves the color array from the database for a track.
      *
      * @param trackId the id of the track for which the colors should be retrieved.
-     * @return byte array, to be read as int array with the first int as sample rate
+     * @return byte array, to be read as int array with the first int as sample rate, or null on error or if colours not
+     * found
      */
     public static byte[] getMusicColors(int trackId) {
         try {
@@ -450,8 +451,10 @@ public class DbManager {
             statement.setInt(1, trackId);
             ResultSet rs = statement.executeQuery();
 
-            rs.next();
-            byte[] colors = rs.getBytes("colors");
+            byte[] colors = null;
+            if (rs.next()) {
+                colors = rs.getBytes("colors");
+            }
 
             rs.close();
             return colors;
