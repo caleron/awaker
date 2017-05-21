@@ -1,7 +1,7 @@
 package com.awaker;
 
-import com.awaker.analyzer.AnalyzeResultListener;
 import com.awaker.analyzer.ColorTranslator;
+import com.awaker.analyzer.MusicColorChangeListener;
 import com.awaker.audio.AudioCommand;
 import com.awaker.audio.PlayerMaster;
 import com.awaker.automation.Automator;
@@ -10,10 +10,10 @@ import com.awaker.config.ConfigKey;
 import com.awaker.control.RaspiControl;
 import com.awaker.data.DbManager;
 import com.awaker.data.MediaManager;
+import com.awaker.global.DataCommand;
 import com.awaker.global.router.Command;
 import com.awaker.global.router.CommandHandler;
 import com.awaker.global.router.CommandRouter;
-import com.awaker.global.DataCommand;
 import com.awaker.gpio.LightController;
 import com.awaker.mesh.MeshMaster;
 import com.awaker.server.ServerManager;
@@ -40,7 +40,7 @@ import java.util.Map;
 //TODO Ahead of Time-Analyse
 //TODO Web notification
 
-public class Awaker implements AnalyzeResultListener, CommandHandler {
+public class Awaker implements MusicColorChangeListener, CommandHandler {
     //Ausgabefenster und -feld beim Betrieb auf Windows
     private JFrame stringOutputFrame = null;
     private JTextArea stringOutputBox = null;
@@ -114,12 +114,12 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
     }
 
     @Override
-    public void newResults(List<Map.Entry<Double, Double>> list) {
+    public void newColor(Color color) {
         if (isMSWindows) {
-            panel.fftResultList = list;
+            panel.color = color;
             SwingUtilities.invokeLater(panel::repaint);
         } else {
-            lightController.updateColor(ColorTranslator.translatePartition2(list), true);
+            lightController.updateColor(color, true);
         }
     }
 
@@ -170,6 +170,7 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
 
         //Liste mit den Ergebnissen aus der Frequenzanalyse mit FFT
         private List<Map.Entry<Double, Double>> fftResultList;
+        private Color color = Color.BLACK;
 
         AwakerPanel() {
             addMouseListener(new MyMouseAdapter());
@@ -182,7 +183,6 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
 
             int width = getWidth();
             int yBottom = getHeight() - 10;
-
 
             g.setColor(Color.GRAY);
             g.fillRect(0, 0, width, getHeight());
@@ -197,8 +197,9 @@ public class Awaker implements AnalyzeResultListener, CommandHandler {
                     g.drawLine(x, yBottom, x, y);
                 }
 
+                color = ColorTranslator.translatePartition2(fftResultList);
             }
-            Color color = ColorTranslator.translatePartition2(fftResultList);
+
             int fieldWidth = width / 4;
             int fieldHeight = 100;//getHeight() / 3;
             int space = width / 16;
