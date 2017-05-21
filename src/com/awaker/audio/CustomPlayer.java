@@ -5,8 +5,10 @@ import javazoom.jl.decoder.*;
 import javazoom.jl.player.AudioDevice;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
-class CustomPlayer {
+class CustomPlayer implements PlayerListener {
     /**
      * The MPEG audio bitstream.
      */
@@ -31,7 +33,7 @@ class CustomPlayer {
      */
     private int offsetPlayedMs = 0;
 
-    private final PlayerListener samplesListener;
+    private final List<PlayerListener> samplesListener;
 
     private PlaybackStatus status = PlaybackStatus.CREATED;
 
@@ -43,11 +45,11 @@ class CustomPlayer {
     /**
      * Creates a new <code>Player</code> instance.
      *
-     * @param a      PlayerListener, der über Playback-Events informiert wird
-     * @param stream Inputstream, aus dem abgespielt werden soll.
+     * @param listener PlayerListener, der über Playback-Events informiert wird
+     * @param stream   Inputstream, aus dem abgespielt werden soll.
      */
-    CustomPlayer(PlayerListener a, InputStream stream, int volume) {
-        samplesListener = a;
+    CustomPlayer(PlayerListener[] listener, InputStream stream, int volume) {
+        samplesListener = Arrays.asList(listener);
         decoder = new Decoder();
         bitstream = new Bitstream(stream);
         this.volume = volume;
@@ -128,7 +130,7 @@ class CustomPlayer {
      * @param start Die Anzahl an Frames, die übersprungen werden sollen.
      */
     private void runPlayback(final int start) throws JavaLayerException {
-        samplesListener.playbackStarted(getPosition());
+        playbackStarted(getPosition());
 
         skipFrames(start);
 
@@ -145,7 +147,7 @@ class CustomPlayer {
                 close();
             }
             //Wenn out schon vorher null ist, dann wurde gestoppt, deshalb nur Event auslösen, wenn out noch nicht null war
-            samplesListener.playbackFinished();
+            playbackFinished();
         }
     }
 
@@ -154,7 +156,7 @@ class CustomPlayer {
      */
     void stop() {
         status = PlaybackStatus.STOPPED;
-        samplesListener.playbackStopped();
+        playbackStopped();
         if (audio != null) {
             offsetPlayedMs += audio.getPosition();
         }
@@ -167,7 +169,7 @@ class CustomPlayer {
      */
     synchronized void pause() {
         status = PlaybackStatus.PAUSED;
-        samplesListener.playbackPaused();
+        playbackPaused();
 
         AudioDevice out = audio;
         if (out != null) {
@@ -263,14 +265,14 @@ class CustomPlayer {
 
             if (!sampleRateReported) {
                 //lastHeader ist jetzt != null
-                samplesListener.reportAudioParams(getSampleRate(), lastHeader.ms_per_frame());
+                reportAudioParams(getSampleRate(), lastHeader.ms_per_frame());
                 sampleRateReported = true;
             }
 
             // sample buffer set when decoder constructed
             SampleBuffer output = (SampleBuffer) decoder.decodeFrame(lastHeader, bitstream);
 
-            samplesListener.newSamples(output.getBuffer());
+            newSamples(output.getBuffer());
 
             synchronized (this) {
                 out = audio;
@@ -312,7 +314,7 @@ class CustomPlayer {
 
         if (!sampleRateReported) {
             //lastHeader ist jetzt != null
-            samplesListener.reportAudioParams(getSampleRate(), lastHeader.ms_per_frame());
+            reportAudioParams(getSampleRate(), lastHeader.ms_per_frame());
             sampleRateReported = true;
         }
 
@@ -332,5 +334,31 @@ class CustomPlayer {
         if (audio != null) {
             audio.setVolume(volume);
         }
+    }
+
+    @Override
+    public void newSamples(short[] samples) {
+        samplesListener.forEach(playerListener -> playerListener.newSamples(samples));
+    }
+
+    @Override
+    public void reportAudioParams(int sampleRate, float msPerFrame) {
+        samplesListener.forEach(playerListener -> playerListener.reportAudioParams(sampleRate, msPerFrame));
+    }
+
+    public void playbackStarted(int positionMs) {
+        samplesListener.forEach(playerListener -> playerListener.playbackStarted(positionMs));
+    }
+
+    public void playbackFinished() {
+        samplesListener.forEach(PlayerListener::playbackFinished);
+    }
+
+    public void playbackStopped() {
+        samplesListener.forEach(PlayerListener::playbackStopped);
+    }
+
+    public void playbackPaused() {
+        samplesListener.forEach(PlayerListener::playbackPaused);
     }
 }

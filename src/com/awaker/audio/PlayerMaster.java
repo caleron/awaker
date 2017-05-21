@@ -1,7 +1,7 @@
 package com.awaker.audio;
 
-import com.awaker.analyzer.AnalyzeResultListener;
-import com.awaker.analyzer.jit.SampleAnalyzeProxy;
+import com.awaker.analyzer.MusicAnalyzeManager;
+import com.awaker.analyzer.MusicColorChangeListener;
 import com.awaker.config.Config;
 import com.awaker.config.ConfigKey;
 import com.awaker.data.MediaManager;
@@ -22,8 +22,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     private TrackQueue trackQueue;
 
     private CustomPlayer player;
-    private final SampleAnalyzeProxy analyzer;
-    private boolean customColorMode = false;
+    private final MusicAnalyzeManager musicAnalyzeManager;
 
     private int volume = 100;
 
@@ -31,16 +30,14 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
      * Erstellt eine neue Instanz. Es darf nur eine einzige Instanz existieren. Falls der Konstruktor ein zweites Mal
      * aufgerufen wird, wird eine {@link RuntimeException} geworfen.
      *
-     * @param analyzeResultListener Der Listener für die Ergebnisse der Analyse mit FFT
+     * @param musicColorChangeListener Der Listener für die Ergebnisse der Analyse mit FFT und der Farbtranslation
      */
-    public PlayerMaster(AnalyzeResultListener analyzeResultListener) {
+    public PlayerMaster(MusicColorChangeListener musicColorChangeListener) {
         //Nur eine Instanz erlauben, damit nicht 2 Songs gleichzeitig abgespielt werden können.
         if (instance != null) {
             throw new RuntimeException("PlayerMaster already existing");
         }
         instance = this;
-
-        analyzer = new SampleAnalyzeProxy(analyzeResultListener);
 
         CommandRouter.registerHandler(AudioCommand.class, this);
         EventRouter.registerReceiver(this, GlobalEvent.SHUTDOWN);
@@ -49,6 +46,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
         if (MediaManager.isReady()) {
             trackQueue = TrackQueue.getInstance();
         }
+        musicAnalyzeManager = new MusicAnalyzeManager(musicColorChangeListener);
     }
 
     public static PlayerMaster getInstance() {
@@ -153,16 +151,14 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
             return false;
 
         FileInputStream fis = MediaManager.getFileStream(track);
-
-        analyzer.reset();
+        musicAnalyzeManager.nextTrackPlaying(track);
 
         if (fis != null) {
             if (player != null) {
                 player.stop();
             }
-            analyzer.reset();
             try {
-                player = new CustomPlayer(this, fis, volume);
+                player = new CustomPlayer(new PlayerListener[]{this, musicAnalyzeManager}, fis, volume);
                 if (position == 0) {
                     player.play();
                 } else {
@@ -357,7 +353,6 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     private synchronized void pause() {
         if (player != null) {
             player.pause();
-            analyzer.reset();
         }
         EventRouter.raiseEvent(GlobalEvent.PLAYBACK_PAUSED);
     }
@@ -389,7 +384,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
         int analyzePosition = 0;
 
         if (sampleRate > 0) {
-            analyzePosition = (int) ((analyzer.getAnalyzedSamplesCount() * 1.0) / (sampleRate / 1000.0)) + player.getOffsetPlayedMs();
+//            analyzePosition = (int) ((analyzer.getAnalyzedSamplesCount() * 1.0) / (sampleRate / 1000.0)) + player.getOffsetPlayedMs();
         }
 
         Log.message("sampleRate: " + sampleRate
@@ -444,15 +439,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
      * @param customColorMode True, wenn Lichtfarbe manuell gesetzt wird
      */
     public void setColorMode(boolean customColorMode) {
-        this.customColorMode = customColorMode;
-    }
-
-    @Override
-    public void newSamples(short[] samples) {
-        if (!customColorMode) {
-            //Falls manuelle Lichtfarbe, keine Analyse auslösen
-            analyzer.pushSamples(samples);
-        }
+        musicAnalyzeManager.setEnabled(!customColorMode, player != null ? player.getPosition(): -1);
     }
 
     private synchronized void setVolume(int newVolume) {
@@ -463,13 +450,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     }
 
     @Override
-    public void reportAudioParams(int sampleRate, float msPerFrame) {
-        analyzer.updateAudioParams(sampleRate, msPerFrame);
-    }
-
-    @Override
     public void playbackFinished() {
         playNext();
     }
-
 }

@@ -20,11 +20,23 @@ public class MusicAnalyzeManager implements PlayerListener, AnalyzeResultListene
     private final ColorReplay colorReplay;
 
     private boolean useAotData = false;
+    private boolean isEnabled = true;
 
     public MusicAnalyzeManager(MusicColorChangeListener colorChangeListener) {
         this.listener = colorChangeListener;
         analyzer = new SampleAnalyzeProxy(this);
         colorReplay = new ColorReplay(colorChangeListener);
+    }
+
+    public void setEnabled(boolean enabled, int positionMs) {
+        this.isEnabled = enabled;
+        if (useAotData) {
+            if (enabled && positionMs >= 0) {
+                colorReplay.playFromPosition(positionMs);
+            } else {
+                colorReplay.stop();
+            }
+        }
     }
 
     public void nextTrackPlaying(TrackWrapper trackWrapper) {
@@ -44,7 +56,7 @@ public class MusicAnalyzeManager implements PlayerListener, AnalyzeResultListene
 
     @Override
     public void newSamples(short[] samples) {
-        if (!useAotData) {
+        if (!useAotData && isEnabled) {
             analyzer.pushSamples(samples);
         }
     }
@@ -80,7 +92,9 @@ public class MusicAnalyzeManager implements PlayerListener, AnalyzeResultListene
 
     @Override
     public void newResults(List<Map.Entry<Double, Double>> list) {
-        Color color = ColorTranslator.translatePartition2(list);
-        listener.newColor(color);
+        if (isEnabled) {
+            Color color = ColorTranslator.translatePartition2(list);
+            listener.newColor(color);
+        }
     }
 }
