@@ -5,11 +5,15 @@ public interface PlayerListener {
 
     void reportAudioParams(int sampleRate, float msPerFrame);
 
-    void playbackStarted(int positionMs);
+    default void playbackStarted(int positionMs) {
+    }
 
-    void playbackFinished();
+    default void playbackFinished() {
+    }
 
-    void playbackStopped();
+    default void playbackStopped() {
+    }
 
-    void playbackPaused();
+    default void playbackPaused() {
+    }
 }

@@ -468,23 +468,8 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     }
 
     @Override
-    public void playbackStarted(int positionMs) {
-
-    }
-
-    @Override
     public void playbackFinished() {
         playNext();
-    }
-
-    @Override
-    public void playbackStopped() {
-
-    }
-
-    @Override
-    public void playbackPaused() {
-
     }
 
 }
