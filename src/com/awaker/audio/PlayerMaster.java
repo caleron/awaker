@@ -468,7 +468,7 @@ public class PlayerMaster implements PlayerListener, CommandHandler, EventReceiv
     }
 
     @Override
-    public void playbackStarted() {
+    public void playbackStarted(int positionMs) {
 
     }
 

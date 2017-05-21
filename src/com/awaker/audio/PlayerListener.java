@@ -1,11 +1,11 @@
 package com.awaker.audio;
 
-interface PlayerListener {
+public interface PlayerListener {
     void newSamples(short[] samples);
 
     void reportAudioParams(int sampleRate, float msPerFrame);
 
-    void playbackStarted();
+    void playbackStarted(int positionMs);
 
     void playbackFinished();
 

@@ -128,7 +128,7 @@ class CustomPlayer {
      * @param start Die Anzahl an Frames, die übersprungen werden sollen.
      */
     private void runPlayback(final int start) throws JavaLayerException {
-        samplesListener.playbackStarted();
+        samplesListener.playbackStarted(getPosition());
 
         skipFrames(start);
 
