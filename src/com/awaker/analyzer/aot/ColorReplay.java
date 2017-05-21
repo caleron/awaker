@@ -39,7 +39,7 @@ public class ColorReplay {
      * @param positionMs the position in milliseconds
      */
     public void playFromPosition(int positionMs) {
-        scheduledFuture.cancel(false);
+        stop();
 
         //sampleRate / 1024 = colors per second = ints per second
         //colors per second * position in seconds = position in ints
@@ -55,12 +55,14 @@ public class ColorReplay {
     }
 
     public void play() {
-        scheduledFuture.cancel(false);
+        stop();
         scheduledFuture = replayThread.scheduleAtFixedRate(this::outputNextColor, 0, sleepTimeMicroSeconds, TimeUnit.MICROSECONDS);
     }
 
     public void stop() {
-        scheduledFuture.cancel(false);
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(false);
+        }
     }
 
     private void outputNextColor() {
