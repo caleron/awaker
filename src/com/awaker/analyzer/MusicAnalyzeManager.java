@@ -35,7 +35,6 @@ public class MusicAnalyzeManager implements PlayerListener, AnalyzeResultListene
             useAotData = false;
         } else {
             colorReplay.newTrack(musicColors);
-            colorReplay.play();
         }
     }
 
