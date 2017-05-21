@@ -5,6 +5,7 @@ import com.awaker.analyzer.jit.SampleAnalyzeProxy;
 import com.awaker.audio.PlayerListener;
 import com.awaker.data.DbManager;
 import com.awaker.data.TrackWrapper;
+import com.awaker.util.Log;
 
 import java.awt.*;
 import java.util.List;
@@ -45,8 +46,10 @@ public class MusicAnalyzeManager implements PlayerListener, AnalyzeResultListene
 
         if (musicColors == null) {
             useAotData = false;
+            Log.message("using JIT color data");
         } else {
             colorReplay.newTrack(musicColors);
+            Log.message("using AOT color data");
         }
     }
 
@@ -71,7 +74,9 @@ public class MusicAnalyzeManager implements PlayerListener, AnalyzeResultListene
     @Override
     public void playbackStarted(int positionMs) {
         //adjust to playposition every time
-        colorReplay.playFromPosition(positionMs);
+        if (useAotData) {
+            colorReplay.playFromPosition(positionMs);
+        }
     }
 
     @Override
