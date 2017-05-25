@@ -23,7 +23,7 @@
  * change `us` to `de` (or your own layout)
  * Save: Ctrl + X, type Y, Enter
    
-#### Setting up wlan (detailed instructions [here](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
+#### Connect to your wlan (detailed instructions [here](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
  * `sudo ifconfig wlan0 up`
  * `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf`
  * enter the following at the end of the file:
@@ -39,14 +39,14 @@
  * check if connected with `iwconfig` (ESSID should be there)
  * get the ip with `ifconfig` (second line "inet addr") and memorize it
  
-#### Accessing remote
+#### Set up remote access
 * shutdown raspberry, remove keyboard, monitor and place it where you want
 * let it boot again with only the power supply attached
 * install and start [Putty](http://www.putty.org/) on your PC
 * connect to the memorized ip and login
 * do the same with [WinSCP](https://winscp.net/eng/docs/lang:de)
  
-#### Updating everything
+#### Update all the software
 * `sudo apt-get update`
 * `sudo apt-get dist-upgrade`
 * `sudo apt-get upgrade`
