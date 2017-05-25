@@ -18,20 +18,28 @@
  * under `Localization Options` select your time zone and wifi country
  * activate SSH, SPI and I2C in `Interfacing Options`
    
-#### change keyboard layout
+#### Change keyboard layout
  * `sudo nano /etc/default/keyboard`
  * change `us` to `de` (or your own layout)
  * Save: Ctrl + X, type Y, Enter
    
-#### set up wlan (detailed instructions [here](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
+#### Setting up wlan (detailed instructions [here](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
  * `sudo ifconfig wlan0 up`
  * `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf`
  * enter the following at the end of the file:
 
+```
       network={
           ssid="<the wlan name (essid)>"
           psk="<wlan password>"
       }
+```
 
-
- * sss
+ * wait some time, use `sudo wpa_cli reconfigure` or reboot
+ * check if connected with `iwconfig` (ESSID should be there)
+ * get the ip with `ifconfig` (second line "inet addr") and memorize it
+ 
+#### Updating everything
+* `sudo apt-get update`
+* `sudo apt-get dist-upgrade`
+* `sudo apt-get upgrade`
