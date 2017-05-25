@@ -4,7 +4,7 @@
 * micro SD card reader
 
 ## Installing Raspbian
- * Download the Raspbian lite image [here](https://www.raspberrypi.org/downloads/raspbian/)
+ * Download the [Raspbian lite image](https://www.raspberrypi.org/downloads/raspbian/)
  * Download and install [Etcher](https://etcher.io/)
  * Flash the image on your sd card with Etcher
  * insert the sd card into your raspberry, attach monitor, keyboard and power supply, boot
