@@ -50,3 +50,5 @@
 * `sudo apt-get dist-upgrade`
 * `sudo apt-get upgrade`
 
+#### Install some stuff
+* Java 8 JDK: `sudo apt-get install oracle-java8-jdk`
