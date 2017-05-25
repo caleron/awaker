@@ -71,5 +71,4 @@
 * create a "web" directory in the awaker directory and copy the contents of the WebAwaker project in there
 
 #### Start!
-`cd /home/pi/awaker`
-`sudo java -jar Awaker.jar`
+Get into the awaker directory  (`cd /home/pi/awaker`) and finally start this: `sudo java -jar Awaker.jar`
