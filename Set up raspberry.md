@@ -3,7 +3,7 @@
 * micro SD card min. 16GB 
 * micro SD card reader
 
-## Install Raspbian
+## Installing Raspbian
  * Download the Raspbian lite image [here](https://www.raspberrypi.org/downloads/raspbian/)
  * Download and install [Etcher](https://etcher.io/)
  * Flash the image on your sd card with Etcher
@@ -50,7 +50,7 @@
 * `sudo apt-get dist-upgrade`
 * `sudo apt-get upgrade`
 
-#### Install some stuff
+### Install some stuff
 * Java 8 JDK: `sudo apt-get install oracle-java8-jdk`
 * Git: `sudo apt-get install git`
 * create /home/pi/rf24 (with mkdir) and cd in there
@@ -62,7 +62,7 @@
 * build them all
   * cd into each dir and execute `sudo make install`
   
-#### Setting up Awaker 
+## Setting up Awaker 
 * clone this repository
 * open in IntelliJ IDEA
 * build the Artifact
@@ -70,5 +70,5 @@
 * copy the contents of the artifact output to the raspberry
 * create a "web" directory in the awaker directory and copy the contents of the WebAwaker project in there
 
-#### Start!
+## Start!
 Get into the awaker directory  (`cd /home/pi/awaker`) and finally start this: `sudo java -jar Awaker.jar`
