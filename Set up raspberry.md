@@ -21,4 +21,15 @@
    * `sudo nano /etc/default/keyboard`
    * change `us` to `de` (or your own layout)
    * Save: Ctrl + X, type Y, Enter
- 
+ * set up wlan (detailed instructions [here](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
+   * `sudo ifconfig wlan0 up`
+   * `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf`
+   * enter the following at the end of the file:
+   
+    network={
+        ssid="<the wlan name (essid)>"
+        psk="<wlan password>"
+    }
+
+
+   * sss
