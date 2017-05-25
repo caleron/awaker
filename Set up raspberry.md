@@ -68,7 +68,7 @@
 * build the Artifact
 * create a "awaker" directory in the raspberry home directory
 * copy the contents of the artifact output to the raspberry
-* create a "web" directory in the awaker directory and copy the contents of the WebAwaker project in there
+* create a "web" directory in the awaker directory and copy the contents of the [WebAwaker](https://github.com/caleron/WebAwaker) project in there
 
 ## Start!
 Get into the awaker directory  (`cd /home/pi/awaker`) and finally start this: `sudo java -jar Awaker.jar`
