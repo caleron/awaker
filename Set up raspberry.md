@@ -51,7 +51,7 @@
 * `sudo apt-get dist-upgrade`
 * `sudo apt-get upgrade`
 
-### Install some stuff
+#### Install some stuff
 * Java 8 JDK: `sudo apt-get install oracle-java8-jdk`
 * Git: `sudo apt-get install git`
 * create /home/pi/rf24 (with mkdir) and cd in there
