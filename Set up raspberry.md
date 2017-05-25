@@ -1,5 +1,5 @@
 ## Prerequisites
-* Raspberry Pi 2/3
+* Raspberry Pi 2/3 (instructions here are for 3)
 * micro SD card min. 16GB 
 * micro SD card reader
 
@@ -39,7 +39,14 @@
  * check if connected with `iwconfig` (ESSID should be there)
  * get the ip with `ifconfig` (second line "inet addr") and memorize it
  
+#### Accessing remote
+* shutdown raspberry, remove keyboard, monitor and place it where you want
+* let it boot again with only the power supply attached
+* start [Putty](http://www.putty.org/) on your PC
+* connect to the memorized ip and login
+ 
 #### Updating everything
 * `sudo apt-get update`
 * `sudo apt-get dist-upgrade`
 * `sudo apt-get upgrade`
+
