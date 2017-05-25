@@ -42,8 +42,9 @@
 #### Accessing remote
 * shutdown raspberry, remove keyboard, monitor and place it where you want
 * let it boot again with only the power supply attached
-* start [Putty](http://www.putty.org/) on your PC
+* install and start [Putty](http://www.putty.org/) on your PC
 * connect to the memorized ip and login
+* do the same with [WinSCP](https://winscp.net/eng/docs/lang:de)
  
 #### Updating everything
 * `sudo apt-get update`
