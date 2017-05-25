@@ -52,3 +52,12 @@
 
 #### Install some stuff
 * Java 8 JDK: `sudo apt-get install oracle-java8-jdk`
+
+
+#### Setting up Awaker 
+* clone this repository
+* open in IntelliJ IDEA
+* build the Artifact
+* create a "awaker" directory in the raspberry home directory
+* copy the contents of the artifact output to the raspberry
+* create a "web" directory in the awaker directory and copy the contents of the WebAwaker project in there
