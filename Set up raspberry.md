@@ -52,8 +52,16 @@
 
 #### Install some stuff
 * Java 8 JDK: `sudo apt-get install oracle-java8-jdk`
-
-
+* Git: `sudo apt-get install git`
+* create /home/pi/rf24 (with mkdir) and cd in there
+* download [RF24](https://tmrh20.github.io/RF24/RPi.html and associates (and awaker_master)
+  * `git clone https://github.com/nRF24/RF24`
+  * `git clone https://github.com/nRF24/RF24Network`
+  * `git clone https://github.com/nRF24/RF24Mesh`
+  * `git clone https://github.com/caleron/awaker_master`
+* build them all
+  * cd into each dir and execute `sudo make install`
+  
 #### Setting up Awaker 
 * clone this repository
 * open in IntelliJ IDEA
