@@ -19,7 +19,7 @@ public class LightController implements CommandHandler, EventReceiver {
     private static final int PWM_PIN_BLUE = 0;
     private static final int PWM_PIN_WHITE = 8;
 
-    private final PwmPin white, red, green, blue;
+    private final RaspiPwmPin white, red, green, blue;
     //Steht für die letzte über die Funktion updateColor gesetzte Farbe
     private Color currentColor = Color.BLACK;
 
@@ -40,10 +40,10 @@ public class LightController implements CommandHandler, EventReceiver {
           Durch eine Auflösung bis 100 ergibt dies 100 Taktzyklen pro PWM-Takt, also insgesamt 100 * 100µS = 10ms pro
           PWM-Takt, was eine PWM-Frequenz von 100Hz bedeutet.
          */
-        white = new PwmPin(PWM_PIN_WHITE);
-        red = new PwmPin(PWM_PIN_RED);
-        blue = new PwmPin(PWM_PIN_BLUE);
-        green = new PwmPin(PWM_PIN_GREEN);
+        white = new RaspiPwmPin(PWM_PIN_WHITE);
+        red = new RaspiPwmPin(PWM_PIN_RED);
+        blue = new RaspiPwmPin(PWM_PIN_BLUE);
+        green = new RaspiPwmPin(PWM_PIN_GREEN);
 
         CommandRouter.registerHandler(LightCommand.class, this);
         EventRouter.registerReceiver(this, GlobalEvent.PLAYBACK_PAUSED);

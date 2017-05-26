@@ -2,13 +2,16 @@ package com.awaker.gpio;
 
 import com.pi4j.wiringpi.SoftPwm;
 
-class PwmPin {
+/**
+ * Controls a pin directly from the raspberry as pwm pin
+ */
+class RaspiPwmPin {
     private final int pin;
     private int value;
 
     private Thread smoothThread;
 
-    PwmPin(int pin) {
+    RaspiPwmPin(int pin) {
         this.pin = pin;
         SoftPwm.softPwmCreate(pin, 0, 100);
     }
