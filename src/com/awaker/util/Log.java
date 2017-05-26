@@ -1,9 +1,6 @@
 package com.awaker.util;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,6 +23,16 @@ public class Log {
     static {
         Date now = new Date();
         DateFormat format = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
+
+        //check if logs dir exists, create it otherwise
+        File logDir = new File("logs");
+        if (!logDir.exists() || !logDir.isDirectory()) {
+            if (!logDir.mkdir()) {
+                System.out.println("could not create logs directory");
+            } else {
+                System.out.println("created logs directory");
+            }
+        }
 
         try {
             logWriter = new PrintWriter("logs/log " + format.format(now) + ".log");
