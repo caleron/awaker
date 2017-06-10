@@ -73,3 +73,7 @@
 
 ## Start!
 Get into the awaker directory  (`cd /home/pi/awaker`) and finally start this: `sudo java -jar Awaker.jar`
+
+
+## Advanced
+* auto-mount usb drives: https://raspberrypi.stackexchange.com/questions/41959/automount-various-usb-stick-file-systems-on-jessie-lite
