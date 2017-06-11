@@ -74,6 +74,19 @@
 ## Start!
 Get into the awaker directory  (`cd /home/pi/awaker`) and finally start this: `sudo java -jar Awaker.jar`
 
+## Autostart
+* create a script with `sudo nano /home/pi/start.sh`
+* type in the following contents:
+```bash
+#!/bin/sh
+cd /home/pi/awaker
+sudo java -jar Awaker.jar &
+```
+* save the file with Ctrl + X and Y
+* type `sudo nano /etc/rc.local`
+* add the line `/home/pi/start.sh` before the line `exit 0`
+* save again with Ctrl + X and Y
+* That's it!
 
 ## Advanced
 * auto-mount usb drives: https://raspberrypi.stackexchange.com/questions/41959/automount-various-usb-stick-file-systems-on-jessie-lite
