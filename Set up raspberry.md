@@ -89,5 +89,22 @@ sudo java -jar Awaker.jar &
 * save again with Ctrl + X and Y
 * That's it!
 
+## Use USB soundcard
+* plug in the usb sound card
+* reboot
+* edit the file `sudo nano /usr/share/alsa/alsa.conf`
+* replace the lines 
+```
+defaults.ctl.card 0
+defaults.pcm.card 0
+```
+with
+```
+defaults.ctl.card 1
+defaults.pcm.card 1
+```
+* reboot
+* That's it! Awaker now should be able to use the usb sound card (tested with a cheap CM108 sound card).
+
 ## Advanced
 * auto-mount usb drives: https://raspberrypi.stackexchange.com/questions/41959/automount-various-usb-stick-file-systems-on-jessie-lite
