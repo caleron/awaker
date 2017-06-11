@@ -92,6 +92,8 @@ sudo java -jar Awaker.jar &
 ## Use USB soundcard
 * plug in the usb sound card
 * reboot
+* `lsusb` should show your usb sound card
+* you should be able to select your usb sound card on `alsamixer` with F6, but it is not set as default yet.
 * edit the file `sudo nano /usr/share/alsa/alsa.conf`
 * replace the lines 
 ```
