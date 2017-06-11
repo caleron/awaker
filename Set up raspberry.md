@@ -17,6 +17,7 @@
  * choose `Boot Options` and activate console startup (maybe with autologin)
  * under `Localization Options` select your time zone and wifi country
  * activate SSH, SPI and I2C in `Interfacing Options`
+ * activate boot into CLI with `Boot options` -> `Desktop / CLI` -> `Console`
    
 #### Change keyboard layout
  * `sudo nano /etc/default/keyboard`
