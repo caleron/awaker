@@ -18,6 +18,8 @@ class CustomDevice extends AudioDeviceBase {
 
     private int volume;
 
+    private static boolean isFirstOpening = true;
+
     CustomDevice(int volume) {
         this.volume = volume;
     }
@@ -46,11 +48,23 @@ class CustomDevice extends AudioDeviceBase {
             Mixer.Info[] arrMixerInfo = AudioSystem.getMixerInfo();
             Mixer.Info mixerInfo = arrMixerInfo[0];
 
+            if (isFirstOpening) {
+                System.out.println("available sound devices: ");
+            }
             for (Mixer.Info info : arrMixerInfo) {
+
+                if (isFirstOpening) {
+                    System.out.println(" - " + info.getName());
+                }
                 if (info.getName().toLowerCase().contains("usb")) {
                     mixerInfo = info;
                     break;
                 }
+            }
+
+            if (isFirstOpening) {
+                System.out.println("Selected " + mixerInfo.getName());
+                isFirstOpening = false;
             }
 
             Line line = AudioSystem.getSourceDataLine(getAudioFormat(), mixerInfo);
