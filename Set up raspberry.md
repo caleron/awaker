@@ -17,6 +17,7 @@
  * choose `Boot Options` and activate console startup (maybe with autologin)
  * under `Localization Options` select your time zone and wifi country
  * activate SSH, SPI and I2C in `Interfacing Options`
+ * activate boot into CLI with `Boot options` -> `Desktop / CLI` -> `Console`
    
 #### Change keyboard layout
  * `sudo nano /etc/default/keyboard`
@@ -73,3 +74,39 @@
 
 ## Start!
 Get into the awaker directory  (`cd /home/pi/awaker`) and finally start this: `sudo java -jar Awaker.jar`
+
+## Autostart
+* create a script with `sudo nano /home/pi/start.sh`
+* type in the following contents:
+```bash
+#!/bin/sh
+cd /home/pi/awaker
+sudo java -jar Awaker.jar &
+```
+* save the file with Ctrl + X and Y
+* type `sudo nano /etc/rc.local`
+* add the line `/home/pi/start.sh` before the line `exit 0`
+* save again with Ctrl + X and Y
+* That's it!
+
+## Use USB soundcard
+* plug in the usb sound card
+* reboot
+* `lsusb` should show your usb sound card
+* you should be able to select your usb sound card on `alsamixer` with F6, but it is not set as default yet.
+* edit the file `sudo nano /usr/share/alsa/alsa.conf`
+* replace the lines 
+```
+defaults.ctl.card 0
+defaults.pcm.card 0
+```
+with
+```
+defaults.ctl.card 1
+defaults.pcm.card 1
+```
+* reboot
+* That's it! Awaker now should be able to use the usb sound card (tested with a cheap CM108 sound card).
+
+## Advanced
+* auto-mount usb drives: https://raspberrypi.stackexchange.com/questions/41959/automount-various-usb-stick-file-systems-on-jessie-lite
